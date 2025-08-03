@@ -96,7 +96,7 @@
 
   /* Settings navigation */
   .nav-link-settings {
-    @apply group rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-700 transition-all duration-200;
+    @apply rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-700 transition-all duration-200;
   }
 
   .nav-link-settings-active {

@@ -88,12 +88,13 @@ export default function Sidebar({ open, setOpen }) {
                             <li key={item.name}>
                               <NavLink
                                 to={item.href}
-                                className={({ isActive }) =>
+                                className={({ isActive }) => 
                                   cn(
+                                    'group',
                                     isActive
                                       ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                                       : 'text-gray-700 dark:text-dark-300 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30',
-                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                    'flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                   )
                                 }
                                 onClick={() => setOpen(false)}
@@ -147,12 +148,13 @@ export default function Sidebar({ open, setOpen }) {
                     <li key={item.name}>
                       <NavLink
                         to={item.href}
-                        className={({ isActive }) =>
+                        className={({ isActive }) => 
                           cn(
+                            'group',
                             isActive
                               ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                               : 'text-gray-700 dark:text-dark-300 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30',
-                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                            'flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                           )
                         }
                       >

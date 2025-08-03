@@ -124,8 +124,8 @@ function App() {
             {/* Page content */}
             <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-900">
               <div className="py-6">
-                    <AnimatePresence mode="wait">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <AnimatePresence mode="wait">
                   <Routes>
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={<Dashboard />} />
@@ -136,8 +136,8 @@ function App() {
                     <Route path="/content-creation" element={<ContentCreation />} />
                     <Route path="/monitoring" element={<Monitoring />} />
                     <Route path="/settings" element={<Settings />} />
+                  </AnimatePresence>
                     </AnimatePresence>
-                  </Routes>
                 </div>
               </div>
             </main>

@@ -94,7 +94,7 @@ export default function Settings() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`nav-link-settings ${
+                className={`group nav-link-settings ${
                   activeTab === tab.id ? 'nav-link-settings-active' : ''
                 }`}
               >
