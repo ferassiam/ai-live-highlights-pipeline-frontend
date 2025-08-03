@@ -92,12 +92,12 @@ export default function ContentCreation() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentItems, setContentItems] = useState([]);
-  const [generationProgress, setGenerationProgress] = useState(0);
+  const [generationProgress, setGenerationProgress] = useState([]);
 
   // Fetch content items
-  const { data: content, refetch } = useQuery(
-    'contentItems',
-    async () => {
+  const { data: content, refetch } = useQuery({
+    queryKey: ['contentItems'],
+    queryFn: async () => {
       try {
         const response = await apiService.getContentItems({
           limit: 100
@@ -109,16 +109,14 @@ export default function ContentCreation() {
         return mockContentItems;
       }
     },
-    {
-      refetchInterval: 30000, // Refresh every 30 seconds
-      retry: 2,
-    }
-  );
+    refetchInterval: 30000, // Refresh every 30 seconds
+    retry: 2,
+  });
 
   // Fetch content generation progress
-  const { data: progressData, refetch: refetchProgress } = useQuery(
-    'contentProgress',
-    async () => {
+  const { data: progressData, refetch: refetchProgress } = useQuery({
+    queryKey: ['contentProgress'],
+    queryFn: async () => {
       try {
         const response = await apiService.getContentProgress();
         return response.progress || [];
@@ -127,11 +125,9 @@ export default function ContentCreation() {
         return mockGenerationProgress;
       }
     },
-    {
-      refetchInterval: 10000, // Refresh every 10 seconds for real-time updates
-      retry: 1,
-    }
-  );
+    refetchInterval: 10000, // Refresh every 10 seconds for real-time updates
+    retry: 1,
+  });
 
   useEffect(() => {
     if (content) {
@@ -309,10 +305,10 @@ export default function ContentCreation() {
           </h3>
           <div className="flow-root">
             <ul className="-mb-8">
-              {generationProgress.slice(0, 5).map((item, itemIdx) => (
+              {(Array.isArray(generationProgress) ? generationProgress : []).slice(0, 5).map((item, itemIdx) => (
                 <li key={item.id}>
                   <div className="relative pb-8">
-                    {itemIdx !== generationProgress.length - 1 ? (
+                    {itemIdx !== (Array.isArray(generationProgress) ? generationProgress : []).length - 1 ? (
                       <span
                         className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-dark-700"
                         aria-hidden="true"
@@ -473,7 +469,7 @@ export default function ContentCreation() {
           Content Generation Progress
         </h3>
         <div className="space-y-4">
-          {generationProgress.map((item) => (
+          {(Array.isArray(generationProgress) ? generationProgress : []).map((item) => (
             <div
               key={item.id}
               className="border border-gray-200 dark:border-dark-700 rounded-lg p-4"

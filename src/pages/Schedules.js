@@ -76,80 +76,68 @@ export default function Schedules() {
   const queryClient = useQueryClient();
 
   // Fetch schedules
-  const { data: schedulesData, isLoading } = useQuery(
-    'schedules',
-    () => apiService.getSchedules(),
-    {
-      refetchInterval: 30000,
-    }
-  );
+  const { data: schedulesData, isLoading } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: () => apiService.getSchedules(),
+    refetchInterval: 30000,
+  });
 
   // Fetch system status for active channels
-  const { data: status } = useQuery(
-    'systemStatus',
-    () => apiService.getStatus(),
-    {
-      refetchInterval: 30000,
-    }
-  );
+  const { data: status } = useQuery({
+    queryKey: ['systemStatus'],
+    queryFn: () => apiService.getStatus(),
+    refetchInterval: 30000,
+  });
 
   // Mutations
-  const createMutation = useMutation(
-    (scheduleData) => apiService.createSchedule(scheduleData),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('schedules');
-        showSuccessToast('Schedule created successfully');
-        setIsModalOpen(false);
-        setFormData(defaultSchedule);
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to create schedule');
-      },
-    }
-  );
+  const createMutation = useMutation({
+    mutationFn: (scheduleData) => apiService.createSchedule(scheduleData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      showSuccessToast('Schedule created successfully');
+      setIsModalOpen(false);
+      setFormData(defaultSchedule);
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to create schedule');
+    },
+  });
 
-  const updateMutation = useMutation(
-    ({ scheduleId, scheduleData }) => apiService.updateSchedule(scheduleId, scheduleData),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('schedules');
-        showSuccessToast('Schedule updated successfully');
-        setIsModalOpen(false);
-        setEditingSchedule(null);
-        setFormData(defaultSchedule);
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to update schedule');
-      },
-    }
-  );
+  const updateMutation = useMutation({
+    mutationFn: ({ scheduleId, scheduleData }) => apiService.updateSchedule(scheduleId, scheduleData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      showSuccessToast('Schedule updated successfully');
+      setIsModalOpen(false);
+      setEditingSchedule(null);
+      setFormData(defaultSchedule);
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to update schedule');
+    },
+  });
 
-  const deleteMutation = useMutation(
-    (scheduleId) => apiService.deleteSchedule(scheduleId),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('schedules');
-        showSuccessToast('Schedule deleted successfully');
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to delete schedule');
-      },
-    }
-  );
+  const deleteMutation = useMutation({
+    mutationFn: (scheduleId) => apiService.deleteSchedule(scheduleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      showSuccessToast('Schedule deleted successfully');
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to delete schedule');
+    },
+  });
 
-  const manualControlMutation = useMutation(
-    ({ scheduleId, action }) => apiService.manualChannelControl(scheduleId, action),
-    {
-      onSuccess: (data) => {
-        queryClient.invalidateQueries('systemStatus');
-        showSuccessToast(data.message);
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to control channel');
-      },
-    }
-  );
+  const manualControlMutation = useMutation({
+    mutationFn: ({ scheduleId, action }) => apiService.manualChannelControl(scheduleId, action),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['systemStatus'] });
+      showSuccessToast(data.message);
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to control channel');
+    },
+  });
 
   const schedules = schedulesData?.schedules || [];
   const activeChannels = status?.orchestrator_status?.active_channels || {};

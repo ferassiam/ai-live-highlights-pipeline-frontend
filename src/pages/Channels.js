@@ -15,37 +15,31 @@ export default function Channels() {
   const queryClient = useQueryClient();
 
   // Fetch channels
-  const { data: channelsData, isLoading } = useQuery(
-    'channels',
-    () => apiService.getChannels(),
-    {
-      refetchInterval: 30000,
-    }
-  );
+  const { data: channelsData, isLoading } = useQuery({
+    queryKey: ['channels'],
+    queryFn: () => apiService.getChannels(),
+    refetchInterval: 30000,
+  });
 
   // Fetch system status
-  const { data: status } = useQuery(
-    'systemStatus',
-    () => apiService.getStatus(),
-    {
-      refetchInterval: 30000,
-    }
-  );
+  const { data: status } = useQuery({
+    queryKey: ['systemStatus'],
+    queryFn: () => apiService.getStatus(),
+    refetchInterval: 30000,
+  });
 
   // Manual control mutation
-  const manualControlMutation = useMutation(
-    ({ scheduleId, action }) => apiService.manualChannelControl(scheduleId, action),
-    {
-      onSuccess: (data) => {
-        queryClient.invalidateQueries('channels');
-        queryClient.invalidateQueries('systemStatus');
-        showSuccessToast(data.message);
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to control channel');
-      },
-    }
-  );
+  const manualControlMutation = useMutation({
+    mutationFn: ({ scheduleId, action }) => apiService.manualChannelControl(scheduleId, action),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['channels'] });
+      queryClient.invalidateQueries({ queryKey: ['systemStatus'] });
+      showSuccessToast(data.message);
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to control channel');
+    },
+  });
 
   const activeChannels = channelsData?.active_channels || {};
   const orchestratorRunning = status?.orchestrator_running || false;

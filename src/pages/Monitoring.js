@@ -36,25 +36,21 @@ export default function Monitoring() {
   const [selectedPipeline, setSelectedPipeline] = useState(null);
 
   // Fetch monitoring data
-  const { data: monitoringData, isLoading } = useQuery(
-    ['monitoring', timeRange],
-    () => apiService.get(`/highlights/monitoring?hours=${timeRange}`),
-    {
-      refetchInterval: 30000,
-      retry: false,
-    }
-  );
+  const { data: monitoringData, isLoading } = useQuery({
+    queryKey: ['monitoring', timeRange],
+    queryFn: () => apiService.get(`/highlights/monitoring?hours=${timeRange}`),
+    refetchInterval: 30000,
+    retry: false,
+  });
 
   // Fetch pipeline-specific data if selected
-  const { data: pipelineData } = useQuery(
-    ['pipelineMonitoring', selectedPipeline, timeRange],
-    () => apiService.get(`/highlights/monitoring/pipeline/${selectedPipeline}?hours=${timeRange}`),
-    {
-      enabled: !!selectedPipeline,
-      refetchInterval: 30000,
-      retry: false,
-    }
-  );
+  const { data: pipelineData } = useQuery({
+    queryKey: ['pipelineMonitoring', selectedPipeline, timeRange],
+    queryFn: () => apiService.get(`/highlights/monitoring/pipeline/${selectedPipeline}?hours=${timeRange}`),
+    enabled: !!selectedPipeline,
+    refetchInterval: 30000,
+    retry: false,
+  });
 
   if (isLoading) {
     return (

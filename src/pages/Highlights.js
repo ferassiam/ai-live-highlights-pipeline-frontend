@@ -23,28 +23,24 @@ export default function Highlights() {
   const [selectedHighlight, setSelectedHighlight] = useState(null);
 
   // Fetch highlights
-  const { data: highlightsData, isLoading } = useQuery(
-    ['highlights', filters],
-    () => apiService.getHighlights(filters),
-    {
-      keepPreviousData: true,
-    }
-  );
+  const { data: highlightsData, isLoading } = useQuery({
+    queryKey: ['highlights', filters],
+    queryFn: () => apiService.getHighlights(filters),
+    keepPreviousData: true,
+  });
 
   // Fetch highlights summary
-  const { data: summaryData } = useQuery(
-    'highlightsSummary',
-    () => apiService.getHighlightsSummary(),
-    {
-      refetchInterval: 60000,
-    }
-  );
+  const { data: summaryData } = useQuery({
+    queryKey: ['highlightsSummary'],
+    queryFn: () => apiService.getHighlightsSummary(),
+    refetchInterval: 60000,
+  });
 
   // Fetch schedules for filter dropdown
-  const { data: schedulesData } = useQuery(
-    'schedules',
-    () => apiService.getSchedules()
-  );
+  const { data: schedulesData } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: () => apiService.getSchedules(),
+  });
 
   const highlights = highlightsData?.highlights || [];
   const summary = summaryData?.statistics || {};

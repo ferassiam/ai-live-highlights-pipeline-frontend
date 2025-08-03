@@ -15,66 +15,56 @@ export default function Pipelines() {
   const queryClient = useQueryClient();
 
   // Fetch pipelines
-  const { data: pipelinesData, isLoading } = useQuery(
-    'pipelines',
-    () => apiService.getPipelines(),
-    {
-      refetchInterval: 30000,
-    }
-  );
+  const { data: pipelinesData, isLoading } = useQuery({
+    queryKey: ['pipelines'],
+    queryFn: () => apiService.getPipelines(),
+    refetchInterval: 30000,
+  });
 
   // Fetch system status
-  const { data: status } = useQuery(
-    'systemStatus',
-    () => apiService.getStatus(),
-    {
-      refetchInterval: 30000,
-    }
-  );
+  const { data: status } = useQuery({
+    queryKey: ['systemStatus'],
+    queryFn: () => apiService.getStatus(),
+    refetchInterval: 30000,
+  });
 
   // Fetch schedules for pipeline information
-  const { data: schedulesData } = useQuery(
-    'schedules',
-    () => apiService.getSchedules()
-  );
+  const { data: schedulesData } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: () => apiService.getSchedules(),
+  });
 
   // Fetch segment files for pipeline activity
-  const { data: filesData } = useQuery(
-    'segmentFiles',
-    () => apiService.getSegmentFiles(),
-    {
-      refetchInterval: 60000,
-    }
-  );
+  const { data: filesData } = useQuery({
+    queryKey: ['segmentFiles'],
+    queryFn: () => apiService.getSegmentFiles(),
+    refetchInterval: 60000,
+  });
 
   // Pipeline control mutations
-  const startMutation = useMutation(
-    (scheduleId) => apiService.startPipeline(scheduleId),
-    {
-      onSuccess: (data) => {
-        queryClient.invalidateQueries('pipelines');
-        queryClient.invalidateQueries('systemStatus');
-        showSuccessToast(data.message);
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to start pipeline');
-      },
-    }
-  );
+  const startMutation = useMutation({
+    mutationFn: (scheduleId) => apiService.startPipeline(scheduleId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['pipelines'] });
+      queryClient.invalidateQueries({ queryKey: ['systemStatus'] });
+      showSuccessToast(data.message);
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to start pipeline');
+    },
+  });
 
-  const stopMutation = useMutation(
-    (scheduleId) => apiService.stopPipeline(scheduleId),
-    {
-      onSuccess: (data) => {
-        queryClient.invalidateQueries('pipelines');
-        queryClient.invalidateQueries('systemStatus');
-        showSuccessToast(data.message);
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to stop pipeline');
-      },
-    }
-  );
+  const stopMutation = useMutation({
+    mutationFn: (scheduleId) => apiService.stopPipeline(scheduleId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['pipelines'] });
+      queryClient.invalidateQueries({ queryKey: ['systemStatus'] });
+      showSuccessToast(data.message);
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to stop pipeline');
+    },
+  });
 
   const activePipelines = pipelinesData?.active_pipelines || [];
   const orchestratorRunning = status?.orchestrator_running || false;

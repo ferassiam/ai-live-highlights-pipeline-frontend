@@ -27,18 +27,16 @@ export default function Settings() {
   });
 
   // Update global config mutation
-  const updateConfigMutation = useMutation(
-    (config) => apiService.updateGlobalConfig(config),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('globalConfig');
-        showSuccessToast('Configuration updated successfully');
-      },
-      onError: (error) => {
-        showErrorToast(error.response?.data?.detail || 'Failed to update configuration');
-      },
-    }
-  );
+  const updateConfigMutation = useMutation({
+    mutationFn: (config) => apiService.updateGlobalConfig(config),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['globalConfig'] });
+      showSuccessToast('Configuration updated successfully');
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to update configuration');
+    },
+  });
 
   const [configForm, setConfigForm] = useState(globalConfig || {});
 
