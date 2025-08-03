@@ -15,16 +15,16 @@ export default function Settings() {
   const queryClient = useQueryClient();
 
   // Fetch global config
-  const { data: globalConfig, isLoading } = useQuery(
-    'globalConfig',
-    () => apiService.getGlobalConfig()
-  );
+  const { data: globalConfig, isLoading } = useQuery({
+    queryKey: ['globalConfig'],
+    queryFn: () => apiService.getGlobalConfig()
+  });
 
   // Fetch system status
-  const { data: status } = useQuery(
-    'systemStatus',
-    () => apiService.getStatus()
-  );
+  const { data: status } = useQuery({
+    queryKey: ['systemStatus'],
+    queryFn: () => apiService.getStatus()
+  });
 
   // Update global config mutation
   const updateConfigMutation = useMutation(
