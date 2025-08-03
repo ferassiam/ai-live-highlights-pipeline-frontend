@@ -6,7 +6,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Logo } from '../components/ui/Logo';
 
-export const Login = ({ onLogin }) => {
+export function Login({ onLogin }) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''

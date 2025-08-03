@@ -110,10 +110,9 @@ export default function ContentCreation() {
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentItems, setContentItems] = useState([]);
   const [generationProgress, setGenerationProgress] = useState(mockGenerationProgress);
-  const queryClient = useQueryClient();
 
   // Fetch content items
-  const { data: content, isLoading, error, refetch } = useQuery(
+  const { data: content, refetch } = useQuery(
     'contentItems',
     async () => {
       try {
