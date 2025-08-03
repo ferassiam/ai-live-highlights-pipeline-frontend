@@ -444,7 +444,7 @@ export default function Settings() {
                 <div className="card-body">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
-                      <BellIcon className="h-5 w-5 text-gray-400 mr-3" />
+                      <BellIcon className={`h-5 w-5 mr-3 ${configForm.notification_webhook ? 'text-success-500' : 'text-gray-400 dark:text-dark-500'}`} />
                       <div>
                         <h4 className="text-sm font-medium text-gray-900">Event Notifications</h4>
                         <p className="text-sm text-gray-500">
@@ -455,8 +455,9 @@ export default function Settings() {
                         </p>
                       </div>
                     </div>
-                    <span className={`status-indicator ${configForm.notification_webhook ? 'status-running' : 'status-stopped'}`}>
-                      {configForm.notification_webhook ? 'Configured' : 'Not configured'}
+                    <span className={configForm.notification_webhook ? 'connection-connected' : 'connection-disabled'}>
+                      <div className={`w-2 h-2 rounded-full mr-2 ${configForm.notification_webhook ? 'bg-success-500' : 'bg-gray-400 dark:bg-dark-500'}`}></div>
+                      {configForm.notification_webhook ? 'Connected' : 'Not configured'}
                     </span>
                   </div>
                 </div>
