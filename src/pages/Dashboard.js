@@ -5,7 +5,6 @@ import {
   StopIcon,
   TvIcon,
   SparklesIcon,
-  ClockIcon,
   ChartBarIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';

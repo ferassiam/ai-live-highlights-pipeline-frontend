@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { 
   DocumentTextIcon,
   ChatBubbleLeftEllipsisIcon,
-  ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
   ArrowPathIcon,
   EyeIcon,
   ShareIcon,
-  PlusIcon,
   DocumentChartBarIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
@@ -61,22 +59,6 @@ const contentTypeIcons = {
   match_summary: DocumentChartBarIcon,
 };
 
-// Platform icons
-const platformIcons = {
-  twitter: SocialIcon,
-  facebook: SocialIcon,
-  instagram: SocialIcon,
-  linkedin: SocialIcon,
-};
-
-// Platform colors
-const platformColors = {
-  twitter: 'text-blue-400',
-  facebook: 'text-blue-600',
-  instagram: 'text-pink-500',
-  linkedin: 'text-blue-700',
-};
-
 // Mock content generation status
 const mockGenerationProgress = [
   { 
@@ -109,7 +91,6 @@ export default function ContentCreation() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentItems, setContentItems] = useState([]);
-  const [generationProgress, setGenerationProgress] = useState(mockGenerationProgress);
 
   // Fetch content items
   const { data: content, refetch } = useQuery(

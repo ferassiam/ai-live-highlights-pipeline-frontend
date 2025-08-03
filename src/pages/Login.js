@@ -224,3 +224,5 @@ export function Login({ onLogin }) {
     </div>
   );
 };
+
+export default Login;
