@@ -1,0 +1,6 @@
+segments/
+__pycache__/
+CLAUDE.md
+node_modules/
+web-ui/node_modules/
+.claude
