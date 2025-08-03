@@ -102,56 +102,57 @@ function App() {
 
   return (
     <ThemeProvider>
-    <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <Router>
           <motion.div 
             className="flex h-screen bg-gray-50 dark:bg-dark-900"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-          {/* Sidebar */}
-          <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+            {/* Sidebar */}
+            <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
-          {/* Main content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Header */}
-            <Header 
-              setSidebarOpen={setSidebarOpen}
-              onLogout={handleLogout}
-            />
+            {/* Main content */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Header */}
+              <Header 
+                setSidebarOpen={setSidebarOpen}
+                onLogout={handleLogout}
+              />
 
-            {/* Page content */}
-            <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-900">
-              <div className="py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <AnimatePresence mode="wait">
-                  <Routes>
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/schedules" element={<Schedules />} />
-                    <Route path="/channels" element={<Channels />} />
-                    <Route path="/pipelines" element={<Pipelines />} />
-                    <Route path="/highlights" element={<Highlights />} />
-                    <Route path="/content-creation" element={<ContentCreation />} />
-                    <Route path="/monitoring" element={<Monitoring />} />
-                    <Route path="/settings" element={<Settings />} />
-                  </Routes>
-                  </AnimatePresence>
+              {/* Page content */}
+              <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-900">
+                <div className="py-6">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <AnimatePresence mode="wait">
+                      <Routes>
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/schedules" element={<Schedules />} />
+                        <Route path="/channels" element={<Channels />} />
+                        <Route path="/pipelines" element={<Pipelines />} />
+                        <Route path="/highlights" element={<Highlights />} />
+                        <Route path="/content-creation" element={<ContentCreation />} />
+                        <Route path="/monitoring" element={<Monitoring />} />
+                        <Route path="/settings" element={<Settings />} />
+                      </Routes>
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            </main>
-          </div>
+              </main>
+            </div>
           </motion.div>
 
-        {/* Toast notifications */}
+          {/* Toast notifications */}
           <Toaster 
             position="top-right"
             toastOptions={{
               className: 'dark:bg-dark-800 dark:text-white',
             }}
           />
-      </Router>
-    </QueryClientProvider>
+        </Router>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
