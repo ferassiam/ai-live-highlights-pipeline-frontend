@@ -171,7 +171,7 @@ export function Login({ onLogin }) {
 
               <div className="text-sm">
                 <a
-                  href="#"
+                  href="/forgot-password"
                   className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Forgot your password?
@@ -212,7 +212,7 @@ export function Login({ onLogin }) {
 
             <div className="mt-6 text-center">
               <a
-                href="#"
+                href="/register"
                 className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Create an account

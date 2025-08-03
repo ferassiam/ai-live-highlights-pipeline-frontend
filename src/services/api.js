@@ -293,7 +293,7 @@ class WebSocketService {
 
   connect(url = null) {
     const baseUrl = process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
-    const wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '') + '/ws';
+    const wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '').replace(/\/$/, '') + '/ws';
     
     try {
       this.ws = new WebSocket(wsUrl);

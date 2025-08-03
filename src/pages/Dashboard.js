@@ -53,44 +53,29 @@ export default function Dashboard() {
   const [realtimeUpdates, setRealtimeUpdates] = useState([]);
 
   // Fetch system status
-  const { data: status, refetch: refetchStatus } = useQuery(
-    'systemStatus',
-    () => apiService.getStatus(),
-    {
-      refetchInterval: 30000,
-      retry: false,
-    }
-  );
+  const { data: status, refetch: refetchStatus } = useQuery({
+    queryKey: ['systemStatus'],
+    queryFn: () => apiService.getStatus(),
+    refetchInterval: 30000,
+    retry: false,
+  });
 
   // Fetch highlights summary
-  const { data: highlightsSummary } = useQuery(
-    'highlightsSummary',
-    () => apiService.getHighlightsSummary(),
-    {
-      refetchInterval: 60000,
-      retry: false,
-    }
-  );
+  const { data: highlightsSummary } = useQuery({
+    queryKey: ['highlightsSummary'],
+    queryFn: () => apiService.getHighlightsSummary(),
+    refetchInterval: 60000,
+    retry: false,
+  });
 
   // Fetch schedules for overview
-  const { data: schedulesData } = useQuery(
-    'schedules',
-    () => apiService.getSchedules(),
-    {
-      refetchInterval: 60000,
-      retry: false,
-    }
-  );
-
   // Fetch files data for pipeline metrics
-  const { data: filesData } = useQuery(
-    'segmentFiles',
-    () => apiService.getSegmentFiles(),
-    {
-      refetchInterval: 60000,
-      retry: false,
-    }
-  );
+  const { data: filesData } = useQuery({
+    queryKey: ['segmentFiles'],
+    queryFn: () => apiService.getSegmentFiles(),
+    refetchInterval: 60000,
+    retry: false,
+  });
 
   // WebSocket setup for real-time updates
   useEffect(() => {
@@ -159,12 +144,10 @@ export default function Dashboard() {
   const orchestratorStatus = status?.orchestrator_status;
   const activeChannels = orchestratorStatus?.active_channels || {};
   const activePipelines = orchestratorStatus?.active_pipelines || [];
-  const schedulesLoaded = orchestratorStatus?.schedules_loaded || 0;
 
   // Calculate real metrics
   const totalHighlights = highlightsSummary?.statistics?.total_highlights || 0;
   const totalSegments = filesData?.files?.filter(f => f.type === 'mp4')?.length || 0;
-  const totalPipelines = Object.keys(highlightsSummary?.statistics?.pipelines || {}).length;
   const recentHighlights = Math.floor(totalHighlights * 0.15); // Assume 15% are recent
   
   // Calculate trends based on real data
