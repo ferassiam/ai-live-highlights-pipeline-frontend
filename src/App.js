@@ -137,7 +137,6 @@ function App() {
                     <Route path="/settings" element={<Settings />} />
                   </Routes>
                   </AnimatePresence>
-                    </AnimatePresence>
                 </div>
               </div>
             </main>
