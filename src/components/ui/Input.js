@@ -47,6 +47,7 @@ export const FormField = ({ label, error, children, required, className }) => (
       <Label>
         {label}
         {required && <span className="text-danger-500 ml-1">*</span>}
+        }
       </Label>
     )}
     {children}
