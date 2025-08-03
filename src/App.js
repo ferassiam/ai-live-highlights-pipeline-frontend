@@ -140,6 +140,7 @@ function App() {
                 </div>
               </div>
             </main>
+          </div>
           </motion.div>
 
         {/* Toast notifications */}
