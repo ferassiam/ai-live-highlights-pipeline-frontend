@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Bars3Icon, 
   BellIcon, 
@@ -9,12 +9,15 @@ import {
 } from '@heroicons/react/24/outline';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { motion } from 'framer-motion';
 
+import { Logo } from '../ui/Logo';
+import { ThemeToggle } from '../ui/ThemeToggle';
+import { StatusIndicator } from '../ui/StatusIndicator';
+import { Badge } from '../ui/Badge';
 import { apiService } from '../../services/api';
+import { cn } from '../../utils/cn';
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
 
 export default function Header({ setSidebarOpen, onLogout }) {
   const [notifications] = useState([
@@ -24,9 +27,9 @@ export default function Header({ setSidebarOpen, onLogout }) {
 
   // Fetch system status for header display
   const { data: status } = useQuery(
-    'systemStatus',
-    () => apiService.getStatus(),
     {
+      queryKey: ['systemStatus'],
+      queryFn: () => apiService.getStatus(),
       refetchInterval: 30000, // Refresh every 30 seconds
       retry: false,
     }
@@ -37,8 +40,14 @@ export default function Header({ setSidebarOpen, onLogout }) {
   const activePipelines = status?.orchestrator_status?.active_pipelines?.length || 0;
 
   return (
-    <div className="sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8">
+    <motion.div 
+      className="sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-8"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex h-16 items-center gap-x-4 border-b border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-0 lg:shadow-none">
+        {/* Mobile menu button */}
         <button
           type="button"
           className="-m-2.5 p-2.5 text-gray-700 dark:text-dark-300 lg:hidden"
@@ -48,6 +57,11 @@ export default function Header({ setSidebarOpen, onLogout }) {
           <Bars3Icon className="h-6 w-6" aria-hidden="true" />
         </button>
 
+        {/* Logo for mobile */}
+        <div className="lg:hidden">
+          <Logo size="sm" />
+        </div>
+
         {/* Separator */}
         <div className="h-6 w-px bg-gray-200 dark:bg-dark-700 lg:hidden" aria-hidden="true" />
 
@@ -55,21 +69,23 @@ export default function Header({ setSidebarOpen, onLogout }) {
         <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
           <div className="flex items-center gap-x-4 lg:gap-x-6">
             {/* Orchestrator status */}
-            <div className="flex items-center gap-x-2">
-              <div className={`h-2 w-2 rounded-full ${orchestratorRunning ? 'bg-success-500 animate-pulse-fast' : 'bg-gray-300 dark:bg-dark-600'}`}></div>
-              <span className="text-sm text-gray-600 dark:text-dark-300">
-                Orchestrator {orchestratorRunning ? 'Running' : 'Stopped'}
-              </span>
-            </div>
+            <StatusIndicator 
+              status={orchestratorRunning ? 'running' : 'stopped'}
+              showText={true}
+            />
 
             {/* Active channels/pipelines */}
             {orchestratorRunning && (
               <>
                 <div className="hidden sm:flex items-center gap-x-2">
-                  <span className="text-sm text-gray-600 dark:text-dark-300">Channels: {activeChannels}</span>
+                  <Badge variant="secondary">
+                    Channels: {activeChannels}
+                  </Badge>
                 </div>
                 <div className="hidden sm:flex items-center gap-x-2">
-                  <span className="text-sm text-gray-600 dark:text-dark-300">Pipelines: {activePipelines}</span>
+                  <Badge variant="secondary">
+                    Pipelines: {activePipelines}
+                  </Badge>
                 </div>
               </>
             )}
@@ -77,15 +93,23 @@ export default function Header({ setSidebarOpen, onLogout }) {
         </div>
 
         <div className="flex items-center gap-x-4 lg:gap-x-6">
+          {/* Theme toggle */}
+          <ThemeToggle />
+
           {/* Notifications */}
           <Menu as="div" className="relative">
             <Menu.Button className="-m-2.5 p-2.5 text-gray-400 dark:text-dark-400 hover:text-gray-500 dark:hover:text-dark-300">
               <span className="sr-only">View notifications</span>
               <BellIcon className="h-6 w-6" aria-hidden="true" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-danger-500 text-white text-xs rounded-full flex items-center justify-center">
+                <motion.span 
+                  className="absolute -top-1 -right-1 h-4 w-4 bg-danger-500 text-white text-xs rounded-full flex items-center justify-center"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
                   {notifications.length}
-                </span>
+                </motion.span>
               )}
             </Menu.Button>
             <Transition
@@ -106,10 +130,13 @@ export default function Header({ setSidebarOpen, onLogout }) {
                 ) : (
                   notifications.map((notification) => (
                     <Menu.Item key={notification.id}>
-                      <div className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-dark-700">
+                      <motion.div 
+                        className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer"
+                        whileHover={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
+                      >
                         <p className="text-sm text-gray-900 dark:text-white">{notification.message}</p>
                         <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">{notification.time}</p>
-                      </div>
+                      </motion.div>
                     </Menu.Item>
                   ))
                 )}
@@ -144,7 +171,7 @@ export default function Header({ setSidebarOpen, onLogout }) {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={classNames(
+                      className={cn(
                         active ? 'bg-gray-50 dark:bg-dark-700' : '',
                         'flex w-full items-center px-3 py-1 text-sm leading-6 text-gray-900 dark:text-white'
                       )}
@@ -158,7 +185,7 @@ export default function Header({ setSidebarOpen, onLogout }) {
                   {({ active }) => (
                     <button
                       onClick={onLogout}
-                      className={classNames(
+                      className={cn(
                         active ? 'bg-gray-50 dark:bg-dark-700' : '',
                         'flex w-full items-center px-3 py-1 text-sm leading-6 text-gray-900 dark:text-white'
                       )}
@@ -173,6 +200,6 @@ export default function Header({ setSidebarOpen, onLogout }) {
           </Menu>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

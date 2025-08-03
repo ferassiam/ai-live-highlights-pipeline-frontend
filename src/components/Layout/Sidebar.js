@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
+import { motion } from 'framer-motion';
 import {
   HomeIcon,
   CalendarIcon,
@@ -14,6 +15,9 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
+import { Logo } from '../ui/Logo';
+import { StatusIndicator } from '../ui/StatusIndicator';
+import { cn } from '../../utils/cn';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Schedules', href: '/schedules', icon: CalendarIcon },
@@ -25,9 +29,6 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: CogIcon },
 ];
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
 
 export default function Sidebar({ open, setOpen }) {
   return (
@@ -77,16 +78,7 @@ export default function Sidebar({ open, setOpen }) {
 
                 <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-dark-800 px-6 pb-2">
                   <div className="flex h-16 shrink-0 items-center">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                          <SparklesIcon className="h-5 w-5 text-white" />
-                        </div>
-                      </div>
-                      <div className="ml-3">
-                        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Live Highlights</h1>
-                      </div>
-                    </div>
+                    <Logo />
                   </div>
                   <nav className="flex flex-1 flex-col">
                     <ul className="flex flex-1 flex-col gap-y-7">
@@ -97,7 +89,7 @@ export default function Sidebar({ open, setOpen }) {
                               <NavLink
                                 to={item.href}
                                 className={({ isActive }) =>
-                                  classNames(
+                                  cn(
                                     isActive
                                       ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                                       : 'text-gray-700 dark:text-dark-300 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30',
@@ -107,16 +99,20 @@ export default function Sidebar({ open, setOpen }) {
                                 onClick={() => setOpen(false)}
                               >
                                 {({ isActive }) => (
-                                  <>
+                                  <motion.div 
+                                    className="flex items-center gap-x-3 w-full"
+                                    whileHover={{ x: 2 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                  >
                                     <item.icon
-                                      className={classNames(
+                                      className={cn(
                                         isActive ? 'text-primary-700 dark:text-primary-300' : 'text-gray-400 dark:text-dark-400 group-hover:text-primary-700 dark:group-hover:text-primary-300',
                                         'h-6 w-6 shrink-0'
                                       )}
                                       aria-hidden="true"
                                     />
                                     {item.name}
-                                  </>
+                                  </motion.div>
                                 )}
                               </NavLink>
                             </li>
@@ -134,19 +130,14 @@ export default function Sidebar({ open, setOpen }) {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 px-6">
+        <motion.div 
+          className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 px-6"
+          initial={{ x: -300 }}
+          animate={{ x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex h-16 shrink-0 items-center">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                  <SparklesIcon className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <div className="ml-3">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Live Highlights</h1>
-                <p className="text-xs text-gray-500 dark:text-dark-400">Pipeline Dashboard</p>
-              </div>
-            </div>
+            <Logo />
           </div>
           <nav className="flex flex-1 flex-col">
             <ul className="flex flex-1 flex-col gap-y-7">
@@ -157,7 +148,7 @@ export default function Sidebar({ open, setOpen }) {
                       <NavLink
                         to={item.href}
                         className={({ isActive }) =>
-                          classNames(
+                          cn(
                             isActive
                               ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                               : 'text-gray-700 dark:text-dark-300 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30',
@@ -166,16 +157,20 @@ export default function Sidebar({ open, setOpen }) {
                         }
                       >
                         {({ isActive }) => (
-                          <>
+                          <motion.div 
+                            className="flex items-center gap-x-3 w-full"
+                            whileHover={{ x: 2 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                          >
                             <item.icon
-                              className={classNames(
+                              className={cn(
                                 isActive ? 'text-primary-700 dark:text-primary-300' : 'text-gray-400 dark:text-dark-400 group-hover:text-primary-700 dark:group-hover:text-primary-300',
                                 'h-6 w-6 shrink-0'
                               )}
                               aria-hidden="true"
                             />
                             {item.name}
-                          </>
+                          </motion.div>
                         )}
                       </NavLink>
                     </li>
@@ -187,15 +182,15 @@ export default function Sidebar({ open, setOpen }) {
                   <div className="flex items-center justify-between">
                     <span>API Status</span>
                     <div className="flex items-center">
-                      <div className="h-2 w-2 bg-success-500 rounded-full animate-pulse-fast"></div>
-                      <span className="ml-2 text-success-600 dark:text-success-400">Connected</span>
+                      <StatusIndicator status="running" showText={false} />
+                      <span className="ml-2 text-success-600 dark:text-success-400 text-xs">Connected</span>
                     </div>
                   </div>
                 </div>
               </li>
             </ul>
           </nav>
-        </div>
+        </motion.div>
       </div>
     </>
   );

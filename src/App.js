@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
+import { ThemeProvider } from './hooks/useTheme';
+import { LoadingPage } from './components/ui/LoadingSpinner';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import Dashboard from './pages/Dashboard';
@@ -24,6 +27,7 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       staleTime: 30000,
+      gcTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
@@ -33,10 +37,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    // Enable dark mode by default
-    document.documentElement.classList.add('dark');
-  }, []);
 
   useEffect(() => {
     // Check for existing auth token
@@ -81,28 +81,34 @@ function App() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-dark-300">Loading Live Highlights Dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingPage message="Loading Live Highlights Dashboard..." />;
   }
 
   if (!isAuthenticated) {
     return (
+      <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <Login onLogin={handleLogin} />
-        <Toaster />
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              className: 'dark:bg-dark-800 dark:text-white',
+            }}
+          />
       </QueryClientProvider>
+      </ThemeProvider>
     );
   }
 
   return (
+    <ThemeProvider>
     <QueryClientProvider client={queryClient}>
-      <Router>
+          <motion.div 
+            className="flex h-screen bg-gray-50 dark:bg-dark-900"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
         <div className="flex h-screen bg-gray-50 dark:bg-dark-900">
           {/* Sidebar */}
           <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
@@ -118,6 +124,7 @@ function App() {
             {/* Page content */}
             <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-900">
               <div className="py-6">
+                    <AnimatePresence mode="wait">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <Routes>
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -129,17 +136,24 @@ function App() {
                     <Route path="/content-creation" element={<ContentCreation />} />
                     <Route path="/monitoring" element={<Monitoring />} />
                     <Route path="/settings" element={<Settings />} />
+                    </AnimatePresence>
                   </Routes>
                 </div>
               </div>
             </main>
-          </div>
+          </motion.div>
         </div>
 
         {/* Toast notifications */}
-        <Toaster />
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              className: 'dark:bg-dark-800 dark:text-white',
+            }}
+          />
       </Router>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

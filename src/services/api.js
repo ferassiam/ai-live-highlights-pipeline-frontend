@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api/',
+  baseURL: process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('apiToken');
-      window.location.href = '/login';
+      window.location.reload();
     }
     
     const message = error.response?.data?.detail || error.message || 'An error occurred';
@@ -255,6 +255,30 @@ class ApiService {
     const response = await api.post(`/content/matches/${matchId}/end`);
     return response.data;
   }
+
+  // Generic GET method for custom endpoints
+  async get(endpoint, params = {}) {
+    const response = await api.get(endpoint, { params });
+    return response.data;
+  }
+
+  // Generic POST method for custom endpoints
+  async post(endpoint, data = null, config = {}) {
+    const response = await api.post(endpoint, data, config);
+    return response.data;
+  }
+
+  // Generic PUT method for custom endpoints
+  async put(endpoint, data = null, config = {}) {
+    const response = await api.put(endpoint, data, config);
+    return response.data;
+  }
+
+  // Generic DELETE method for custom endpoints
+  async delete(endpoint, config = {}) {
+    const response = await api.delete(endpoint, config);
+    return response.data;
+  }
 }
 
 // WebSocket service
@@ -268,7 +292,8 @@ class WebSocketService {
   }
 
   connect(url = null) {
-    const wsUrl = url || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+    const baseUrl = process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
+    const wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '') + '/ws';
     
     try {
       this.ws = new WebSocket(wsUrl);
