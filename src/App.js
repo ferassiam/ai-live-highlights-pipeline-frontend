@@ -135,6 +135,7 @@ function App() {
                     <Route path="/content-creation" element={<ContentCreation />} />
                     <Route path="/monitoring" element={<Monitoring />} />
                     <Route path="/settings" element={<Settings />} />
+                  </Routes
                   </AnimatePresence>
                     </AnimatePresence>
                 </div>
