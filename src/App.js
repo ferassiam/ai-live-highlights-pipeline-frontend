@@ -17,7 +17,6 @@ import ContentCreation from './pages/ContentCreation';
 import Monitoring from './pages/Monitoring';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
-import { Login } from './pages/Login';
 
 import { apiService, wsService } from './services/api';
 
