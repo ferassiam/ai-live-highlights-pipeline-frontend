@@ -11,6 +11,7 @@ import {
   ShareIcon,
   DocumentChartBarIcon,
   StarIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 
 // Import real social media icons
@@ -91,6 +92,7 @@ export default function ContentCreation() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentItems, setContentItems] = useState([]);
+  const [generationProgress, setGenerationProgress] = useState(0);
 
   // Fetch content items
   const { data: content, refetch } = useQuery(
