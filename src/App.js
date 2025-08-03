@@ -109,7 +109,6 @@ function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-        <div className="flex h-screen bg-gray-50 dark:bg-dark-900">
           {/* Sidebar */}
           <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
@@ -142,7 +141,6 @@ function App() {
               </div>
             </main>
           </motion.div>
-        </div>
 
         {/* Toast notifications */}
           <Toaster 
