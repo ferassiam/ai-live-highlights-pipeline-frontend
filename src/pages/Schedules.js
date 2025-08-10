@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   PlusIcon,
@@ -9,11 +9,14 @@ import {
   TvIcon,
   PlayIcon,
   StopIcon,
+  ArrowPathIcon,
+  DocumentArrowUpIcon,
+  DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 
-import { apiService, showSuccessToast, showErrorToast } from '../services/api';
+import { apiService, showSuccessToast, showErrorToast, wsService } from '../services/api';
 
 const defaultSchedule = {
   id: '',
@@ -72,6 +75,9 @@ export default function Schedules() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [formData, setFormData] = useState(defaultSchedule);
+  const [lastReloadTime, setLastReloadTime] = useState(null);
+  const [pollingEnabled, setPollingEnabled] = useState(true);
+  const fileInputRef = useRef(null);
 
   const queryClient = useQueryClient();
 
@@ -139,8 +145,64 @@ export default function Schedules() {
     },
   });
 
+  const reloadSchedulesMutation = useMutation({
+    mutationFn: () => apiService.reloadSchedules(),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      setLastReloadTime(new Date());
+      showSuccessToast(data.message || 'Schedules reloaded successfully');
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to reload schedules');
+    },
+  });
+
+  const uploadScheduleMutation = useMutation({
+    mutationFn: (file) => apiService.uploadScheduleFile(file),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      showSuccessToast(data.message || 'Schedule file uploaded successfully');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    },
+    onError: (error) => {
+      showErrorToast(error.response?.data?.detail || 'Failed to upload schedule file');
+    },
+  });
+
+  const downloadScheduleMutation = useMutation({
+    mutationFn: () => apiService.downloadScheduleFile(),
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'channel_schedule.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showSuccessToast('Schedule file downloaded successfully');
+    },
+    onError: (error) => {
+      showErrorToast('Failed to download schedule file');
+    },
+  });
+
   const schedules = schedulesData?.schedules || [];
   const activeChannels = status?.orchestrator_status?.active_channels || {};
+
+  // WebSocket listeners for real-time updates
+  useEffect(() => {
+    const handleScheduleReloaded = (data) => {
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      setLastReloadTime(new Date());
+      showSuccessToast('Schedules automatically reloaded');
+    };
+
+    wsService.on('scheduleReloaded', handleScheduleReloaded);
+    return () => wsService.off('scheduleReloaded', handleScheduleReloaded);
+  }, [queryClient]);
 
   const handleCreate = () => {
     setEditingSchedule(null);
@@ -172,6 +234,25 @@ export default function Schedules() {
 
   const handleManualControl = (scheduleId, action) => {
     manualControlMutation.mutate({ scheduleId, action });
+  };
+
+  const handleReloadSchedules = () => {
+    reloadSchedulesMutation.mutate();
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.type !== 'application/json') {
+        showErrorToast('Please select a JSON file');
+        return;
+      }
+      uploadScheduleMutation.mutate(file);
+    }
+  };
+
+  const handleDownloadSchedules = () => {
+    downloadScheduleMutation.mutate();
   };
 
   const updateFormData = (path, value) => {
@@ -249,8 +330,73 @@ export default function Schedules() {
           <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
             Manage channel schedules and automation rules
           </p>
+          
+          {/* Polling status */}
+          <div className="mt-3 flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-500 dark:text-dark-400">Auto-reload:</span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                pollingEnabled 
+                  ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
+                  : 'bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200'
+              }`}>
+                {pollingEnabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </div>
+            {lastReloadTime && (
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500 dark:text-dark-400">Last reload:</span>
+                <span className="text-xs text-gray-700 dark:text-dark-300">
+                  {lastReloadTime.toLocaleTimeString()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex space-x-3">
+        
+        <div className="flex items-center space-x-3">
+          {/* File operations */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadScheduleMutation.isLoading}
+            className="btn btn-outline flex items-center space-x-2"
+            title="Upload schedule file"
+          >
+            <DocumentArrowUpIcon className="h-4 w-4" />
+            <span>Upload</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleDownloadSchedules}
+            disabled={downloadScheduleMutation.isLoading}
+            className="btn btn-outline flex items-center space-x-2"
+            title="Download schedule file"
+          >
+            <DocumentArrowDownIcon className="h-4 w-4" />
+            <span>Download</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleReloadSchedules}
+            disabled={reloadSchedulesMutation.isLoading}
+            className="btn btn-outline flex items-center space-x-2"
+            title="Reload schedules from file"
+          >
+            <ArrowPathIcon className={`h-4 w-4 ${reloadSchedulesMutation.isLoading ? 'animate-spin' : ''}`} />
+            <span>Reload</span>
+          </button>
+          
           <button
             type="button"
             onClick={handleCreate}

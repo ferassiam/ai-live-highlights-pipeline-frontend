@@ -13,6 +13,9 @@ import {
   ChartBarIcon,
   CogIcon,
   XMarkIcon,
+  DocumentTextIcon,
+  FolderIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 import { Logo } from '../ui/Logo';
@@ -25,12 +28,20 @@ const navigation = [
   { name: 'Pipelines', href: '/pipelines', icon: PlayIcon },
   { name: 'Highlights', href: '/highlights', icon: SparklesIcon },
   { name: 'Content Creation', href: '/content-creation', icon: PencilSquareIcon },
-  { name: 'Monitoring', href: '/monitoring', icon: ChartBarIcon },
+  { name: 'Configuration', href: '/configuration', icon: WrenchScrewdriverIcon, adminOnly: true },
+  { name: 'Enhanced Monitoring', href: '/enhanced-monitoring', icon: ChartBarIcon },
+  { name: 'File Manager', href: '/files', icon: FolderIcon },
   { name: 'Settings', href: '/settings', icon: CogIcon },
 ];
 
 
 export default function Sidebar({ open, setOpen }) {
+  // TODO: Get from auth context
+  const isAdmin = true;
+  
+  // Filter navigation items based on admin status
+  const filteredNavigation = navigation.filter(item => !item.adminOnly || isAdmin);
+  
   return (
     <>
       {/* Mobile sidebar */}
@@ -84,7 +95,7 @@ export default function Sidebar({ open, setOpen }) {
                     <ul className="flex flex-1 flex-col gap-y-7">
                       <li>
                         <ul className="-mx-2 space-y-1">
-                          {navigation.map((item) => (
+                          {filteredNavigation.map((item) => (
                             <li key={item.name}>
                               <NavLink
                                 to={item.href}
@@ -144,7 +155,7 @@ export default function Sidebar({ open, setOpen }) {
             <ul className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul className="-mx-2 space-y-1">
-                  {navigation.map((item) => (
+                  {filteredNavigation.map((item) => (
                     <li key={item.name}>
                       <NavLink
                         to={item.href}

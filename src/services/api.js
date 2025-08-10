@@ -25,7 +25,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('apiToken');
-      window.location.reload();
+      // Only reload if we're not already on the login page
+      if (window.location.pathname !== '/login') {
+        // Use a more gentle redirect instead of hard reload
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
+      }
     }
     
     const message = error.response?.data?.detail || error.message || 'An error occurred';
@@ -256,6 +262,108 @@ class ApiService {
     return response.data;
   }
 
+  // Schedule Management - Enhanced
+  async reloadSchedules(scheduleFile = 'channel_schedule.json') {
+    const response = await api.post('/schedules/reload', null, {
+      params: { schedule_file: scheduleFile }
+    });
+    return response.data;
+  }
+
+  async downloadScheduleFile(scheduleFile = 'channel_schedule.json') {
+    const response = await api.get('/schedules/download', {
+      params: { schedule_file: scheduleFile },
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+
+  async uploadScheduleFile(file, scheduleFile = 'channel_schedule.json') {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/schedules/upload', formData, {
+      params: { schedule_file: scheduleFile },
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+
+  // Configuration Management - Prompts
+  async getPromptConfig(sport) {
+    const response = await api.get(`/config/prompts/${sport}`);
+    return response.data;
+  }
+
+  async updatePromptConfig(sport, config, etag = null) {
+    const headers = etag ? { 'If-Match': etag } : {};
+    const response = await api.put(`/config/prompts/${sport}`, config, { headers });
+    return response.data;
+  }
+
+  async getPromptHistory(sport) {
+    const response = await api.get(`/config/prompts/${sport}/history`);
+    return response.data;
+  }
+
+  async rollbackPrompt(sport, version) {
+    const response = await api.post(`/config/prompts/${sport}/rollback/${version}`);
+    return response.data;
+  }
+
+  // Configuration Management - Schemas
+  async getSchemaConfig(sport) {
+    const response = await api.get(`/config/schemas/${sport}`);
+    return response.data;
+  }
+
+  async updateSchemaConfig(sport, schema, etag = null) {
+    const headers = etag ? { 'If-Match': etag } : {};
+    const response = await api.put(`/config/schemas/${sport}`, { schema }, { headers });
+    return response.data;
+  }
+
+  async getSchemaHistory(sport) {
+    const response = await api.get(`/config/schemas/${sport}/history`);
+    return response.data;
+  }
+
+  async rollbackSchema(sport, version) {
+    const response = await api.post(`/config/schemas/${sport}/rollback/${version}`);
+    return response.data;
+  }
+
+  // Sports Configuration
+  async getSupportedSports() {
+    const response = await api.get('/config/sports');
+    return response.data;
+  }
+
+  // Enhanced Monitoring
+  async getMonitoringStats(hours = 24) {
+    const response = await api.get('/highlights/monitoring', { params: { hours } });
+    return response.data;
+  }
+
+  async getPipelineMonitoringStats(pipelineId, hours = 24) {
+    const response = await api.get(`/highlights/monitoring/pipeline/${pipelineId}`, {
+      params: { hours }
+    });
+    return response.data;
+  }
+
+  async getPrometheusMetrics() {
+    const response = await api.get('/metrics', {
+      headers: { 'Accept': 'text/plain' }
+    });
+    return response.data;
+  }
+
+  // Enhanced Files
+  async getSegmentFilesWithMetadata(filters = {}) {
+    const response = await api.get('/files/segments/metadata', { params: filters });
+    return response.data;
+  }
+
   // Generic GET method for custom endpoints
   async get(endpoint, params = {}) {
     const response = await api.get(endpoint, { params });
@@ -293,7 +401,18 @@ class WebSocketService {
 
   connect(url = null) {
     const baseUrl = process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
-    const wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '').replace(/\/$/, '') + '/ws';
+    let wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '').replace(/\/$/, '') + '/ws';
+    // Include token as query param for demo environments if available
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('apiToken') : null;
+      if (token) {
+        const u = new URL(wsUrl);
+        u.searchParams.set('token', token);
+        wsUrl = u.toString();
+      }
+    } catch (_) {
+      // no-op
+    }
     
     try {
       this.ws = new WebSocket(wsUrl);
@@ -307,8 +426,34 @@ class WebSocketService {
       this.ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log('WebSocket message received:', data);
           this.emit('message', data);
           this.emit(data.type, data);
+          
+          // Handle specific event types with toast notifications
+          switch (data.type) {
+            case 'schedule_reloaded':
+              this.emit('scheduleReloaded', data);
+              break;
+            case 'config_updated':
+              this.emit('configUpdated', data);
+              break;
+            case 'pipeline_status':
+              this.emit('pipelineStatus', data);
+              break;
+            case 'monitoring_update':
+              this.emit('monitoringUpdate', data);
+              break;
+            case 'channel_status':
+              this.emit('channelStatus', data);
+              break;
+            case 'content_update':
+              this.emit('contentUpdate', data);
+              break;
+            default:
+              // Generic event handler
+              break;
+          }
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error);
         }

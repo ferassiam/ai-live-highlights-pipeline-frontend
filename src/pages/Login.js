@@ -59,17 +59,42 @@ export function Login({ onLogin }) {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // For development/demo: check if there's an environment token
+      let token = process.env.REACT_APP_API_TOKEN || 'pipeline';
+
+      if (!token) {
+        // If no env token, try a simple auth call to the backend
+        // This is where you'd normally integrate with your actual auth system
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api'}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password
+          })
+        });
+        
+        if (response.ok) {
+          const authData = await response.json();
+          token = authData.token || authData.access_token;
+        } else {
+          throw new Error('Authentication failed');
+        }
+      }
+      
+      if (!token) {
+        throw new Error('No authentication token received');
+      }
       
       // Call the onLogin prop with user data
       onLogin({
         email: formData.email,
         name: formData.email.split('@')[0],
-        token: 'mock-jwt-token'
+        token: token
       });
     } catch (error) {
-      setErrors({ general: 'Login failed. Please try again.' });
+      console.error('Login error:', error);
+      setErrors({ general: error.message || 'Login failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }

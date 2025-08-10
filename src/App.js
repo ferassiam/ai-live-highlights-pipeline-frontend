@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { ThemeProvider } from './hooks/useTheme';
 import { LoadingPage } from './components/ui/LoadingSpinner';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import Dashboard from './pages/Dashboard';
@@ -14,6 +15,9 @@ import Channels from './pages/Channels';
 import Pipelines from './pages/Pipelines';
 import Highlights from './pages/Highlights';
 import ContentCreation from './pages/ContentCreation';
+import Configuration from './pages/Configuration';
+import EnhancedMonitoring from './pages/EnhancedMonitoring';
+import FileManager from './pages/FileManager';
 import Monitoring from './pages/Monitoring';
 import Settings from './pages/Settings';
 import { Login}  from './pages/Login';
@@ -39,28 +43,38 @@ function App() {
 
 
   useEffect(() => {
-    // Check for existing auth token
-    const token = localStorage.getItem('apiToken');
-    if (token) {
-      apiService.setAuthToken(token);
-      // Verify token by making a health check
-      apiService.healthCheck()
-        .then(() => {
-          setIsAuthenticated(true);
-          // Connect WebSocket after successful auth
-          wsService.connect();
-        })
-        .catch(() => {
-          // Token is invalid, remove it
-          apiService.clearAuthToken();
-          setIsAuthenticated(false);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else {
-      setIsLoading(false);
-    }
+    const initAuth = async () => {
+      // Prefer persisted token, else fall back to demo token from env
+      let token = localStorage.getItem('apiToken');
+      if (!token && process.env.REACT_APP_API_TOKEN) {
+        await apiService.setAuthToken(process.env.REACT_APP_API_TOKEN);
+        token = process.env.REACT_APP_API_TOKEN;
+      }
+
+      if (token) {
+        // Start as authenticated and let the API interceptor handle invalid tokens
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        // Connect WebSocket after auth
+        wsService.connect();
+
+        // Verify token in the background with health check
+        apiService.healthCheck()
+          .catch((error) => {
+            console.warn('Health check failed:', error);
+            // Only logout on 401, other errors might be temporary
+            if (error.response?.status === 401) {
+              apiService.clearAuthToken();
+              setIsAuthenticated(false);
+              wsService.disconnect();
+            }
+          });
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
 
     // Cleanup WebSocket on unmount
     return () => {
@@ -68,7 +82,13 @@ function App() {
     };
   }, []);
 
-  const handleLogin = async (token) => {
+  const handleLogin = async (payload) => {
+    // Accept either a raw token string or an object with a `token` field
+    const token = typeof payload === 'string' ? payload : payload?.token;
+    if (!token) {
+      console.error('Login attempted without a valid token');
+      return;
+    }
     await apiService.setAuthToken(token);
     setIsAuthenticated(true);
     wsService.connect();
@@ -125,19 +145,24 @@ function App() {
               <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-900">
                 <div className="py-6">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <AnimatePresence mode="wait">
-                      <Routes>
-                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/schedules" element={<Schedules />} />
-                        <Route path="/channels" element={<Channels />} />
-                        <Route path="/pipelines" element={<Pipelines />} />
-                        <Route path="/highlights" element={<Highlights />} />
-                        <Route path="/content-creation" element={<ContentCreation />} />
-                        <Route path="/monitoring" element={<Monitoring />} />
-                        <Route path="/settings" element={<Settings />} />
-                      </Routes>
-                    </AnimatePresence>
+                    <ErrorBoundary fallbackMessage="This page encountered an error. This might be due to missing backend features or network issues.">
+                      <AnimatePresence mode="wait">
+                        <Routes>
+                          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/schedules" element={<Schedules />} />
+                          <Route path="/channels" element={<Channels />} />
+                          <Route path="/pipelines" element={<Pipelines />} />
+                          <Route path="/highlights" element={<Highlights />} />
+                          <Route path="/content-creation" element={<ContentCreation />} />
+                          <Route path="/configuration" element={<ErrorBoundary fallbackMessage="Configuration management may not be available on this backend."><Configuration /></ErrorBoundary>} />
+                          <Route path="/enhanced-monitoring" element={<ErrorBoundary fallbackMessage="Enhanced monitoring features may not be available on this backend."><EnhancedMonitoring /></ErrorBoundary>} />
+                          <Route path="/files" element={<ErrorBoundary fallbackMessage="File management features may not be available on this backend."><FileManager /></ErrorBoundary>} />
+                          <Route path="/monitoring" element={<Monitoring />} />
+                          <Route path="/settings" element={<Settings />} />
+                        </Routes>
+                      </AnimatePresence>
+                    </ErrorBoundary>
                   </div>
                 </div>
               </main>

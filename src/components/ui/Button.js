@@ -4,7 +4,9 @@ import { cn } from '../../utils/cn';
 
 const buttonVariants = {
   default: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
   secondary: 'bg-white dark:bg-dark-800 text-gray-900 dark:text-white border border-gray-300 dark:border-dark-600 hover:bg-gray-50 dark:hover:bg-dark-700 focus:ring-primary-500',
+  outline: 'bg-white dark:bg-dark-800 text-gray-900 dark:text-white border border-gray-300 dark:border-dark-600 hover:bg-gray-50 dark:hover:bg-dark-700 focus:ring-primary-500',
   success: 'bg-success-600 text-white hover:bg-success-700 focus:ring-success-500',
   danger: 'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500',
   warning: 'bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500',
