@@ -1,94 +1,117 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { TrendingUpIcon, TrendingDownIcon } from '@heroicons/react/24/outline';
 import { cn } from '../../utils/cn';
+import { Card, CardContent } from './Card';
 
+/**
+ * Metrics card for displaying KPIs in sports operations dashboard
+ * Shows big numbers with trend indicators and optional sparkline placeholder
+ */
 export function MetricsCard({ 
   title, 
   value, 
-  change, 
+  change,
+  changeType,
   icon: Icon, 
   color = 'primary',
   loading = false,
   className = '',
-  onClick
+  onClick,
+  subtitle,
+  ...props
 }) {
   const colorClasses = {
-    primary: 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300',
-    success: 'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300',
-    warning: 'bg-warning-50 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300',
-    danger: 'bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300',
-    gray: 'bg-gray-50 dark:bg-dark-800 text-gray-700 dark:text-dark-300'
+    primary: 'text-primary-600 [data-theme="dark"] &:text-primary-400',
+    secondary: 'text-secondary-600 [data-theme="dark"] &:text-secondary-400',
+    success: 'text-success-600 [data-theme="dark"] &:text-success-400',
+    warning: 'text-warning-600 [data-theme="dark"] &:text-warning-400',
+    danger: 'text-danger-600 [data-theme="dark"] &:text-danger-400',
+    info: 'text-info-600 [data-theme="dark"] &:text-info-400',
   };
 
-  const changeColorClasses = {
-    positive: 'text-success-600 dark:text-success-400',
-    negative: 'text-danger-600 dark:text-danger-400',
-    neutral: 'text-gray-500 dark:text-dark-400'
-  };
-
-  const getChangeType = (change) => {
-    if (change > 0) return 'positive';
-    if (change < 0) return 'negative';
-    return 'neutral';
+  const getTrendIcon = () => {
+    if (changeType === 'positive' || (change && change > 0)) {
+      return <TrendingUpIcon className="w-4 h-4 text-success-500" />;
+    }
+    if (changeType === 'negative' || (change && change < 0)) {
+      return <TrendingDownIcon className="w-4 h-4 text-danger-500" />;
+    }
+    return null;
   };
 
   const formatChange = (change) => {
-    const sign = change > 0 ? '+' : '';
-    return `${sign}${change}%`;
+    if (typeof change === 'number') {
+      const sign = change > 0 ? '+' : '';
+      return `${sign}${change}%`;
+    }
+    return change;
   };
 
-  const cardContent = (
-    <div className={cn('relative overflow-hidden rounded-lg border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 px-4 py-5 shadow-sm', className)}>
-      {loading && (
-        <div className="absolute inset-0 bg-white/50 dark:bg-dark-800/50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-        </div>
-      )}
-      
-      <dt>
-        <div className={cn('absolute rounded-md p-3', colorClasses[color])}>
-          {Icon && <Icon className="h-6 w-6" aria-hidden="true" />}
-        </div>
-        <p className="ml-16 truncate text-sm font-medium text-gray-500 dark:text-dark-400">
-          {title}
-        </p>
-      </dt>
-      <dd className="ml-16 flex items-baseline pb-2">
-        <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-          {loading ? '...' : value}
-        </p>
-        {change !== undefined && change !== null && !loading && (
-          <p className={cn('ml-2 flex items-baseline text-sm font-semibold', changeColorClasses[getChangeType(change)])}>
-            <span className="sr-only"> {change > 0 ? 'Increased' : 'Decreased'} by </span>
-            {formatChange(change)}
-          </p>
-        )}
-      </dd>
-    </div>
-  );
-
-  if (onClick) {
-    return (
-      <motion.button
-        onClick={onClick}
-        className="w-full text-left"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      >
-        {cardContent}
-      </motion.button>
-    );
-  }
+  const CardComponent = onClick ? 'button' : 'div';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <CardComponent
+      onClick={onClick}
+      className={cn(
+        onClick && 'transition-all duration-150 hover:shadow-elevated focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-950 [data-theme="light"] &:focus:ring-offset-surface-50',
+        className
+      )}
+      {...props}
     >
-      {cardContent}
-    </motion.div>
+      <Card className="h-full">
+        <CardContent className="p-6">
+          {loading ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="skeleton h-4 w-20"></div>
+                <div className="skeleton h-6 w-6 rounded"></div>
+              </div>
+              <div className="skeleton h-8 w-16"></div>
+              <div className="skeleton h-3 w-24"></div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted truncate">
+                  {title}
+                </p>
+                {Icon && (
+                  <div className={cn('p-2 rounded-md bg-surface-800 [data-theme="light"] &:bg-surface-100', colorClasses[color])}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-1">
+                <p className="text-2xl font-semibold tracking-tight text-surface-50 [data-theme='light'] &:text-surface-950 tabular-nums">
+                  {value}
+                </p>
+                {subtitle && (
+                  <p className="text-xs text-subtle">
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+
+              {(change !== undefined && change !== null) && (
+                <div className="flex items-center gap-1">
+                  {getTrendIcon()}
+                  <span className={cn(
+                    'text-sm font-medium tabular-nums',
+                    changeType === 'positive' || (change && change > 0) ? 'text-success-600 [data-theme="dark"] &:text-success-400' :
+                    changeType === 'negative' || (change && change < 0) ? 'text-danger-600 [data-theme="dark"] &:text-danger-400' :
+                    'text-muted'
+                  )}>
+                    {formatChange(change)}
+                  </span>
+                  <span className="text-xs text-subtle">vs last period</span>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </CardComponent>
   );
 }
 

@@ -1,31 +1,28 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../../hooks/useTheme';
 import { Button } from './Button';
 
-export const ThemeToggle = ({ className }) => {
+/**
+ * Theme toggle component for switching between light and dark modes
+ * Integrates with the useTheme hook and data-theme attribute system
+ */
+export const ThemeToggle = ({ className, size = 'md' }) => {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size={size}
       onClick={toggleTheme}
       className={className}
-      aria-label="Toggle theme"
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      leftIcon={isDark ? SunIcon : MoonIcon}
     >
-      <motion.div
-        initial={false}
-        animate={{ rotate: theme === 'dark' ? 180 : 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {theme === 'dark' ? (
-          <Moon className="h-4 w-4" />
-        ) : (
-          <Sun className="h-4 w-4" />
-        )}
-      </motion.div>
+      <span className="sr-only">
+        {isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      </span>
     </Button>
   );
 };

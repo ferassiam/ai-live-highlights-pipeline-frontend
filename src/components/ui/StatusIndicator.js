@@ -1,81 +1,95 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
-import { Badge } from './Badge';
 
-export const StatusIndicator = ({ 
-  status, 
-  animated = true, 
-  showText = true,
-  className 
-}) => {
-  const getStatusConfig = (status) => {
-    const configs = {
-      running: {
-        variant: 'success',
-        text: 'Running',
-        dotColor: 'bg-success-500',
-      },
-      stopped: {
-        variant: 'secondary',
-        text: 'Stopped',
-        dotColor: 'bg-gray-400 dark:bg-dark-500',
-      },
-      error: {
-        variant: 'danger',
-        text: 'Error',
-        dotColor: 'bg-danger-500',
-      },
-      warning: {
-        variant: 'warning',
-        text: 'Warning',
-        dotColor: 'bg-warning-500',
-      },
-      pending: {
-        variant: 'warning',
-        text: 'Pending',
-        dotColor: 'bg-warning-500',
-      },
-      healthy: {
-        variant: 'success',
-        text: 'Healthy',
-        dotColor: 'bg-success-500',
-      },
-      degraded: {
-        variant: 'warning',
-        text: 'Degraded',
-        dotColor: 'bg-warning-500',
-      },
-      unhealthy: {
-        variant: 'danger',
-        text: 'Unhealthy',
-        dotColor: 'bg-danger-500',
-      },
-    };
-
-    return configs[status?.toLowerCase()] || configs.stopped;
+/**
+ * Status indicator with dot and optional label
+ * Optimized for sports operations status display
+ */
+export const StatusIndicator = React.forwardRef(({ 
+  status = 'unknown',
+  label,
+  showLabel = true,
+  size = 'sm',
+  animated = true,
+  className,
+  ...props 
+}, ref) => {
+  const statusConfig = {
+    live: {
+      color: 'bg-success-500',
+      textColor: 'text-success-600 [data-theme="dark"] &:text-success-400',
+      label: 'Live'
+    },
+    scheduled: {
+      color: 'bg-secondary-500', 
+      textColor: 'text-secondary-600 [data-theme="dark"] &:text-secondary-400',
+      label: 'Scheduled'
+    },
+    processing: {
+      color: 'bg-warning-500',
+      textColor: 'text-warning-600 [data-theme="dark"] &:text-warning-400', 
+      label: 'Processing'
+    },
+    failed: {
+      color: 'bg-danger-500',
+      textColor: 'text-danger-600 [data-theme="dark"] &:text-danger-400',
+      label: 'Failed'
+    },
+    paused: {
+      color: 'bg-surface-500',
+      textColor: 'text-surface-600 [data-theme="dark"] &:text-surface-400',
+      label: 'Paused'
+    },
+    completed: {
+      color: 'bg-surface-500',
+      textColor: 'text-surface-600 [data-theme="dark"] &:text-surface-400',
+      label: 'Completed'
+    },
+    offline: {
+      color: 'bg-surface-400',
+      textColor: 'text-surface-500 [data-theme="dark"] &:text-surface-500',
+      label: 'Offline'
+    },
+    unknown: {
+      color: 'bg-surface-400',
+      textColor: 'text-surface-500 [data-theme="dark"] &:text-surface-500',
+      label: 'Unknown'
+    }
   };
 
-  const config = getStatusConfig(status);
+  const config = statusConfig[status] || statusConfig.unknown;
+  const displayLabel = label || config.label;
 
-  if (showText) {
-    return (
-      <Badge variant={config.variant} className={cn('flex items-center gap-1.5', className)}>
-        <motion.div
-          className={cn('h-2 w-2 rounded-full', config.dotColor)}
-          animate={animated && status === 'running' ? { scale: [1, 1.2, 1] } : {}}
-          transition={{ duration: 2, repeat: Infinity }}
-        />
-        {config.text}
-      </Badge>
-    );
-  }
+  const dotSizes = {
+    xs: 'w-1.5 h-1.5',
+    sm: 'w-2 h-2', 
+    md: 'w-2.5 h-2.5',
+    lg: 'w-3 h-3'
+  };
+
+  const shouldAnimate = animated && (status === 'live' || status === 'processing');
 
   return (
-    <motion.div
-      className={cn('h-3 w-3 rounded-full', config.dotColor, className)}
-      animate={animated && status === 'running' ? { scale: [1, 1.2, 1] } : {}}
-      transition={{ duration: 2, repeat: Infinity }}
-    />
+    <div
+      ref={ref}
+      className={cn('inline-flex items-center gap-2', className)}
+      {...props}
+    >
+      <span 
+        className={cn(
+          'rounded-full',
+          dotSizes[size],
+          config.color,
+          shouldAnimate && 'animate-pulse-subtle'
+        )}
+      />
+      {showLabel && (
+        <span className={cn('text-sm font-medium', config.textColor)}>
+          {displayLabel}
+        </span>
+      )}
+    </div>
   );
-};
+});
+
+StatusIndicator.displayName = 'StatusIndicator';
