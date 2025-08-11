@@ -73,6 +73,7 @@ export const Label = React.forwardRef(({
   >
     {props.children}
     {required && <span className="text-danger-500 ml-1">*</span>}
+    }
   </label>
 ));
 
