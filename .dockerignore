@@ -64,6 +64,6 @@ README.md
 # Temporary files
 segments/
 results/
-
+build/
 node_modules/
 package-lock.json
