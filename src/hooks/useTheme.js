@@ -31,8 +31,12 @@ export const ThemeProvider = ({ children }) => {
     
     if (theme === 'dark') {
       root.classList.add('dark');
+  // Ensure CSS using [data-theme="dark"] selectors activates
+  root.setAttribute('data-theme', 'dark');
     } else {
       root.classList.remove('dark');
+  // Revert to light theme for [data-theme] based styles
+  root.setAttribute('data-theme', 'light');
     }
     
     localStorage.setItem('theme', theme);

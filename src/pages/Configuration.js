@@ -6,8 +6,7 @@ import {
   DocumentTextIcon,
   CodeBracketIcon,
   ClockIcon,
-  GlobeAltIcon,
-  ChevronDownIcon
+  GlobeAltIcon
 } from '@heroicons/react/24/outline';
 
 import { apiService, showSuccessToast, showErrorToast, wsService } from '../services/api';
@@ -16,7 +15,8 @@ import { CodeEditor } from '../components/ui/CodeEditor';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Select } from '../components/ui/Select';
 import { Button } from '../components/ui/Button';
-import { cn } from '../utils/cn';
+import { Container } from '../components/ui/Container';
+import { PageHeader } from '../components/ui/PageHeader';
 
 export default function Configuration() {
   const [activeTab, setActiveTab] = useState('prompts');
@@ -87,14 +87,14 @@ export default function Configuration() {
   }, [sportsResponse]);
 
   // Fetch prompt configuration
-  const { data: promptData, isLoading: promptLoading, error: promptFetchError } = useQuery({
+  const { data: promptData, isLoading: promptLoading } = useQuery({
     queryKey: ['promptConfig', selectedSport, promptType],
     queryFn: () => apiService.getPromptConfig(selectedSport),
     enabled: activeTab === 'prompts' && !!selectedSport,
   });
 
   // Fetch schema configuration
-  const { data: schemaData, isLoading: schemaLoading, error: schemaFetchError } = useQuery({
+  const { data: schemaData, isLoading: schemaLoading } = useQuery({
     queryKey: ['schemaConfig', selectedSport],
     queryFn: () => apiService.getSchemaConfig(selectedSport),
     enabled: activeTab === 'schemas' && !!selectedSport,
@@ -269,26 +269,22 @@ export default function Configuration() {
 
   if (sportsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner message="Loading configuration management..." />
-      </div>
+      <Container>
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner message="Loading configuration management..." />
+        </div>
+      </Container>
     );
   }
 
   if (sportsError) {
     return (
-      <div className="space-y-6">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title flex items-center">
-              <CogIcon className="h-8 w-8 mr-3" />
-              Configuration Management
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-              Manage sport-specific prompts, schemas, and system configuration
-            </p>
-          </div>
-        </div>
+      <Container className="space-y-6">
+        <PageHeader 
+          title="Configuration Management"
+          icon={CogIcon}
+          description="Manage sport-specific prompts, schemas, and system configuration"
+        />
         
         <div className="bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-md p-4">
           <div className="flex">
@@ -310,24 +306,18 @@ export default function Configuration() {
             </div>
           </div>
         </div>
-      </div>
+  </Container>
     );
   }
 
   if (!sportsLoading && (!Array.isArray(supportedSports) || supportedSports.length === 0)) {
     return (
-      <div className="space-y-6">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title flex items-center">
-              <CogIcon className="h-8 w-8 mr-3" />
-              Configuration Management
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-              Manage sport-specific prompts, schemas, and system configuration
-            </p>
-          </div>
-        </div>
+      <Container className="space-y-6">
+        <PageHeader 
+          title="Configuration Management"
+          icon={CogIcon}
+          description="Manage sport-specific prompts, schemas, and system configuration"
+        />
         
         <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-md p-4">
           <div className="flex">
@@ -341,40 +331,33 @@ export default function Configuration() {
             </div>
           </div>
         </div>
-      </div>
+  </Container>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title flex items-center">
-            <CogIcon className="h-8 w-8 mr-3" />
-            Configuration Management
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-            Manage sport-specific prompts, schemas, and system configuration
-          </p>
-        </div>
-        
-        {/* Sport selector */}
-        <div className="flex items-center space-x-4">
-          <Select
-            label="Sport"
-            value={selectedSport}
-            onChange={setSelectedSport}
-            options={Array.isArray(supportedSports) ? supportedSports.map(sport => ({ value: sport, label: sport.charAt(0).toUpperCase() + sport.slice(1) })) : []}
-            className="min-w-[150px]"
-          />
-          {!isAdmin && (
-            <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-md px-3 py-2">
-              <span className="text-sm text-warning-700 dark:text-warning-300">Read-only access</span>
-            </div>
-          )}
-        </div>
-      </div>
+    <Container className="space-y-6">
+      <PageHeader 
+        title="Configuration Management"
+        icon={CogIcon}
+        description="Manage sport-specific prompts, schemas, and system configuration"
+        actions={
+          <div className="flex items-center space-x-4">
+            <Select
+              label="Sport"
+              value={selectedSport}
+              onChange={setSelectedSport}
+              options={Array.isArray(supportedSports) ? supportedSports.map(sport => ({ value: sport, label: sport.charAt(0).toUpperCase() + sport.slice(1) })) : []}
+              className="min-w-[150px]"
+            />
+            {!isAdmin && (
+              <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-md px-3 py-2">
+                <span className="text-sm text-warning-700 dark:text-warning-300">Read-only access</span>
+              </div>
+            )}
+          </div>
+        }
+      />
 
       {/* Tab navigation */}
       <TabNavigation
@@ -634,6 +617,6 @@ export default function Configuration() {
           )}
         </motion.div>
       </AnimatePresence>
-    </div>
+  </Container>
   );
 }

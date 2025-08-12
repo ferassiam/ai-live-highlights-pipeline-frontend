@@ -5,7 +5,10 @@ import {
   DocumentIcon,
   XMarkIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
+  PhotoIcon,
+  FilmIcon,
+  SpeakerWaveIcon
 } from '@heroicons/react/24/outline';
 import { cn } from '../../utils/cn';
 
@@ -92,12 +95,10 @@ export function FileUpload({
   };
 
   const getFileIcon = (file) => {
-    if (file.type.startsWith('image/')) return '🖼️';
-    if (file.type.startsWith('video/')) return '🎥';
-    if (file.type.startsWith('audio/')) return '🎵';
-    if (file.type === 'application/json') return '📄';
-    if (file.type === 'text/plain') return '📝';
-    return '📄';
+    if (file.type.startsWith('image/')) return <PhotoIcon className="h-4 w-4 text-info-600" />;
+    if (file.type.startsWith('video/')) return <FilmIcon className="h-4 w-4 text-warning-600" />;
+    if (file.type.startsWith('audio/')) return <SpeakerWaveIcon className="h-4 w-4 text-success-600" />;
+    return <DocumentIcon className="h-4 w-4 text-slate-600" />;
   };
 
   return (
@@ -105,14 +106,15 @@ export function FileUpload({
       {/* Upload Area */}
       <motion.div
         className={cn(
-          'relative border-2 border-dashed rounded-lg p-6 transition-colors cursor-pointer',
+          'relative border-2 border-dashed rounded-lg p-8 transition-all duration-200 cursor-pointer',
+          'bg-slate-50 dark:bg-slate-900',
           isDragOver && !disabled
-            ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
+            ? 'border-primary-400 bg-primary-50 dark:bg-primary-950/30 scale-[1.02]'
             : success
-            ? 'border-success-400 bg-success-50 dark:bg-success-900/20'
+            ? 'border-success-400 bg-success-50 dark:bg-success-950/30'
             : error
-            ? 'border-danger-400 bg-danger-50 dark:bg-danger-900/20'
-            : 'border-gray-300 dark:border-dark-600 hover:border-gray-400 dark:hover:border-dark-500',
+            ? 'border-danger-400 bg-danger-50 dark:bg-danger-950/30'
+            : 'border-stone-300 dark:border-stone-600 hover:border-stone-400 dark:hover:border-stone-500',
           disabled && 'cursor-not-allowed opacity-50'
         )}
         onDragOver={handleDragOver}
@@ -133,61 +135,81 @@ export function FileUpload({
         />
 
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 flex items-center justify-center">
+          <div className="mx-auto h-16 w-16 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
             {uploading ? (
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-r-transparent"></div>
             ) : success ? (
               <CheckCircleIcon className="h-8 w-8 text-success-600" />
             ) : error ? (
               <ExclamationCircleIcon className="h-8 w-8 text-danger-600" />
             ) : (
-              <CloudArrowUpIcon className="h-8 w-8 text-gray-400" />
+              <CloudArrowUpIcon className="h-8 w-8 text-slate-500" />
             )}
           </div>
 
           {children || (
-            <div className="mt-2">
-              <p className="text-sm text-gray-600 dark:text-dark-400">
+            <div className="mt-4">
+              <h3 className="font-subheading text-slate-900 dark:text-slate-100 tracking-tight">
                 {uploading
-                  ? 'Uploading...'
+                  ? 'Uploading files...'
                   : success
                   ? 'Upload successful!'
                   : error
                   ? 'Upload failed'
-                  : 'Drop files here or click to browse'
+                  : 'Drop files to upload'
+                }
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                {uploading
+                  ? 'Please wait while your files are being uploaded'
+                  : success
+                  ? 'Your files have been uploaded successfully'
+                  : error
+                  ? 'Please try again or check your file format'
+                  : 'or click to browse from your computer'
                 }
               </p>
               {!uploading && !success && !error && (
-                <p className="text-xs text-gray-500 dark:text-dark-500 mt-1">
-                  {accept !== '*/*' && `Accepts: ${accept} • `}
-                  Max size: {formatFileSize(maxSize)}
-                  {multiple && ' • Multiple files allowed'}
-                </p>
+                <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 space-y-1">
+                  {accept !== '*/*' && (
+                    <div>Accepted formats: <span className="font-medium">{accept}</span></div>
+                  )}
+                  <div>Maximum file size: <span className="font-medium">{formatFileSize(maxSize)}</span></div>
+                  {multiple && <div>Multiple files allowed</div>}
+                </div>
               )}
             </div>
           )}
 
           {/* Progress bar */}
           {uploading && uploadProgress > 0 && (
-            <div className="mt-3 w-full bg-gray-200 dark:bg-dark-600 rounded-full h-2">
-              <motion.div
-                className="bg-primary-600 h-2 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${uploadProgress}%` }}
-                transition={{ duration: 0.3 }}
-              />
+            <div className="mt-4 w-full">
+              <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-slate-600 dark:text-slate-400">Progress</span>
+                <span className="font-medium text-primary-600 tabular-nums">{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                <motion.div
+                  className="bg-primary-500 h-2 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${uploadProgress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
             </div>
           )}
 
           {/* Error message */}
           {error && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mt-2 text-sm text-danger-600 dark:text-danger-400"
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3 p-3 bg-danger-50 dark:bg-danger-950/30 border border-danger-200 dark:border-danger-800 rounded-lg"
             >
-              {error}
-            </motion.p>
+              <p className="text-sm text-danger-700 dark:text-danger-300 font-medium">
+                {error}
+              </p>
+            </motion.div>
           )}
         </div>
       </motion.div>
@@ -201,7 +223,7 @@ export function FileUpload({
             exit={{ opacity: 0, height: 0 }}
             className="space-y-2"
           >
-            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+            <h4 className="text-sm font-subheading text-slate-900 dark:text-slate-100 tracking-tight">
               Selected Files ({selectedFiles.length})
             </h4>
             <div className="space-y-2">
@@ -211,15 +233,17 @@ export function FileUpload({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
-                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-700 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-slate-100 dark:bg-slate-800 border border-stone-200 dark:border-stone-600 rounded-lg"
                 >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-lg">{getFileIcon(file)}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-slate-50 dark:bg-slate-700 rounded-md">
+                      {getFileIcon(file)}
+                    </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100 tracking-tight">
                         {file.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-dark-400">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                         {formatFileSize(file.size)}
                       </p>
                     </div>
@@ -230,7 +254,7 @@ export function FileUpload({
                       e.stopPropagation();
                       removeFile(index);
                     }}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:text-dark-500 dark:hover:text-dark-300"
+                    className="p-2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors"
                     disabled={disabled || uploading}
                   >
                     <XMarkIcon className="h-4 w-4" />
@@ -246,9 +270,26 @@ export function FileUpload({
                 animate={{ opacity: 1, y: 0 }}
                 onClick={handleUpload}
                 disabled={disabled || uploading}
-                className="w-full btn btn-primary"
+                className={cn(
+                  'w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-subheading tracking-tight transition-all duration-200',
+                  'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700',
+                  'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+                  'focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                  'shadow-subtle hover:shadow-elevation'
+                )}
               >
-                {uploading ? 'Uploading...' : `Upload ${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'}`}
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-r-transparent" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <CloudArrowUpIcon className="h-4 w-4" />
+                    Upload {selectedFiles.length} file{selectedFiles.length === 1 ? '' : 's'}
+                  </>
+                )}
               </motion.button>
             )}
           </motion.div>

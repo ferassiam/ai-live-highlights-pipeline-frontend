@@ -224,24 +224,293 @@ wsService.on('status_update', (data) => {
 - **Bulk Actions**: Download, export, or delete multiple highlights
 - **Analytics**: Highlight generation trends and statistics
 
-## 🎨 UI/UX Design
+## 🎨 Professional Design System
 
-### Design System
-- **Color Palette**: Primary blue, success green, warning orange, danger red
-- **Typography**: Inter font family with consistent sizing
-- **Spacing**: 8px grid system for consistent spacing
-- **Components**: Reusable button, card, form, and layout components
+### Overview
+The Live Highlights Dashboard uses a professional sports operations design system optimized for broadcast/OTT operations teams. The design eliminates "AI-ish" aesthetics in favor of functional, high-contrast, information-dense patterns suitable for mission-critical workflows.
 
-### Responsive Breakpoints
-- **Mobile**: 0-639px (single column, sidebar overlay)
-- **Tablet**: 640-1023px (adjusted columns, collapsible sidebar)
-- **Desktop**: 1024px+ (full layout, permanent sidebar)
+### Color Palette
 
-### Accessibility
-- **Keyboard Navigation**: Full keyboard support
-- **Screen Readers**: ARIA labels and semantic HTML
-- **Color Contrast**: WCAG AA compliant contrast ratios
-- **Focus Management**: Visible focus indicators
+#### Primary Colors (Sports Operations Theme)
+- **Primary (Emerald)**: `#10b981` - Primary actions, navigation highlights
+- **Secondary (Sky)**: `#0ea5e9` - Information, charts, secondary actions
+- **Surface Colors**: Professional slate/stone palette for backgrounds and UI elements
+
+#### Status Colors (Operational)
+- **Success**: `#10b981` - Live/active/healthy status
+- **Warning**: `#f59e0b` - Degraded/attention needed
+- **Danger**: `#ef4444` - Critical/failed/offline
+- **Processing**: `#8b5cf6` - Active processing states
+- **Scheduled**: `#0ea5e9` - Scheduled/planned states
+
+#### Neutral Colors (Professional)
+```css
+:root {
+  /* Light theme */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+  
+  /* Surface colors for operations UI */
+  --color-surface-primary: var(--color-slate-50);
+  --color-surface-secondary: var(--color-slate-100);
+  --color-surface-elevated: #ffffff;
+}
+
+[data-theme="dark"] {
+  /* Dark theme optimized for operations */
+  --color-surface-primary: var(--color-slate-950);
+  --color-surface-secondary: var(--color-slate-900);
+  --color-surface-elevated: var(--color-slate-800);
+}
+```
+
+### Typography System
+
+#### Font Family
+- **Primary**: Inter (system font with excellent readability)
+- **Fallback**: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
+
+#### Font Weights & Usage
+- **font-light (300)**: Large headings, minimal text
+- **font-normal (400)**: Body text, descriptions
+- **font-medium (500)**: Labels, secondary headings
+- **font-semibold (600)**: Section headings, emphasis
+- **font-bold (700)**: Primary headings, strong emphasis
+- **font-extrabold (800)**: Page titles, hero text
+
+#### Typography Classes
+```css
+/* Professional heading hierarchy */
+.font-heading { font-weight: 700; line-height: 1.2; letter-spacing: -0.025em; }
+.font-subheading { font-weight: 600; line-height: 1.3; letter-spacing: -0.025em; }
+
+/* Operational text styles */
+.tracking-tight { letter-spacing: -0.025em; } /* Headings */
+.tabular-nums { font-variant-numeric: tabular-nums; } /* Metrics */
+```
+
+### Component Architecture
+
+#### Button Variants
+```jsx
+// Professional button system
+<Button variant="primary">Primary Action</Button>
+<Button variant="secondary">Secondary Action</Button>
+<Button variant="subtle">Subtle Action</Button>
+<Button variant="destructive">Delete/Remove</Button>
+<Button variant="ghost">Minimal Action</Button>
+<Button variant="success">Confirm/Start</Button>
+<Button variant="warning">Caution Required</Button>
+```
+
+#### Status Indicators
+```jsx
+// Operations-grade status system
+<StatusIndicator status="healthy" showText showRing />
+<StatusIndicator status="warning" showText />
+<StatusIndicator status="unhealthy" showText />
+<StatusIndicator status="paused" showText />
+```
+
+#### Badge System
+```jsx
+// Status-driven badge variants
+<Badge variant="live">Live</Badge>
+<Badge variant="scheduled">Scheduled</Badge>
+<Badge variant="processing">Processing</Badge>
+<Badge variant="completed">Completed</Badge>
+<Badge variant="failed">Failed</Badge>
+<Badge variant="paused">Paused</Badge>
+```
+
+#### Cards & Layout
+```jsx
+// Professional card system with variants
+<Card variant="default">Standard content</Card>
+<Card variant="elevated">Important content</Card>
+<Card variant="interactive">Clickable content</Card>
+<Card variant="flat">Subtle content</Card>
+
+// Density modes for operations workflows
+<Card density="compact">High-density data</Card>
+<Card density="default">Standard spacing</Card>
+<Card density="spacious">Comfortable reading</Card>
+```
+
+#### Metrics & KPIs
+```jsx
+// Big-number KPIs for operations dashboards
+<MetricsCard
+  title="Active Channels"
+  value={42}
+  change={12.5}
+  changeLabel="from last hour"
+  icon={TvIcon}
+  color="primary"
+  showTrend={true}
+/>
+```
+
+### Professional Shadow System
+- **shadow-subtle**: `0 1px 2px 0 rgba(0, 0, 0, 0.05)` - Minimal elevation
+- **shadow-elevation**: `0 4px 6px -1px rgba(0, 0, 0, 0.1)` - Standard elevation
+- **shadow-elevated**: `0 10px 15px -3px rgba(0, 0, 0, 0.1)` - High elevation
+
+### Spacing & Layout
+
+#### Grid System
+- **Base unit**: 0.25rem (4px)
+- **Common spacing**: 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px
+- **Container max-width**: 1280px (max-w-7xl)
+- **Content padding**: 1.5rem (24px)
+
+#### Professional Breakpoints
+```javascript
+// Tailwind breakpoints optimized for operations
+screens: {
+  'sm': '640px',   // Large mobile
+  'md': '768px',   // Tablet
+  'lg': '1024px',  // Desktop
+  'xl': '1280px',  // Large desktop
+  '2xl': '1536px', // Ultra-wide
+}
+```
+
+### Dark Mode Implementation
+Uses data-theme attribute strategy instead of class-based:
+```css
+/* Light mode (default) */
+.text-primary { color: #0f172a; }
+
+/* Dark mode */
+[data-theme="dark"] .text-primary { color: #f8fafc; }
+```
+
+### Responsive Design Patterns
+
+#### Mobile-First Approach (360px+)
+- Single column layouts
+- Overlay navigation
+- Touch-optimized controls
+- Condensed information
+
+#### Tablet Optimizations (768px+)
+- Two-column layouts
+- Collapsible sidebar
+- Improved data density
+- Gesture support
+
+#### Desktop Experience (1280px+)
+- Multi-column layouts
+- Persistent sidebar
+- Full feature access
+- Keyboard shortcuts
+
+### Accessibility Standards
+
+#### WCAG AA Compliance
+- **Color contrast**: Minimum 4.5:1 for normal text
+- **Large text**: Minimum 3:1 contrast ratio
+- **Interactive elements**: 44px minimum touch target
+- **Focus indicators**: 2px solid ring with proper contrast
+
+#### Keyboard Navigation
+- **Tab order**: Logical flow through interface
+- **Focus management**: Visible focus indicators
+- **Keyboard shortcuts**: Standard shortcuts for common actions
+- **Screen readers**: Semantic HTML with ARIA labels
+
+#### Implementation Examples
+```jsx
+// Accessible button with proper ARIA
+<Button
+  variant="primary"
+  onClick={handleAction}
+  aria-label="Start orchestrator service"
+  className="focus:outline-none focus:ring-2 focus:ring-primary-500"
+>
+  Start Service
+</Button>
+
+// Status indicator with screen reader support
+<StatusIndicator 
+  status="healthy"
+  showText
+  aria-label="System status: healthy and operational"
+/>
+```
+
+### Animation & Transitions
+Professional, subtle animations that enhance UX without distraction:
+
+#### Motion Principles
+- **Duration**: 150ms-300ms for most transitions
+- **Easing**: `ease-out` for entrances, `ease-in` for exits
+- **Reduced motion**: Respects `prefers-reduced-motion`
+- **Performance**: GPU-accelerated transforms only
+
+#### Common Patterns
+```jsx
+// Page transitions
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+>
+  Page Content
+</motion.div>
+
+// Interactive elements
+<motion.button
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  transition={{ duration: 0.15 }}
+>
+  Interactive Button
+</motion.button>
+```
+
+### Component Library Usage
+
+#### Import Patterns
+```javascript
+// Individual component imports (recommended)
+import { Button } from '../components/ui/Button';
+import { Card, CardHeader, CardContent } from '../components/ui/Card';
+import { StatusIndicator } from '../components/ui/StatusIndicator';
+import { MetricsCard } from '../components/ui/MetricsCard';
+```
+
+#### Professional Layout Example
+```jsx
+function ProfessionalDashboard() {
+  return (
+    <motion.div className="space-y-8 p-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-heading font-bold text-slate-900 [data-theme=\"dark\"] &:text-slate-100">
+          System Overview
+        </h1>
+        <StatusIndicator status="healthy" showText />
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {metrics.map((metric) => (
+          <MetricsCard key={metric.title} {...metric} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+```
 
 ## 🔧 Customization
 

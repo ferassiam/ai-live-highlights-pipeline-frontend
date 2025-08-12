@@ -6,9 +6,11 @@ import {
   PlayIcon,
   SparklesIcon,
   ServerIcon,
-  ClockIcon,
   ArrowPathIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  SignalIcon,
+  EyeIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 import { apiService, wsService } from '../services/api';
@@ -17,6 +19,9 @@ import { TabNavigation } from '../components/ui/TabNavigation';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
+import { Card, CardHeader, CardContent } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
+import { StatusIndicator } from '../components/ui/StatusIndicator';
 import { cn } from '../utils/cn';
 
 export default function EnhancedMonitoring() {
@@ -81,21 +86,43 @@ export default function EnhancedMonitoring() {
     };
   }, [queryClient]);
 
+  const activePipelines = systemStatus?.orchestrator_status?.active_pipelines || [];
+
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: ChartBarIcon },
-    { id: 'pipelines', name: 'Pipelines', icon: PlayIcon },
-    { id: 'events', name: 'Recent Events', icon: ClockIcon },
-    { id: 'health', name: 'System Health', icon: ServerIcon },
+    { 
+      id: 'overview', 
+      name: 'Overview', 
+      icon: ChartBarIcon,
+      count: Object.keys(systemStatus?.orchestrator_status?.active_channels || {}).length
+    },
+    { 
+      id: 'pipelines', 
+      name: 'Pipelines', 
+      icon: PlayIcon,
+      count: activePipelines.length,
+      alert: activePipelines.length === 0 ? 'warning' : null
+    },
+    { 
+      id: 'events', 
+      name: 'Activity', 
+      icon: EyeIcon,
+      count: recentHighlights?.highlights?.length || 0
+    },
+    { 
+      id: 'health', 
+      name: 'Health', 
+      icon: ShieldCheckIcon,
+      alert: !systemStatus?.orchestrator_running ? 'danger' : null
+    },
   ];
 
   const timeRangeOptions = [
-    { value: 1, label: 'Last Hour' },
-    { value: 6, label: 'Last 6 Hours' },
-    { value: 24, label: 'Last 24 Hours' },
-    { value: 168, label: 'Last Week' },
+    { value: '1', label: 'Last Hour' },
+    { value: '6', label: 'Last 6 Hours' },
+    { value: '24', label: 'Last 24 Hours' },
+    { value: '168', label: 'Last Week' },
   ];
 
-  const activePipelines = systemStatus?.orchestrator_status?.active_pipelines || [];
   const pipelineOptions = [
     { value: 'all', label: 'All Pipelines' },
     ...activePipelines.map(p => ({ value: p, label: p }))
@@ -114,46 +141,67 @@ export default function EnhancedMonitoring() {
 
   if (statsLoading && !monitoringStats) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner message="Loading monitoring data..." />
-      </div>
+      <motion.div 
+        className="space-y-8 p-6 max-w-7xl mx-auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner message="Loading enhanced monitoring data..." />
+        </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title flex items-center">
-            <ChartBarIcon className="h-8 w-8 mr-3" />
-            Enhanced Monitoring
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-            Real-time system monitoring and analytics
+    <motion.div 
+      className="space-y-8 p-6 max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Professional page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-3">
+            <SignalIcon className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+            <h1 className="text-2xl font-heading font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              Enhanced Monitoring
+            </h1>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-400 font-medium mt-2">
+            Advanced real-time system monitoring and performance analytics
           </p>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-3">
+          <StatusIndicator 
+            status={systemStatus?.orchestrator_running ? 'healthy' : 'unhealthy'} 
+            showText 
+            size="sm"
+          />
+          
           <Select
-            label="Time Range"
-            value={selectedHours}
-            onChange={setSelectedHours}
+            value={selectedHours.toString()}
+            onChange={(value) => setSelectedHours(parseInt(value))}
             options={timeRangeOptions}
-            className="min-w-[150px]"
+            size="sm"
+            className="min-w-[140px]"
           />
           
           <Button
-            variant="outline"
+            variant={autoRefresh ? "success" : "subtle"}
+            size="sm"
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={cn(autoRefresh && 'border-success-300 dark:border-success-600')}
           >
             <ArrowPathIcon className={cn('h-4 w-4 mr-2', autoRefresh && 'animate-spin')} />
-            {autoRefresh ? 'Auto Refresh: On' : 'Auto Refresh: Off'}
+            Auto Refresh
           </Button>
 
           <Button
-            variant="outline"
+            variant="ghost"
+            size="sm"
             onClick={() => {
               queryClient.invalidateQueries({ queryKey: ['monitoringStats'] });
               queryClient.invalidateQueries({ queryKey: ['systemStatus'] });
@@ -166,21 +214,28 @@ export default function EnhancedMonitoring() {
         </div>
       </div>
 
-      {/* Error state */}
+      {/* Professional error state */}
       {statsError && (
-        <div className="bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-md p-4">
-          <div className="flex">
-            <ExclamationTriangleIcon className="h-5 w-5 text-danger-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-danger-800 dark:text-danger-200">
-                Failed to load monitoring data
-              </h3>
-              <p className="mt-1 text-sm text-danger-700 dark:text-danger-300">
-                {statsError.message || 'Unable to fetch monitoring statistics'}
-              </p>
+        <Card 
+          variant="default"
+          className="border-l-4 border-l-danger-500 bg-danger-50 dark:bg-danger-950/20"
+        >
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 pt-0.5">
+                <ExclamationTriangleIcon className="h-6 w-6 text-danger-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-subheading tracking-tight text-danger-700 dark:text-danger-300">
+                  Monitoring Data Error
+                </h3>
+                <p className="text-sm text-danger-600 dark:text-danger-400 mt-1">
+                  {statsError.message || 'Unable to fetch monitoring statistics. Check system connectivity.'}
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Tab navigation */}
@@ -233,16 +288,16 @@ export default function EnhancedMonitoring() {
               />
             </div>
 
-            {/* Charts and detailed metrics */}
+            {/* Professional analytics cards */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Processing Statistics */}
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <Card variant="elevated">
+                <CardHeader>
+                  <h3 className="text-lg font-subheading font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
                     Processing Statistics
                   </h3>
-                </div>
-                <div className="card-body">
+                </CardHeader>
+                <CardContent>
                   {statsLoading ? (
                     <div className="flex items-center justify-center h-32">
                       <LoadingSpinner />
@@ -250,76 +305,74 @@ export default function EnhancedMonitoring() {
                   ) : (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500 dark:text-dark-400">Total Processed</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Total Processed</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                           {formatNumber(monitoringStats?.total_processed || 0)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500 dark:text-dark-400">Successful</span>
-                        <span className="font-medium text-success-600 dark:text-success-400">
+                        <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Successful</span>
+                        <span className="font-bold text-success-600 dark:text-success-400 tabular-nums">
                           {formatNumber(monitoringStats?.successful || 0)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500 dark:text-dark-400">Failed</span>
-                        <span className="font-medium text-danger-600 dark:text-danger-400">
+                        <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Failed</span>
+                        <span className="font-bold text-danger-600 dark:text-danger-400 tabular-nums">
                           {formatNumber(monitoringStats?.failed || 0)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500 dark:text-dark-400">Avg Processing Time</span>
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Avg Processing Time</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                           {monitoringStats?.avg_processing_time ? 
                             `${monitoringStats.avg_processing_time.toFixed(1)}s` : 'N/A'}
                         </span>
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* System Resources */}
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <Card variant="elevated">
+                <CardHeader>
+                  <h3 className="text-lg font-subheading font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
                     System Resources
                   </h3>
-                </div>
-                <div className="card-body">
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Active Connections</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Active Connections</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                         {systemStatus?.active_connections || 0}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Schedules Loaded</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Schedules Loaded</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                         {systemStatus?.orchestrator_status?.schedules_loaded || 0}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Active Channels</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
+                      <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Active Channels</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                         {Object.keys(systemStatus?.orchestrator_status?.active_channels || {}).length}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Backend Status</span>
-                      <span className={cn(
-                        'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-                        systemStatus?.orchestrator_status?.highlights_backend_enabled
-                          ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
-                          : 'bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200'
-                      )}>
+                      <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">Backend Status</span>
+                      <Badge 
+                        variant={systemStatus?.orchestrator_status?.highlights_backend_enabled ? 'success' : 'secondary'}
+                        size="sm"
+                      >
                         {systemStatus?.orchestrator_status?.highlights_backend_enabled ? 'Connected' : 'Disabled'}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
@@ -561,6 +614,6 @@ export default function EnhancedMonitoring() {
           </div>
         )}
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

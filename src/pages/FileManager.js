@@ -3,10 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   FolderIcon,
-  DocumentIcon,
   ArrowDownTrayIcon,
   MagnifyingGlassIcon,
-  CalendarIcon,
   InformationCircleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
@@ -15,7 +13,6 @@ import { apiService, showSuccessToast, showErrorToast } from '../services/api';
 import { FileUpload } from '../components/ui/FileUpload';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
-import { cn } from '../utils/cn';
 
 export default function FileManager() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +28,9 @@ export default function FileManager() {
     queryFn: () => apiService.getSegmentFilesWithMetadata(),
     refetchInterval: 60000, // Refresh every minute
   });
+
+  // Ensure filesData is always an array
+  const files = Array.isArray(filesData) ? filesData : [];
 
   // Upload schedule file mutation
   const uploadFileMutation = useMutation({
@@ -124,8 +124,11 @@ export default function FileManager() {
   };
 
   // Filter and sort files
-  const filteredFiles = filesData
+  const filteredFiles = files
     .filter(file => {
+      // Ensure file has required properties
+      if (!file || !file.name) return false;
+      
       const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = selectedFileType === 'all' || getFileType(file.name).toLowerCase() === selectedFileType;
       return matchesSearch && matchesType;
@@ -133,10 +136,13 @@ export default function FileManager() {
     .sort((a, b) => {
       let aValue, bValue;
       
+      // Safety checks to ensure objects exist and have required properties
+      if (!a || !b) return 0;
+      
       switch (sortBy) {
         case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = (a.name || '').toLowerCase();
+          bValue = (b.name || '').toLowerCase();
           break;
         case 'size':
           aValue = a.size || 0;
@@ -347,7 +353,7 @@ export default function FileManager() {
                 <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
                   {filteredFiles.map((file, index) => (
                     <motion.tr
-                      key={file.name}
+                      key={file.name || index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: index * 0.05 }}
@@ -355,10 +361,10 @@ export default function FileManager() {
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className="text-lg mr-3">{getFileIcon(file.name)}</span>
+                          <span className="text-lg mr-3">{getFileIcon(file.name || '')}</span>
                           <div>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {file.name}
+                              {file.name || 'Unknown file'}
                             </div>
                             {file.path && (
                               <div className="text-sm text-gray-500 dark:text-dark-400">
@@ -370,7 +376,7 @@ export default function FileManager() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200">
-                          {getFileType(file.name)}
+                          {getFileType(file.name || '')}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-dark-400">
