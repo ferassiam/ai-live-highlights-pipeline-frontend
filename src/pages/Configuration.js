@@ -6,7 +6,8 @@ import {
   DocumentTextIcon,
   CodeBracketIcon,
   ClockIcon,
-  GlobeAltIcon
+  GlobeAltIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 import { apiService, showSuccessToast, showErrorToast, wsService } from '../services/api';
@@ -27,6 +28,11 @@ export default function Configuration() {
   const [promptError, setPromptError] = useState(null);
   const [schemaError, setSchemaError] = useState(null);
   const [isAdmin] = useState(true); // TODO: Get from auth context
+  
+  // Content prompts state
+  const [contentPrompts, setContentPrompts] = useState({});
+  const [contentPromptError, setContentPromptError] = useState(null);
+  const [editingPrompt, setEditingPrompt] = useState(null);
   
   const queryClient = useQueryClient();
 
@@ -114,6 +120,26 @@ export default function Configuration() {
     enabled: activeTab === 'history' && !!selectedSport,
   });
 
+  // Fetch content prompts
+  const { data: contentPromptsData, isLoading: contentPromptsLoading } = useQuery({
+    queryKey: ['contentPrompts'],
+    queryFn: () => apiService.getContentPrompts(),
+    enabled: activeTab === 'content-prompts',
+    retry: false,
+    onError: (error) => {
+      console.error('Failed to fetch content prompts:', error);
+      setContentPromptError('Failed to load content prompts');
+    }
+  });
+
+  // Fetch content prompt types
+  const { data: contentPromptTypes = [] } = useQuery({
+    queryKey: ['contentPromptTypes'],
+    queryFn: () => apiService.getContentPromptTypes(),
+    enabled: activeTab === 'content-prompts',
+    retry: false,
+  });
+
   // Update prompt mutation
   const updatePromptMutation = useMutation({
     mutationFn: ({ sport, config, etag }) => apiService.updatePromptConfig(sport, config, etag),
@@ -172,6 +198,22 @@ export default function Configuration() {
     },
   });
 
+  // Update content prompts mutation
+  const updateContentPromptsMutation = useMutation({
+    mutationFn: (prompts) => apiService.updateContentPrompts(prompts),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contentPrompts'] });
+      showSuccessToast('Content prompts updated successfully');
+      setContentPromptError(null);
+      setEditingPrompt(null);
+    },
+    onError: (error) => {
+      const message = error.response?.data?.detail || 'Failed to update content prompts';
+      showErrorToast(message);
+      setContentPromptError(message);
+    },
+  });
+
   // Update local states when data changes
   useEffect(() => {
     if (promptData) {
@@ -194,6 +236,12 @@ export default function Configuration() {
     }
   }, [schemaData]);
 
+  useEffect(() => {
+    if (contentPromptsData?.prompts) {
+      setContentPrompts(contentPromptsData.prompts);
+    }
+  }, [contentPromptsData]);
+
   // WebSocket listeners for real-time updates
   useEffect(() => {
     const handleConfigUpdate = (data) => {
@@ -211,6 +259,7 @@ export default function Configuration() {
   const tabs = [
     { id: 'prompts', name: 'Prompts', icon: DocumentTextIcon },
     { id: 'schemas', name: 'Schemas', icon: CodeBracketIcon },
+    { id: 'content-prompts', name: 'Content Prompts', icon: ChatBubbleLeftRightIcon },
     { id: 'history', name: 'Version History', icon: ClockIcon },
     { id: 'global', name: 'Global Config', icon: GlobeAltIcon },
   ];
@@ -264,6 +313,41 @@ export default function Configuration() {
         rollbackSchemaMutation.mutate({ sport: selectedSport, version });
       }
     }
+  };
+
+  const handleContentPromptsSubmit = () => {
+    if (!editingPrompt) return;
+    
+    // Map the frontend keys to backend keys
+    const keyMapping = {
+      'editorial': 'editorial_generation',
+      'social_media': 'social_media_generation',
+      'game_summary': 'game_summary',
+      'contextual_analysis': 'contextual_analysis',
+      'player_spotlight': 'player_spotlight'
+    };
+    
+    const backendKey = keyMapping[editingPrompt.type] || editingPrompt.type;
+    
+    const updatedPrompts = {
+      editorial_generation: contentPrompts.editorial_generation || '',
+      social_media_generation: contentPrompts.social_media_generation || '',
+      game_summary: contentPrompts.game_summary || '',
+      contextual_analysis: contentPrompts.contextual_analysis || '',
+      player_spotlight: contentPrompts.player_spotlight || '',
+      [backendKey]: editingPrompt.content
+    };
+    
+    updateContentPromptsMutation.mutate(updatedPrompts);
+  };
+
+  const handleEditPrompt = (promptType, content) => {
+    setEditingPrompt({ type: promptType, content });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPrompt(null);
+    setContentPromptError(null);
   };
 
 
@@ -597,6 +681,124 @@ export default function Configuration() {
                           )}
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Content Prompts Tab */}
+          {activeTab === 'content-prompts' && (
+            <div className="space-y-6">
+              <div className="card">
+                <div className="card-header">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Content Generation Prompts
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
+                        Configure prompts for AI content generation across different content types
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-body">
+                  {contentPromptError && (
+                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                      <p className="text-sm text-red-700 dark:text-red-300">{contentPromptError}</p>
+                    </div>
+                  )}
+
+                  {contentPromptsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner message="Loading content prompts..." />
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {contentPromptTypes?.types?.map((promptType) => {
+                        const keyMapping = {
+                          'editorial': 'editorial_generation',
+                          'social_media': 'social_media_generation',
+                          'game_summary': 'game_summary',
+                          'contextual_analysis': 'contextual_analysis',
+                          'player_spotlight': 'player_spotlight'
+                        };
+                        
+                        const backendKey = keyMapping[promptType.key] || promptType.key;
+                        const promptContent = contentPrompts[backendKey] || '';
+                        const isEditing = editingPrompt?.type === promptType.key;
+                        
+                        return (
+                          <div key={promptType.key} className="border border-gray-200 dark:border-dark-700 rounded-lg">
+                            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h4 className="text-md font-medium text-gray-900 dark:text-white">
+                                    {promptType.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
+                                    {promptType.description}
+                                  </p>
+                                </div>
+                                {!isEditing && isAdmin && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditPrompt(promptType.key, promptContent)}
+                                  >
+                                    Edit
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {isEditing ? (
+                              <div className="p-4 space-y-4">
+                                <CodeEditor
+                                  value={editingPrompt.content}
+                                  onChange={(content) => setEditingPrompt(prev => ({ ...prev, content }))}
+                                  language="text"
+                                  placeholder="Enter the prompt content..."
+                                  className="min-h-[200px]"
+                                />
+                                <div className="flex justify-end space-x-3">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleContentPromptsSubmit}
+                                    loading={updateContentPromptsMutation.isLoading}
+                                  >
+                                    Save Changes
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4">
+                                <div className="bg-gray-50 dark:bg-dark-700 rounded-md p-3 border border-gray-200 dark:border-dark-600">
+                                  <pre className="text-sm text-gray-700 dark:text-dark-300 whitespace-pre-wrap font-mono">
+                                    {promptContent || 'No prompt configured'}
+                                  </pre>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      
+                      {(!contentPromptTypes?.types || contentPromptTypes.types.length === 0) && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500 dark:text-dark-400">No content prompt types available</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
