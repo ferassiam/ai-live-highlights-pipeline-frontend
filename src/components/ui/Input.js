@@ -1,12 +1,6 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-const inputSizes = {
-  sm: 'h-8 px-3 py-1.5 text-sm',
-  default: 'h-10 px-4 py-2.5 text-sm',
-  lg: 'h-12 px-4 py-3 text-base'
-};
-
 /**
  * Form input components for sports operations UI
  * Consistent styling with proper focus states and accessibility

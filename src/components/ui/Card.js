@@ -32,10 +32,12 @@ export const CardTitle = React.forwardRef(({ className, children, ...props }, re
     ref={ref}
     className={cn('text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white', className)}
     {...props}
-  />
+  >
+    {children}
+  </h3>
 ));
 
-CardSubtitle.displayName = 'CardSubtitle';
+CardTitle.displayName = 'CardTitle';
 
 export const CardSubtitle = React.forwardRef(({ 
   className, 

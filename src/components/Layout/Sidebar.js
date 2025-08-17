@@ -18,7 +18,6 @@ import {
 
 import { Logo } from '../ui/Logo';
 import { StatusIndicator } from '../ui/StatusIndicator';
-import { Button } from '../ui/Button';
 import { cn } from '../../utils/cn';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },

@@ -1,12 +1,5 @@
 import React from 'react';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { cn } from '../../utils/cn';
-
-const selectSizes = {
-  sm: 'h-8 px-3 py-1.5 text-sm',
-  default: 'h-10 px-4 py-2.5 text-sm pr-10',
-  lg: 'h-12 px-4 py-3 text-base pr-10'
-};
 
 /**
  * Select component for sports operations UI
