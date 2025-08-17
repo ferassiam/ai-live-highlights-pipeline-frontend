@@ -151,7 +151,20 @@ class ApiService {
 
   // Highlights
   async getHighlights(filters = {}) {
-    const response = await api.get('/highlights', { params: filters });
+    // Clean up filters - remove empty strings and null/undefined values
+    const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        // Convert datetime-local format to ISO string for start_time and end_time
+        if ((key === 'start_time' || key === 'end_time') && value) {
+          acc[key] = new Date(value).toISOString();
+        } else {
+          acc[key] = value;
+        }
+      }
+      return acc;
+    }, {});
+    
+    const response = await api.get('/highlights', { params: cleanFilters });
     return response.data;
   }
 
@@ -234,18 +247,32 @@ class ApiService {
     return response.data;
   }
 
+  async initializeContentService() {
+    const response = await api.post('/content/initialize');
+    return response.data;
+  }
+
   async initializeContentGeneration(matchId, homeTeam, awayTeam, options = {}) {
-    const response = await api.post('/content/initialize', {
-      match_id: matchId,
+    const response = await api.post(`/content/matches/${matchId}/start`, {
       home_team: homeTeam,
       away_team: awayTeam,
-      ...options
+      editorial_frequency: options.editorial_frequency || 3,
+      social_frequency: options.social_frequency || 1,
+      enable_editorials: options.enable_editorials !== false,
+      enable_social_media: options.enable_social_media !== false
     });
     return response.data;
   }
 
-  async startContentGeneration(matchId) {
-    const response = await api.post(`/content/matches/${matchId}/start`);
+  async startContentGeneration(matchId, homeTeam, awayTeam, options = {}) {
+    const response = await api.post(`/content/matches/${matchId}/start`, {
+      home_team: homeTeam,
+      away_team: awayTeam,
+      editorial_frequency: options.editorial_frequency || 3,
+      social_frequency: options.social_frequency || 1,
+      enable_editorials: options.enable_editorials !== false,
+      enable_social_media: options.enable_social_media !== false
+    });
     return response.data;
   }
 
@@ -335,6 +362,27 @@ class ApiService {
   // Sports Configuration
   async getSupportedSports() {
     const response = await api.get('/config/sports');
+    return response.data;
+  }
+
+  // Content Prompts Configuration
+  async getContentPrompts() {
+    const response = await api.get('/config/content-prompts');
+    return response.data;
+  }
+
+  async getContentPrompt(promptType) {
+    const response = await api.get(`/config/content-prompts/${promptType}`);
+    return response.data;
+  }
+
+  async updateContentPrompts(prompts) {
+    const response = await api.put('/config/content-prompts', prompts);
+    return response.data;
+  }
+
+  async getContentPromptTypes() {
+    const response = await api.get('/config/content-prompts/types');
     return response.data;
   }
 

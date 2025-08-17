@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
+import { Card, CardContent } from '../components/ui/Card';
 import { Logo } from '../components/ui/Logo';
 
 export function Login({ onLogin }) {
@@ -101,7 +101,7 @@ export function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -109,142 +109,146 @@ export function Login({ onLogin }) {
         className="max-w-md w-full space-y-8"
       >
         <div className="text-center">
-          <Logo className="mx-auto h-12 w-auto" />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Sign in to your account
+          <Logo showSubtitle={false} className="mx-auto" />
+          <h2 className="mt-8 text-2xl font-heading font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+            Sports Operations Portal
           </h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-            Welcome back! Please enter your credentials.
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 font-medium">
+            Sign in to access live highlights management
           </p>
         </div>
 
-        <Card className="p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {errors.general && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4"
-              >
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {errors.general}
-                </p>
-              </motion.div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
-                Email address
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                error={errors.email}
-                placeholder="Enter your email"
-                className="w-full"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-dark-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  error={errors.password}
-                  placeholder="Enter your password"
-                  className="w-full pr-10"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
+        <Card variant="elevated" className="shadow-elevated">
+          <CardContent className="p-8">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {errors.general && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-danger-50 dark:bg-danger-950/20 border border-danger-200 dark:border-danger-800 rounded-lg p-4"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-dark-300" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-dark-300" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:border-dark-600 dark:bg-dark-700"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-dark-300">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a
-                  href="/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center items-center"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign in
-                </div>
+                  <p className="text-sm text-danger-600 dark:text-danger-400 font-medium">
+                    {errors.general}
+                  </p>
+                </motion.div>
               )}
-            </Button>
-          </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-dark-600" />
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Email address
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  error={errors.email}
+                  placeholder="Enter your work email"
+                  className="w-full"
+                />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-dark-800 text-gray-500 dark:text-dark-400">
-                  New to our platform?
-                </span>
-              </div>
-            </div>
 
-            <div className="mt-6 text-center">
-              <a
-                href="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    error={errors.password}
+                    placeholder="Enter your password"
+                    className="w-full pr-10"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700 dark:text-slate-300 font-medium">
+                    Keep me signed in
+                  </label>
+                </div>
+
+                <div className="text-sm">
+                  <a
+                    href="/forgot-password"
+                    className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                  >
+                    Reset password
+                  </a>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                disabled={isLoading}
+                className="w-full"
               >
-                Create an account
-              </a>
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-r-transparent mr-2"></div>
+                    Authenticating...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-300 dark:border-slate-600" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-3 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-medium">
+                    Need access?
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Contact your system administrator for access credentials
+                </p>
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
+
+        <div className="text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Live Highlights Pipeline • Sports Operations Platform
+          </p>
+        </div>
       </motion.div>
     </div>
   );

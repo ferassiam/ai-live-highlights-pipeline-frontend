@@ -12,15 +12,23 @@ import {
   ArrowPathIcon,
   DocumentArrowUpIcon,
   DocumentArrowDownIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 
 import { apiService, showSuccessToast, showErrorToast, wsService } from '../services/api';
+import { Button } from '../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/Card';
+import Container from '../components/ui/Container';
+import PageHeader from '../components/ui/PageHeader';
 
 const defaultSchedule = {
   id: '',
   name: '',
+  sport: 'soccer',
+  league: '',
+  poster_image_url: '',
   description: '',
   channel_config: {
     name: '',
@@ -33,15 +41,13 @@ const defaultSchedule = {
     events: [
       {
         type: 'create_and_start',
-        time: '14:00',
-        days: ['monday'],
-        description: 'Start channel',
+        at: new Date(new Date().getTime() + 10 * 60 * 1000).toISOString(), // 10 minutes from now
+        description: 'Start broadcast',
       },
       {
         type: 'stop_and_delete',
-        time: '15:00',
-        days: ['monday'],
-        description: 'Stop channel',
+        at: new Date(new Date().getTime() + 70 * 60 * 1000).toISOString(), // 70 minutes from now
+        description: 'Stop broadcast',
       },
     ],
   },
@@ -58,6 +64,8 @@ const defaultSchedule = {
       },
       enable_editorials: true,
       enable_social_media: true,
+      contextual_analysis: true,
+      player_spotlights: true,
       editorial_frequency: 3,
       social_frequency: 1,
       editorial_style: 'professional',
@@ -65,18 +73,19 @@ const defaultSchedule = {
       social_tone: 'exciting',
     },
   },
+  webhook_config: {
+    enabled: true,
+    webhooks: [],
+  },
 };
 
-const weekDays = [
-  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
-];
 
 export default function Schedules() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
   const [formData, setFormData] = useState(defaultSchedule);
   const [lastReloadTime, setLastReloadTime] = useState(null);
-  const [pollingEnabled, setPollingEnabled] = useState(true);
+  const [pollingEnabled] = useState(true);
   const fileInputRef = useRef(null);
 
   const queryClient = useQueryClient();
@@ -272,6 +281,7 @@ export default function Schedules() {
   };
 
   const addEvent = () => {
+    const nextHour = new Date(new Date().getTime() + 60 * 60 * 1000).toISOString();
     setFormData(prev => ({
       ...prev,
       schedule: {
@@ -280,8 +290,7 @@ export default function Schedules() {
           ...prev.schedule.events,
           {
             type: 'create_and_start',
-            time: '14:00',
-            days: ['monday'],
+            at: nextHour,
             description: 'New event',
           },
         ],
@@ -320,193 +329,201 @@ export default function Schedules() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">
-            Schedules
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-            Manage channel schedules and automation rules
-          </p>
-          
-          {/* Polling status */}
-          <div className="mt-3 flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-500 dark:text-dark-400">Auto-reload:</span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                pollingEnabled 
-                  ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
-                  : 'bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200'
-              }`}>
-                {pollingEnabled ? 'Enabled' : 'Disabled'}
-              </span>
-            </div>
-            {lastReloadTime && (
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-500 dark:text-dark-400">Last reload:</span>
-                <span className="text-xs text-gray-700 dark:text-dark-300">
-                  {lastReloadTime.toLocaleTimeString()}
-                </span>
-              </div>
-            )}
+    <Container className="space-y-6">
+      {/* Hidden file input for Upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
+      {/* Page header with actions on the right */}
+      <PageHeader
+        title="Schedules"
+        description="Manage channel schedules and automation rules"
+        actions={(
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadScheduleMutation.isLoading}
+              leftIcon={<DocumentArrowUpIcon className="h-4 w-4" />}
+              title="Upload schedule file"
+            >
+              Upload
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleDownloadSchedules}
+              disabled={downloadScheduleMutation.isLoading}
+              leftIcon={<DocumentArrowDownIcon className="h-4 w-4" />}
+              title="Download schedule file"
+            >
+              Download
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleReloadSchedules}
+              disabled={reloadSchedulesMutation.isLoading}
+              leftIcon={<ArrowPathIcon className={`h-4 w-4 ${reloadSchedulesMutation.isLoading ? 'animate-spin' : ''}`} />}
+              title="Reload schedules from file"
+            >
+              Reload
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={handleCreate}
+              leftIcon={<PlusIcon className="h-4 w-4" />}
+            >
+              Create Schedule
+            </Button>
           </div>
+        )}
+      />
+
+      {/* Polling status row */}
+      <div className="mt-1 flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 dark:text-slate-400">Auto-reload:</span>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+            pollingEnabled
+              ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
+              : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
+          }`}>
+            {pollingEnabled ? 'Enabled' : 'Disabled'}
+          </span>
         </div>
-        
-        <div className="flex items-center space-x-3">
-          {/* File operations */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-          
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadScheduleMutation.isLoading}
-            className="btn btn-outline flex items-center space-x-2"
-            title="Upload schedule file"
-          >
-            <DocumentArrowUpIcon className="h-4 w-4" />
-            <span>Upload</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleDownloadSchedules}
-            disabled={downloadScheduleMutation.isLoading}
-            className="btn btn-outline flex items-center space-x-2"
-            title="Download schedule file"
-          >
-            <DocumentArrowDownIcon className="h-4 w-4" />
-            <span>Download</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleReloadSchedules}
-            disabled={reloadSchedulesMutation.isLoading}
-            className="btn btn-outline flex items-center space-x-2"
-            title="Reload schedules from file"
-          >
-            <ArrowPathIcon className={`h-4 w-4 ${reloadSchedulesMutation.isLoading ? 'animate-spin' : ''}`} />
-            <span>Reload</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleCreate}
-            className="btn btn-primary flex items-center space-x-2"
-          >
-            <PlusIcon className="h-4 w-4" />
-            <span>Create Schedule</span>
-          </button>
-        </div>
+        {lastReloadTime && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500 dark:text-slate-400">Last reload:</span>
+            <span className="text-xs text-slate-700 dark:text-slate-300">
+              {lastReloadTime.toLocaleTimeString()}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Schedules list */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {schedules.length === 0 ? (
           <div className="col-span-2 text-center py-12">
-            <CalendarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+            <CalendarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No schedules</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
               Get started by creating a new schedule.
             </p>
             <div className="mt-6">
-              <button
-                type="button"
-                onClick={handleCreate}
-                className="btn btn-primary flex items-center space-x-2"
-              >
-                <PlusIcon className="h-4 w-4" />
-                <span>Create Schedule</span>
-              </button>
+              <Button variant="primary" onClick={handleCreate} leftIcon={<PlusIcon className="h-4 w-4" />}>Create Schedule</Button>
             </div>
           </div>
         ) : (
           schedules.map((schedule) => {
             const isActive = activeChannels[schedule.id];
             return (
-              <div key={schedule.id} className="card">
-                <div className="card-header">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <TvIcon className="h-5 w-5 text-gray-400 dark:text-dark-500 mr-2" />
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{schedule.name}</h3>
-                      {isActive && (
-                        <span className="ml-2 status-running">Active</span>
-                      )}
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(schedule)}
-                        className="text-gray-400 dark:text-dark-500 hover:text-gray-500 dark:hover:text-dark-300 transition-colors duration-200"
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(schedule.id)}
-                        className="text-gray-400 dark:text-dark-500 hover:text-danger-500 dark:hover:text-danger-400 transition-colors duration-200"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    </div>
+              <Card key={schedule.id}>
+                <CardHeader divided actions={(
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(schedule)}
+                      leftIcon={<PencilIcon className="h-4 w-4" />}
+                      aria-label="Edit schedule"
+                      title="Edit schedule"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(schedule.id)}
+                      leftIcon={<TrashIcon className="h-4 w-4" />}
+                      aria-label="Delete schedule"
+                      title="Delete schedule"
+                    />
                   </div>
-                </div>
-                <div className="card-body">
-                  <p className="text-sm text-gray-600 dark:text-dark-400 mb-4">{schedule.description}</p>
-                  
+                )}>
+                  <div className="flex items-center gap-2">
+                    <TvIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                    <CardTitle level={3}>{schedule.name}</CardTitle>
+                    {isActive && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200">Active</span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{schedule.description}</p>
+
+                  {/* Match info */}
+                  {(schedule.sport || schedule.league) && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">Match Details</h4>
+                      <div className="flex flex-wrap gap-2 text-sm">
+                        {schedule.sport && (
+                          <span className="inline-flex items-center px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 capitalize">
+                            {schedule.sport}
+                          </span>
+                        )}
+                        {schedule.league && (
+                          <span className="inline-flex items-center px-2 py-1 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            {schedule.league}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Channel info */}
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Channel</h4>
-                    <p className="text-sm text-gray-600 dark:text-dark-400">{schedule.channel_config.name}</p>
+                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">Channel</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{schedule.channel_config.name}</p>
                   </div>
 
                   {/* Schedule events */}
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Events</h4>
+                  <div className="mb-2">
+                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">Events</h4>
                     <div className="space-y-2">
                       {schedule.schedule.events.map((event, index) => (
                         <div key={index} className="flex items-center text-sm">
-                          <ClockIcon className="h-4 w-4 text-gray-400 dark:text-dark-500 mr-2" />
-                          <span className="text-gray-600 dark:text-dark-400">
-                            {event.type === 'create_and_start' ? 'Start' : 'Stop'} at {event.time} on{' '}
-                            {event.days.join(', ')}
+                          <ClockIcon className="h-4 w-4 text-slate-400 dark:text-slate-500 mr-2" />
+                          <span className="text-slate-600 dark:text-slate-400">
+                            {event.type === 'create_and_start' ? 'Start' : 'Stop'} at{' '}
+                            {event.at ? new Date(event.at).toLocaleString() : 
+                             `${event.time} on ${event.days?.join(', ')}`}
                           </span>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Manual controls */}
-                  <div className="flex space-x-2">
-                    {isActive ? (
-                      <button
-                        onClick={() => handleManualControl(schedule.id, 'stop')}
-                        disabled={manualControlMutation.isLoading}
-                        className="btn btn-danger btn-sm flex items-center space-x-1"
-                      >
-                        <StopIcon className="h-3 w-3" />
-                        <span>Stop</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleManualControl(schedule.id, 'start')}
-                        disabled={manualControlMutation.isLoading}
-                        className="btn btn-success btn-sm flex items-center space-x-1"
-                      >
-                        <PlayIcon className="h-3 w-3" />
-                        <span>Start</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+                <CardFooter divided justify="end">
+                  {isActive ? (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleManualControl(schedule.id, 'stop')}
+                      disabled={manualControlMutation.isLoading}
+                      leftIcon={<StopIcon className="h-4 w-4" />}
+                    >
+                      Stop
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => handleManualControl(schedule.id, 'start')}
+                      disabled={manualControlMutation.isLoading}
+                      leftIcon={<PlayIcon className="h-4 w-4" />}
+                    >
+                      Start
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
             );
           })
         )}
@@ -524,7 +541,7 @@ export default function Schedules() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="modal-overlay" />
+            <div className="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -538,14 +555,27 @@ export default function Schedules() {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="modal-content sm:max-w-2xl">
+                <Dialog.Panel className="relative w-full transform overflow-hidden rounded-lg bg-slate-50 dark:bg-slate-900 border border-stone-200 dark:border-stone-600 text-left shadow-elevated transition-all sm:my-8 sm:w-full sm:max-w-2xl">
                   <form onSubmit={handleSubmit}>
-                    <div className="space-y-6">
-                      <div>
-                        <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-                          {editingSchedule ? 'Edit Schedule' : 'Create Schedule'}
-                        </Dialog.Title>
-                      </div>
+                    {/* Header */}
+                    <div className="px-6 py-4 border-b border-stone-200 dark:border-stone-600 bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm flex items-start justify-between">
+                      <Dialog.Title as="h3" className="text-lg font-heading tracking-tight text-slate-900 dark:text-slate-100">
+                        {editingSchedule ? 'Edit Schedule' : 'Create Schedule'}
+                      </Dialog.Title>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsModalOpen(false)}
+                        aria-label="Close"
+                        title="Close"
+                        className="-mr-2"
+                        leftIcon={<XMarkIcon className="h-4 w-4" />}
+                      />
+                    </div>
+
+                    {/* Content */}
+                    <div className="px-6 py-5 space-y-6">
 
                       {/* Basic info */}
                       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -572,6 +602,50 @@ export default function Schedules() {
                             onChange={(e) => updateFormData('name', e.target.value)}
                             className="form-input"
                             required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                        <div>
+                          <label className="form-label">
+                            Sport
+                          </label>
+                          <select
+                            value={formData.sport || 'soccer'}
+                            onChange={(e) => updateFormData('sport', e.target.value)}
+                            className="form-select"
+                          >
+                            <option value="soccer">Soccer</option>
+                            <option value="football">Football</option>
+                            <option value="basketball">Basketball</option>
+                            <option value="baseball">Baseball</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="hockey">Hockey</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="form-label">
+                            League
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.league || ''}
+                            onChange={(e) => updateFormData('league', e.target.value)}
+                            className="form-input"
+                            placeholder="e.g., LA Liga, Premier League"
+                          />
+                        </div>
+                        <div>
+                          <label className="form-label">
+                            Poster Image URL
+                          </label>
+                          <input
+                            type="url"
+                            value={formData.poster_image_url || ''}
+                            onChange={(e) => updateFormData('poster_image_url', e.target.value)}
+                            className="form-input"
+                            placeholder="https://..."
                           />
                         </div>
                       </div>
@@ -732,6 +806,28 @@ export default function Schedules() {
                                   Enable Social Media
                                 </label>
                               </div>
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.pipeline_config.content_generation?.contextual_analysis || false}
+                                  onChange={(e) => updateFormData('pipeline_config.content_generation.contextual_analysis', e.target.checked)}
+                                  className="form-checkbox"
+                                />
+                                <label className="ml-2 block text-sm text-gray-900 dark:text-white">
+                                  Contextual Analysis
+                                </label>
+                              </div>
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.pipeline_config.content_generation?.player_spotlights || false}
+                                  onChange={(e) => updateFormData('pipeline_config.content_generation.player_spotlights', e.target.checked)}
+                                  className="form-checkbox"
+                                />
+                                <label className="ml-2 block text-sm text-gray-900 dark:text-white">
+                                  Player Spotlights
+                                </label>
+                              </div>
                             </div>
 
                             {/* Frequency Settings */}
@@ -833,18 +929,11 @@ export default function Schedules() {
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-sm font-medium text-gray-900 dark:text-white">Schedule Events</h4>
-                          <button
-                            type="button"
-                            onClick={addEvent}
-                            className="btn btn-sm btn-secondary flex items-center space-x-1"
-                          >
-                            <PlusIcon className="h-3 w-3" />
-                            <span>Add Event</span>
-                          </button>
+                          <Button type="button" size="sm" variant="secondary" onClick={addEvent} leftIcon={<PlusIcon className="h-3 w-3" />}>Add Event</Button>
                         </div>
                         <div className="space-y-4">
                           {formData.schedule.events.map((event, index) => (
-                            <div key={index} className="border border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-800 rounded-lg p-4">
+                            <div key={index} className="border border-stone-200 dark:border-stone-600 bg-white dark:bg-slate-800 rounded-lg p-4">
                               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div>
                                   <label className="form-label">
@@ -861,48 +950,22 @@ export default function Schedules() {
                                 </div>
                                 <div>
                                   <label className="form-label">
-                                    Time
+                                    Date and Time
                                   </label>
                                   <input
-                                    type="time"
-                                    value={event.time}
-                                    onChange={(e) => updateEvent(index, 'time', e.target.value)}
+                                    type="datetime-local"
+                                    value={event.at ? new Date(event.at).toISOString().slice(0, 16) : ''}
+                                    onChange={(e) => {
+                                      const isoString = e.target.value ? new Date(e.target.value).toISOString() : '';
+                                      updateEvent(index, 'at', isoString);
+                                    }}
                                     className="form-input"
                                   />
                                 </div>
                                 <div className="flex items-end">
-                                  <button
-                                    type="button"
-                                    onClick={() => removeEvent(index)}
-                                    className="btn btn-sm btn-danger flex items-center"
-                                  >
-                                    <TrashIcon className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="mt-4">
-                                <label className="form-label mb-2">
-                                  Days
-                                </label>
-                                <div className="flex flex-wrap gap-2">
-                                  {weekDays.map((day) => (
-                                    <label key={day} className="flex items-center">
-                                      <input
-                                        type="checkbox"
-                                        checked={event.days.includes(day)}
-                                        onChange={(e) => {
-                                          const newDays = e.target.checked
-                                            ? [...event.days, day]
-                                            : event.days.filter(d => d !== day);
-                                          updateEvent(index, 'days', newDays);
-                                        }}
-                                        className="form-checkbox"
-                                      />
-                                      <span className="ml-2 text-sm text-gray-700 dark:text-dark-300 capitalize">
-                                        {day.slice(0, 3)}
-                                      </span>
-                                    </label>
-                                  ))}
+                                  <Button type="button" size="sm" variant="destructive" onClick={() => removeEvent(index)} leftIcon={<TrashIcon className="h-3 w-3" />}>
+                                    Remove
+                                  </Button>
                                 </div>
                               </div>
                               <div className="mt-4">
@@ -922,21 +985,14 @@ export default function Schedules() {
                       </div>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-end space-x-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsModalOpen(false)}
-                        className="btn btn-secondary"
-                      >
+                    {/* Footer */}
+                    <div className="px-6 py-4 border-t border-stone-200 dark:border-stone-600 bg-slate-50/30 dark:bg-slate-800/30 flex items-center justify-end gap-3">
+                      <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
                         Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={createMutation.isLoading || updateMutation.isLoading}
-                        className="btn btn-primary"
-                      >
+                      </Button>
+                      <Button type="submit" variant="primary" disabled={createMutation.isLoading || updateMutation.isLoading}>
                         {(createMutation.isLoading || updateMutation.isLoading) ? 'Saving...' : 'Save'}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </Dialog.Panel>
@@ -945,6 +1001,6 @@ export default function Schedules() {
           </div>
         </Dialog>
       </Transition.Root>
-    </div>
+  </Container>
   );
 }

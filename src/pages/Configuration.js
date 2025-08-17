@@ -7,7 +7,7 @@ import {
   CodeBracketIcon,
   ClockIcon,
   GlobeAltIcon,
-  ChevronDownIcon
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 import { apiService, showSuccessToast, showErrorToast, wsService } from '../services/api';
@@ -16,7 +16,8 @@ import { CodeEditor } from '../components/ui/CodeEditor';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Select } from '../components/ui/Select';
 import { Button } from '../components/ui/Button';
-import { cn } from '../utils/cn';
+import { Container } from '../components/ui/Container';
+import { PageHeader } from '../components/ui/PageHeader';
 
 export default function Configuration() {
   const [activeTab, setActiveTab] = useState('prompts');
@@ -27,6 +28,11 @@ export default function Configuration() {
   const [promptError, setPromptError] = useState(null);
   const [schemaError, setSchemaError] = useState(null);
   const [isAdmin] = useState(true); // TODO: Get from auth context
+  
+  // Content prompts state
+  const [contentPrompts, setContentPrompts] = useState({});
+  const [contentPromptError, setContentPromptError] = useState(null);
+  const [editingPrompt, setEditingPrompt] = useState(null);
   
   const queryClient = useQueryClient();
 
@@ -87,14 +93,14 @@ export default function Configuration() {
   }, [sportsResponse]);
 
   // Fetch prompt configuration
-  const { data: promptData, isLoading: promptLoading, error: promptFetchError } = useQuery({
+  const { data: promptData, isLoading: promptLoading } = useQuery({
     queryKey: ['promptConfig', selectedSport, promptType],
     queryFn: () => apiService.getPromptConfig(selectedSport),
     enabled: activeTab === 'prompts' && !!selectedSport,
   });
 
   // Fetch schema configuration
-  const { data: schemaData, isLoading: schemaLoading, error: schemaFetchError } = useQuery({
+  const { data: schemaData, isLoading: schemaLoading } = useQuery({
     queryKey: ['schemaConfig', selectedSport],
     queryFn: () => apiService.getSchemaConfig(selectedSport),
     enabled: activeTab === 'schemas' && !!selectedSport,
@@ -112,6 +118,26 @@ export default function Configuration() {
     queryKey: ['schemaHistory', selectedSport],
     queryFn: () => apiService.getSchemaHistory(selectedSport),
     enabled: activeTab === 'history' && !!selectedSport,
+  });
+
+  // Fetch content prompts
+  const { data: contentPromptsData, isLoading: contentPromptsLoading } = useQuery({
+    queryKey: ['contentPrompts'],
+    queryFn: () => apiService.getContentPrompts(),
+    enabled: activeTab === 'content-prompts',
+    retry: false,
+    onError: (error) => {
+      console.error('Failed to fetch content prompts:', error);
+      setContentPromptError('Failed to load content prompts');
+    }
+  });
+
+  // Fetch content prompt types
+  const { data: contentPromptTypes = [] } = useQuery({
+    queryKey: ['contentPromptTypes'],
+    queryFn: () => apiService.getContentPromptTypes(),
+    enabled: activeTab === 'content-prompts',
+    retry: false,
   });
 
   // Update prompt mutation
@@ -172,6 +198,22 @@ export default function Configuration() {
     },
   });
 
+  // Update content prompts mutation
+  const updateContentPromptsMutation = useMutation({
+    mutationFn: (prompts) => apiService.updateContentPrompts(prompts),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contentPrompts'] });
+      showSuccessToast('Content prompts updated successfully');
+      setContentPromptError(null);
+      setEditingPrompt(null);
+    },
+    onError: (error) => {
+      const message = error.response?.data?.detail || 'Failed to update content prompts';
+      showErrorToast(message);
+      setContentPromptError(message);
+    },
+  });
+
   // Update local states when data changes
   useEffect(() => {
     if (promptData) {
@@ -194,6 +236,12 @@ export default function Configuration() {
     }
   }, [schemaData]);
 
+  useEffect(() => {
+    if (contentPromptsData?.prompts) {
+      setContentPrompts(contentPromptsData.prompts);
+    }
+  }, [contentPromptsData]);
+
   // WebSocket listeners for real-time updates
   useEffect(() => {
     const handleConfigUpdate = (data) => {
@@ -211,6 +259,7 @@ export default function Configuration() {
   const tabs = [
     { id: 'prompts', name: 'Prompts', icon: DocumentTextIcon },
     { id: 'schemas', name: 'Schemas', icon: CodeBracketIcon },
+    { id: 'content-prompts', name: 'Content Prompts', icon: ChatBubbleLeftRightIcon },
     { id: 'history', name: 'Version History', icon: ClockIcon },
     { id: 'global', name: 'Global Config', icon: GlobeAltIcon },
   ];
@@ -266,29 +315,60 @@ export default function Configuration() {
     }
   };
 
+  const handleContentPromptsSubmit = () => {
+    if (!editingPrompt) return;
+    
+    // Map the frontend keys to backend keys
+    const keyMapping = {
+      'editorial': 'editorial_generation',
+      'social_media': 'social_media_generation',
+      'game_summary': 'game_summary',
+      'contextual_analysis': 'contextual_analysis',
+      'player_spotlight': 'player_spotlight'
+    };
+    
+    const backendKey = keyMapping[editingPrompt.type] || editingPrompt.type;
+    
+    const updatedPrompts = {
+      editorial_generation: contentPrompts.editorial_generation || '',
+      social_media_generation: contentPrompts.social_media_generation || '',
+      game_summary: contentPrompts.game_summary || '',
+      contextual_analysis: contentPrompts.contextual_analysis || '',
+      player_spotlight: contentPrompts.player_spotlight || '',
+      [backendKey]: editingPrompt.content
+    };
+    
+    updateContentPromptsMutation.mutate(updatedPrompts);
+  };
+
+  const handleEditPrompt = (promptType, content) => {
+    setEditingPrompt({ type: promptType, content });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPrompt(null);
+    setContentPromptError(null);
+  };
+
 
   if (sportsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner message="Loading configuration management..." />
-      </div>
+      <Container>
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner message="Loading configuration management..." />
+        </div>
+      </Container>
     );
   }
 
   if (sportsError) {
     return (
-      <div className="space-y-6">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title flex items-center">
-              <CogIcon className="h-8 w-8 mr-3" />
-              Configuration Management
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-              Manage sport-specific prompts, schemas, and system configuration
-            </p>
-          </div>
-        </div>
+      <Container className="space-y-6">
+        <PageHeader 
+          title="Configuration Management"
+          icon={CogIcon}
+          description="Manage sport-specific prompts, schemas, and system configuration"
+        />
         
         <div className="bg-danger-50 dark:bg-danger-900/20 border border-danger-200 dark:border-danger-800 rounded-md p-4">
           <div className="flex">
@@ -310,24 +390,18 @@ export default function Configuration() {
             </div>
           </div>
         </div>
-      </div>
+  </Container>
     );
   }
 
   if (!sportsLoading && (!Array.isArray(supportedSports) || supportedSports.length === 0)) {
     return (
-      <div className="space-y-6">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title flex items-center">
-              <CogIcon className="h-8 w-8 mr-3" />
-              Configuration Management
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-              Manage sport-specific prompts, schemas, and system configuration
-            </p>
-          </div>
-        </div>
+      <Container className="space-y-6">
+        <PageHeader 
+          title="Configuration Management"
+          icon={CogIcon}
+          description="Manage sport-specific prompts, schemas, and system configuration"
+        />
         
         <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-md p-4">
           <div className="flex">
@@ -341,40 +415,33 @@ export default function Configuration() {
             </div>
           </div>
         </div>
-      </div>
+  </Container>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title flex items-center">
-            <CogIcon className="h-8 w-8 mr-3" />
-            Configuration Management
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
-            Manage sport-specific prompts, schemas, and system configuration
-          </p>
-        </div>
-        
-        {/* Sport selector */}
-        <div className="flex items-center space-x-4">
-          <Select
-            label="Sport"
-            value={selectedSport}
-            onChange={setSelectedSport}
-            options={Array.isArray(supportedSports) ? supportedSports.map(sport => ({ value: sport, label: sport.charAt(0).toUpperCase() + sport.slice(1) })) : []}
-            className="min-w-[150px]"
-          />
-          {!isAdmin && (
-            <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-md px-3 py-2">
-              <span className="text-sm text-warning-700 dark:text-warning-300">Read-only access</span>
-            </div>
-          )}
-        </div>
-      </div>
+    <Container className="space-y-6">
+      <PageHeader 
+        title="Configuration Management"
+        icon={CogIcon}
+        description="Manage sport-specific prompts, schemas, and system configuration"
+        actions={
+          <div className="flex items-center space-x-4">
+            <Select
+              label="Sport"
+              value={selectedSport}
+              onChange={setSelectedSport}
+              options={Array.isArray(supportedSports) ? supportedSports.map(sport => ({ value: sport, label: sport.charAt(0).toUpperCase() + sport.slice(1) })) : []}
+              className="min-w-[150px]"
+            />
+            {!isAdmin && (
+              <div className="bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-md px-3 py-2">
+                <span className="text-sm text-warning-700 dark:text-warning-300">Read-only access</span>
+              </div>
+            )}
+          </div>
+        }
+      />
 
       {/* Tab navigation */}
       <TabNavigation
@@ -402,7 +469,7 @@ export default function Configuration() {
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                         Prompt Configuration
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-dark-400">
+                      <p className="text-sm text-gray-500 dark:text-slate-400">
                         Edit sport-specific prompts for AI processing
                       </p>
                     </div>
@@ -468,7 +535,7 @@ export default function Configuration() {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     Schema Configuration
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
                     Edit JSON schemas for data validation and structure
                   </p>
                 </div>
@@ -530,7 +597,7 @@ export default function Configuration() {
                 </div>
                 <div className="card-body">
                   {promptHistory.length === 0 ? (
-                    <p className="text-gray-500 dark:text-dark-400 text-center py-4">
+                    <p className="text-gray-500 dark:text-slate-400 text-center py-4">
                       No version history available
                     </p>
                   ) : (
@@ -538,7 +605,7 @@ export default function Configuration() {
                       {promptHistory.map((version, index) => (
                         <div
                           key={version.version}
-                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-dark-600 rounded-lg"
+                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-600 rounded-lg"
                         >
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
@@ -549,7 +616,7 @@ export default function Configuration() {
                                 </span>
                               )}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                            <p className="text-sm text-gray-500 dark:text-slate-400">
                               {new Date(version.created_at).toLocaleString()}
                             </p>
                           </div>
@@ -579,7 +646,7 @@ export default function Configuration() {
                 </div>
                 <div className="card-body">
                   {schemaHistory.length === 0 ? (
-                    <p className="text-gray-500 dark:text-dark-400 text-center py-4">
+                    <p className="text-gray-500 dark:text-slate-400 text-center py-4">
                       No version history available
                     </p>
                   ) : (
@@ -587,7 +654,7 @@ export default function Configuration() {
                       {schemaHistory.map((version, index) => (
                         <div
                           key={version.version}
-                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-dark-600 rounded-lg"
+                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-600 rounded-lg"
                         >
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
@@ -598,7 +665,7 @@ export default function Configuration() {
                                 </span>
                               )}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                            <p className="text-sm text-gray-500 dark:text-slate-400">
                               {new Date(version.created_at).toLocaleString()}
                             </p>
                           </div>
@@ -621,6 +688,124 @@ export default function Configuration() {
             </div>
           )}
 
+          {/* Content Prompts Tab */}
+          {activeTab === 'content-prompts' && (
+            <div className="space-y-6">
+              <div className="card">
+                <div className="card-header">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Content Generation Prompts
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+                        Configure prompts for AI content generation across different content types
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="card-body">
+                  {contentPromptError && (
+                    <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                      <p className="text-sm text-red-700 dark:text-red-300">{contentPromptError}</p>
+                    </div>
+                  )}
+
+                  {contentPromptsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner message="Loading content prompts..." />
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {contentPromptTypes?.types?.map((promptType) => {
+                        const keyMapping = {
+                          'editorial': 'editorial_generation',
+                          'social_media': 'social_media_generation',
+                          'game_summary': 'game_summary',
+                          'contextual_analysis': 'contextual_analysis',
+                          'player_spotlight': 'player_spotlight'
+                        };
+                        
+                        const backendKey = keyMapping[promptType.key] || promptType.key;
+                        const promptContent = contentPrompts[backendKey] || '';
+                        const isEditing = editingPrompt?.type === promptType.key;
+                        
+                        return (
+                          <div key={promptType.key} className="border border-gray-200 dark:border-slate-700 rounded-lg">
+                            <div className="p-4 border-b border-gray-200 dark:border-slate-700">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h4 className="text-md font-medium text-gray-900 dark:text-white">
+                                    {promptType.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+                                    {promptType.description}
+                                  </p>
+                                </div>
+                                {!isEditing && isAdmin && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditPrompt(promptType.key, promptContent)}
+                                  >
+                                    Edit
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {isEditing ? (
+                              <div className="p-4 space-y-4">
+                                <CodeEditor
+                                  value={editingPrompt.content}
+                                  onChange={(content) => setEditingPrompt(prev => ({ ...prev, content }))}
+                                  language="text"
+                                  placeholder="Enter the prompt content..."
+                                  className="min-h-[200px]"
+                                />
+                                <div className="flex justify-end space-x-3">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={handleContentPromptsSubmit}
+                                    loading={updateContentPromptsMutation.isLoading}
+                                  >
+                                    Save Changes
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-4">
+                                <div className="bg-gray-50 dark:bg-slate-700 rounded-md p-3 border border-gray-200 dark:border-slate-600">
+                                  <pre className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-wrap font-mono">
+                                    {promptContent || 'No prompt configured'}
+                                  </pre>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      
+                      {(!contentPromptTypes?.types || contentPromptTypes.types.length === 0) && (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500 dark:text-slate-400">No content prompt types available</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Global Config Tab */}
           {activeTab === 'global' && (
             <div className="space-y-6">
@@ -634,6 +819,6 @@ export default function Configuration() {
           )}
         </motion.div>
       </AnimatePresence>
-    </div>
+  </Container>
   );
 }

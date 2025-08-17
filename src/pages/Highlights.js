@@ -90,7 +90,7 @@ export default function Highlights() {
           <h1 className="page-title">
             Highlights
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
             Browse and analyze generated video highlights
           </p>
         </div>

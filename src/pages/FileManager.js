@@ -3,10 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   FolderIcon,
-  DocumentIcon,
   ArrowDownTrayIcon,
   MagnifyingGlassIcon,
-  CalendarIcon,
   InformationCircleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
@@ -15,7 +13,6 @@ import { apiService, showSuccessToast, showErrorToast } from '../services/api';
 import { FileUpload } from '../components/ui/FileUpload';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Button } from '../components/ui/Button';
-import { cn } from '../utils/cn';
 
 export default function FileManager() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +28,9 @@ export default function FileManager() {
     queryFn: () => apiService.getSegmentFilesWithMetadata(),
     refetchInterval: 60000, // Refresh every minute
   });
+
+  // Ensure filesData is always an array
+  const files = Array.isArray(filesData) ? filesData : [];
 
   // Upload schedule file mutation
   const uploadFileMutation = useMutation({
@@ -124,8 +124,11 @@ export default function FileManager() {
   };
 
   // Filter and sort files
-  const filteredFiles = filesData
+  const filteredFiles = files
     .filter(file => {
+      // Ensure file has required properties
+      if (!file || !file.name) return false;
+      
       const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = selectedFileType === 'all' || getFileType(file.name).toLowerCase() === selectedFileType;
       return matchesSearch && matchesType;
@@ -133,10 +136,13 @@ export default function FileManager() {
     .sort((a, b) => {
       let aValue, bValue;
       
+      // Safety checks to ensure objects exist and have required properties
+      if (!a || !b) return 0;
+      
       switch (sortBy) {
         case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = (a.name || '').toLowerCase();
+          bValue = (b.name || '').toLowerCase();
           break;
         case 'size':
           aValue = a.size || 0;
@@ -167,7 +173,7 @@ export default function FileManager() {
               <FolderIcon className="h-8 w-8 mr-3" />
               File Manager
             </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
+            <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
               Manage and browse system files
             </p>
           </div>
@@ -199,7 +205,7 @@ export default function FileManager() {
             <FolderIcon className="h-8 w-8 mr-3" />
             File Manager
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
             Manage and browse system files
           </p>
         </div>
@@ -230,7 +236,7 @@ export default function FileManager() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
             Upload Files
           </h3>
-          <p className="text-sm text-gray-500 dark:text-dark-400">
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             Upload schedule files and other configuration files
           </p>
         </div>
@@ -251,7 +257,7 @@ export default function FileManager() {
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-dark-500" />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search files..."
@@ -314,11 +320,11 @@ export default function FileManager() {
             </div>
           ) : filteredFiles.length === 0 ? (
             <div className="text-center py-12">
-              <FolderIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+              <FolderIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                 {searchTerm || selectedFileType !== 'all' ? 'No matching files' : 'No files found'}
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 {searchTerm || selectedFileType !== 'all' 
                   ? 'Try adjusting your search or filters'
                   : 'Files will appear here when available'
@@ -328,26 +334,26 @@ export default function FileManager() {
           ) : (
             <div className="overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-600">
-                <thead className="bg-gray-50 dark:bg-dark-700">
+                <thead className="bg-gray-50 dark:bg-slate-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Size
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Modified
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-dark-800 divide-y divide-gray-200 dark:divide-dark-600">
+                <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-dark-600">
                   {filteredFiles.map((file, index) => (
                     <motion.tr
-                      key={file.name}
+                      key={file.name || index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: index * 0.05 }}
@@ -355,13 +361,13 @@ export default function FileManager() {
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className="text-lg mr-3">{getFileIcon(file.name)}</span>
+                          <span className="text-lg mr-3">{getFileIcon(file.name || '')}</span>
                           <div>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {file.name}
+                              {file.name || 'Unknown file'}
                             </div>
                             {file.path && (
-                              <div className="text-sm text-gray-500 dark:text-dark-400">
+                              <div className="text-sm text-gray-500 dark:text-slate-400">
                                 {file.path}
                               </div>
                             )}
@@ -369,11 +375,11 @@ export default function FileManager() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200">
-                          {getFileType(file.name)}
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200">
+                          {getFileType(file.name || '')}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-dark-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
                         {file.size ? formatFileSize(file.size) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

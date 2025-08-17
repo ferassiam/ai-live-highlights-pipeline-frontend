@@ -1,36 +1,75 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 
-/**
- * Tab navigation component for sports operations UI
- * Supports keyboard navigation, badges, and sticky positioning
- */
-export function TabNavigation({ 
-  tabs, 
+// Professional tab navigation for sports operations
+export const TabNavigation = React.forwardRef(({ 
+  tabs = [], 
   activeTab, 
   onTabChange, 
   orientation = 'horizontal',
+  size = 'default',
+  variant = 'line',
   sticky = false,
   className = '',
   tabClassName = '',
-  size = 'md'
-}) {
+  ...props
+}, ref) => {
+  const [focusedTab, setFocusedTab] = useState(null);
+  const tabRefs = useRef({});
   const isHorizontal = orientation === 'horizontal';
 
-  const handleKeyDown = (event, tabId) => {
-    const currentIndex = tabs.findIndex(tab => tab.id === tabId);
-    let nextIndex = currentIndex;
+  // Size variants
+  const sizeClasses = {
+    sm: isHorizontal ? 'py-2 px-3 text-xs' : 'py-1.5 px-2 text-xs',
+    default: isHorizontal ? 'py-3 px-4 text-sm' : 'py-2 px-3 text-sm',
+    lg: isHorizontal ? 'py-4 px-6 text-base' : 'py-3 px-4 text-base'
+  };
 
+  // Tab variants  
+  const variantClasses = {
+    line: {
+      container: isHorizontal 
+        ? 'border-b border-stone-200 dark:border-stone-600' 
+        : 'space-y-1',
+      active: isHorizontal
+  ? 'border-b-2 border-primary-500 text-primary-700 dark:text-primary-300'
+  : 'bg-primary-50 dark:bg-primary-950 text-primary-700 dark:text-primary-300',
+      inactive: isHorizontal
+  ? 'border-b-2 border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:border-stone-300 dark:hover:border-stone-500'
+  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+    },
+    pills: {
+  container: isHorizontal ? 'flex gap-1' : 'space-y-1',
+      active: 'bg-primary-500 text-white shadow-sm',
+  inactive: 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+    },
+    segments: {
+      container: isHorizontal 
+        ? 'inline-flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1' 
+        : 'bg-slate-100 dark:bg-slate-800 rounded-lg p-1 space-y-1',
+      active: 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm',
+      inactive: 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+    }
+  };
+
+  // Keyboard navigation
+  const handleKeyDown = (event, tabId) => {
+    const tabIds = tabs.filter(tab => !tab.disabled).map(tab => tab.id);
+    const currentIndex = tabIds.indexOf(tabId);
+    
+    let nextIndex = currentIndex;
+    
     switch (event.key) {
       case 'ArrowLeft':
       case 'ArrowUp':
         event.preventDefault();
-        nextIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : tabIds.length - 1;
         break;
       case 'ArrowRight':
       case 'ArrowDown':
         event.preventDefault();
-        nextIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
+        nextIndex = currentIndex < tabIds.length - 1 ? currentIndex + 1 : 0;
         break;
       case 'Home':
         event.preventDefault();
@@ -38,109 +77,165 @@ export function TabNavigation({
         break;
       case 'End':
         event.preventDefault();
-        nextIndex = tabs.length - 1;
+        nextIndex = tabIds.length - 1;
         break;
       default:
         return;
     }
 
-    const nextTab = tabs[nextIndex];
-    if (nextTab && !nextTab.disabled) {
-      onTabChange(nextTab.id);
-    }
+    const nextTabId = tabIds[nextIndex];
+    setFocusedTab(nextTabId);
+    tabRefs.current[nextTabId]?.focus();
   };
 
-  const sizeClasses = {
-    sm: isHorizontal ? 'py-2 px-3 text-sm' : 'py-2 px-3 text-sm',
-    md: isHorizontal ? 'py-3 px-4 text-sm' : 'py-2 px-3 text-sm',
-    lg: isHorizontal ? 'py-4 px-6 text-base' : 'py-3 px-4 text-base'
-  };
+  // Auto-focus management
+  useEffect(() => {
+    if (focusedTab && tabRefs.current[focusedTab]) {
+      tabRefs.current[focusedTab].focus();
+    }
+  }, [focusedTab]);
+
+  const currentVariant = variantClasses[variant] || variantClasses.line;
 
   return (
-    <div className={cn(
-      sticky && 'sticky top-0 z-10 bg-surface-950 [data-theme="light"] &:bg-surface-50',
-      className
-    )}>
+    <div 
+      ref={ref} 
+      className={cn(
+  sticky && 'sticky top-0 z-10 bg-slate-50 dark:bg-slate-950',
+        className
+      )}
+      {...props}
+    >
       <nav 
         className={cn(
-          isHorizontal 
-            ? 'flex border-b border-stone-700 [data-theme="light"] &:border-stone-200' 
-            : 'space-y-1',
-          'overflow-x-auto'
+          'flex',
+          isHorizontal ? 'overflow-x-auto scrollbar-hide' : 'flex-col',
+          currentVariant.container
         )}
         role="tablist"
+        aria-label="Navigation tabs"
         aria-orientation={orientation}
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
-          const isDisabled = tab.disabled;
+          const isFocused = focusedTab === tab.id;
           
           return (
-            <button
+            <motion.button
               key={tab.id}
-              role="tab"
-              tabIndex={isActive ? 0 : -1}
-              aria-selected={isActive}
-              aria-disabled={isDisabled}
-              onClick={() => !isDisabled && onTabChange(tab.id)}
+              ref={(el) => {
+                if (el) tabRefs.current[tab.id] = el;
+              }}
+              onClick={() => {
+                if (!tab.disabled) {
+                  onTabChange(tab.id);
+                  setFocusedTab(tab.id);
+                }
+              }}
               onKeyDown={(e) => handleKeyDown(e, tab.id)}
-              disabled={isDisabled}
+              onFocus={() => setFocusedTab(tab.id)}
+              onBlur={() => {
+                if (focusedTab === tab.id) {
+                  setFocusedTab(null);
+                }
+              }}
+              disabled={tab.disabled}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`tabpanel-${tab.id}`}
+              tabIndex={isActive || isFocused ? 0 : -1}
               className={cn(
-                'group relative flex items-center gap-2 font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-950 [data-theme="light"] &:focus:ring-offset-surface-50',
+                'group relative transition-all duration-200',
+                'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+                'focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950',
+                variant === 'pills' || variant === 'segments' ? 'rounded-lg' : '',
+                isHorizontal ? 'flex-shrink-0 whitespace-nowrap' : 'w-full text-left',
                 sizeClasses[size],
-                isHorizontal 
-                  ? cn(
-                      'border-b-2 whitespace-nowrap',
-                      isActive
-                        ? 'border-primary-500 text-primary-600 [data-theme="dark"] &:text-primary-400'
-                        : 'border-transparent text-muted hover:text-surface-200 [data-theme="light"] &:hover:text-surface-700 hover:border-stone-600 [data-theme="light"] &:hover:border-stone-300',
-                      isDisabled && 'cursor-not-allowed opacity-50'
-                    )
-                  : cn(
-                      'w-full text-left rounded-md',
-                      isActive
-                        ? 'bg-primary-100 [data-theme="dark"] &:bg-primary-950 text-primary-700 [data-theme="dark"] &:text-primary-300'
-                        : 'text-muted hover:text-surface-200 [data-theme="light"] &:hover:text-surface-700 hover:bg-surface-800 [data-theme="light"] &:hover:bg-surface-100',
-                      isDisabled && 'cursor-not-allowed opacity-50'
-                    ),
+                isActive ? currentVariant.active : currentVariant.inactive,
+                tab.disabled && 'cursor-not-allowed opacity-50',
+                !tab.disabled && 'cursor-pointer',
                 tabClassName
               )}
+              whileHover={
+                tab.disabled ? {} : { scale: 1.01 }
+              }
+              whileTap={
+                tab.disabled ? {} : { scale: 0.99 }
+              }
+              transition={{ duration: 0.15, ease: 'easeOut' }}
             >
-              {tab.icon && (
-                <tab.icon
-                  className={cn(
-                    'w-4 h-4 flex-shrink-0',
-                    isActive
-                      ? 'text-primary-600 [data-theme="dark"] &:text-primary-400'
-                      : 'text-muted group-hover:text-surface-300 [data-theme="light"] &:group-hover:text-surface-600'
-                  )}
-                />
-              )}
-              
-              <span className="flex-1 truncate">
-                {tab.name}
-              </span>
-              
-              {(tab.badge || tab.count !== undefined) && (
-                <span className={cn(
-                  'inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium min-w-[1.25rem] h-5',
-                  isActive
-                    ? 'bg-primary-200 [data-theme="dark"] &:bg-primary-800 text-primary-800 [data-theme="dark"] &:text-primary-200'
-                    : 'bg-surface-700 [data-theme="light"] &:bg-surface-200 text-surface-300 [data-theme="light"] &:text-surface-600'
-                )}>
-                  {tab.badge || tab.count}
+              <div className="flex items-center gap-2">
+                {/* Icon */}
+                {tab.icon && (
+                  <tab.icon
+                    className={cn(
+                      'h-4 w-4 flex-shrink-0',
+                      isActive 
+                        ? 'text-current' 
+                        : 'text-slate-500 dark:text-slate-400 group-hover:text-current'
+                    )}
+                    aria-hidden="true"
+                  />
+                )}
+                
+                {/* Label */}
+                <span className="font-subheading tracking-tight">
+                  {tab.name}
                 </span>
-              )}
-              
-              {tab.alert && (
-                <span className="w-2 h-2 bg-danger-500 rounded-full animate-pulse-subtle" />
-              )}
-            </button>
+                
+                {/* Badge/Count */}
+                {tab.count !== undefined && (
+                  <span className={cn(
+                    'inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium tabular-nums',
+                    isActive
+                      ? 'bg-primary-600 text-white dark:bg-primary-400 dark:text-primary-950'
+                      : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                  )}>
+                    {tab.count}
+                  </span>
+                )}
+
+                {/* Alert dot */}
+                {tab.alert && (
+                  <div className={cn(
+                    'w-2 h-2 rounded-full flex-shrink-0',
+                    tab.alert === 'danger' 
+                      ? 'bg-danger-500' 
+                      : tab.alert === 'warning' 
+                      ? 'bg-warning-500' 
+                      : 'bg-info-500'
+                  )} aria-hidden="true" />
+                )}
+
+                {/* Badge text */}
+                {tab.badge && (
+                  <span className={cn(
+                    'inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium',
+                    isActive
+                      ? 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200'
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                  )}>
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
+
+              {/* Screen reader content */}
+              <span className="sr-only">
+                {isActive ? 'Current tab: ' : 'Tab: '}
+                {tab.name}
+                {tab.count !== undefined && ` (${tab.count})`}
+                {tab.alert && ' - Has alerts'}
+                {tab.disabled && ' - Disabled'}
+              </span>
+            </motion.button>
           );
         })}
       </nav>
     </div>
   );
-}
+});
+
+TabNavigation.displayName = 'TabNavigation';
 
 export default TabNavigation;

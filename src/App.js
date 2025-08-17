@@ -109,10 +109,10 @@ function App() {
       <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <Login onLogin={handleLogin} />
-          <Toaster 
+      <Toaster 
             position="top-right"
             toastOptions={{
-              className: 'dark:bg-dark-800 dark:text-white',
+        className: 'dark:bg-slate-800 dark:text-white',
             }}
           />
       </QueryClientProvider>
@@ -125,7 +125,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Router>
           <motion.div 
-            className="flex h-screen bg-gray-50 dark:bg-dark-900"
+            className="flex h-screen bg-slate-50 dark:bg-slate-950"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -142,7 +142,7 @@ function App() {
               />
 
               {/* Page content */}
-              <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-dark-900">
+              <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
                 <div className="py-6">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <ErrorBoundary fallbackMessage="This page encountered an error. This might be due to missing backend features or network issues.">
@@ -170,10 +170,10 @@ function App() {
           </motion.div>
 
           {/* Toast notifications */}
-          <Toaster 
+      <Toaster 
             position="top-right"
             toastOptions={{
-              className: 'dark:bg-dark-800 dark:text-white',
+        className: 'dark:bg-slate-800 dark:text-white',
             }}
           />
         </Router>

@@ -127,13 +127,94 @@ src/
 │   └── Settings.js         # System configuration
 ```
 
-### Page-Specific Optimizations
-- **Dashboard**: KPI metrics, live activity feed, quick actions
-- **Monitoring**: Dense tables with status indicators, bulk actions
-- **Channels**: Live status badges, performance metrics, controls
-- **Pipelines**: Processing status, performance charts, manual controls
-- **Highlights**: Content browser with metadata, batch operations
-- **Schedules**: Calendar/list hybrid, timezone-aware, quick reschedule
+### Real-time Features
+- **Live Status**: System status updates every 30 seconds
+- **Event Broadcasting**: All major events broadcasted via WebSocket
+- **Auto-refresh**: Data automatically refreshes on relevant events
+- **Optimistic Updates**: UI updates optimistically for better UX
+
+## 📊 Dashboard Features
+
+### Main Dashboard
+- **System Overview**: Orchestrator status, active channels, pipelines
+- **Real-time Metrics**: Live charts and statistics
+- **Recent Activity**: Timeline of recent events and actions
+- **Quick Actions**: Start/stop orchestrator, view alerts
+
+### Schedule Management
+- **Visual Schedule Editor**: Create and edit schedules with forms
+- **Event Timeline**: Visual representation of scheduled events
+- **Bulk Operations**: Enable/disable multiple schedules
+- **Import/Export**: JSON import/export for schedules
+
+### Channel Monitoring
+- **Live Status**: Real-time channel status and streaming info
+- **Manual Control**: Override automatic channel management
+- **Performance Metrics**: Streaming quality and statistics
+- **Log Viewer**: Real-time log viewing for debugging
+
+### Pipeline Control
+- **Processing Status**: Monitor segment processing and highlights generation
+- **Performance Metrics**: Processing speed, success rates, errors
+- **Manual Override**: Start/stop pipelines independently
+- **Resource Usage**: CPU, memory, and storage monitoring
+
+### Highlights Browser
+- **Advanced Search**: Filter by time, schedule, confidence, tags
+- **Preview Mode**: Quick preview of highlight details
+- **Bulk Actions**: Download, export, or delete multiple highlights
+- **Analytics**: Highlight generation trends and statistics
+
+## 🎨 UI/UX Design
+
+### Design System
+- **Color Palette**: Primary blue, success green, warning orange, danger red
+- **Typography**: Inter font family with consistent sizing
+- **Spacing**: 8px grid system for consistent spacing
+- **Components**: Reusable button, card, form, and layout components
+
+### Responsive Breakpoints
+- **Mobile**: 0-639px (single column, sidebar overlay)
+- **Tablet**: 640-1023px (adjusted columns, collapsible sidebar)
+- **Desktop**: 1024px+ (full layout, permanent sidebar)
+
+### Accessibility
+- **Keyboard Navigation**: Full keyboard support
+- **Screen Readers**: ARIA labels and semantic HTML
+- **Color Contrast**: WCAG AA compliant contrast ratios
+- **Focus Management**: Visible focus indicators
+
+## 🔧 Customization
+
+### Styling
+Customize the appearance by modifying `tailwind.config.js`:
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          // Your brand colors
+        }
+      }
+    }
+  }
+}
+```
+
+### API Configuration
+Modify `src/services/api.js` to customize:
+- **Base URL**: Change default API endpoint
+- **Timeout**: Adjust request timeout
+- **Retry Logic**: Configure retry behavior
+- **Error Handling**: Customize error responses
+
+### Components
+All components are modular and can be easily customized:
+- **Layout**: Modify sidebar and header components
+- **Pages**: Add new pages or modify existing ones
+- **Styling**: Use Tailwind utilities for styling changes
 
 ## 🚀 Deployment
 

@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-900">
-          <div className="max-w-md w-full bg-white dark:bg-dark-800 shadow-lg rounded-lg p-6">
+          <div className="max-w-md w-full bg-white dark:bg-slate-800 shadow-lg rounded-lg p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <ExclamationTriangleIcon className="h-8 w-8 text-danger-400" />
@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component {
                 <summary className="cursor-pointer text-sm text-gray-500 dark:text-dark-400">
                   Error details (development only)
                 </summary>
-                <div className="mt-2 p-4 bg-gray-100 dark:bg-dark-700 rounded text-xs font-mono">
+                <div className="mt-2 p-4 bg-gray-100 dark:bg-slate-700 rounded text-xs font-mono">
                   <div className="text-danger-600 dark:text-danger-400 mb-2">
                     {this.state.error.toString()}
                   </div>
@@ -63,7 +63,7 @@ class ErrorBoundary extends React.Component {
               </button>
               <button
                 onClick={() => window.location.href = '/'}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-dark-600 text-sm font-medium rounded-md text-gray-700 dark:text-dark-300 bg-white dark:bg-dark-800 hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-sm font-medium rounded-md text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-dark-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Go home
               </button>

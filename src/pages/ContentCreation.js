@@ -49,7 +49,7 @@ const SocialIcon = ({ platform, className = "" }) => {
     case 'youtube':
       return <FaYoutube {...iconProps} className={`${iconProps.className} text-red-500 hover:text-red-600`} />;
     default:
-      return <ShareIcon {...iconProps} className={`${iconProps.className} text-gray-500 dark:text-dark-400`} />;
+      return <ShareIcon {...iconProps} className={`${iconProps.className} text-gray-500 dark:text-slate-400`} />;
   }
 };
 
@@ -91,18 +91,29 @@ const mockGenerationProgress = [
 export default function ContentCreation() {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [selectedContent, setSelectedContent] = useState(null);
-  const [contentItems, setContentItems] = useState([]);
+  const [contentItems, setContentItems] = useState(mockContentItems);
   const [generationProgress, setGenerationProgress] = useState([]);
 
+  // Fetch active content matches
+  // eslint-disable-next-line no-unused-vars
+  const { data: activeMatches } = useQuery({
+    queryKey: ['activeContentMatches'],
+    queryFn: () => apiService.getActiveContentMatches(),
+    refetchInterval: 15000, // Refresh every 15 seconds
+    retry: 1,
+  });
+
   // Fetch content items
-  const { data: content, refetch } = useQuery({
+  const { data: content, refetch, isError: contentError } = useQuery({
     queryKey: ['contentItems'],
     queryFn: async () => {
       try {
         const response = await apiService.getContentItems({
           limit: 100
         });
-        return response.items || [];
+        const items = response.items || [];
+        // If API returns empty data, use mock data for demonstration
+        return items.length > 0 ? items : mockContentItems;
       } catch (error) {
         console.error('Failed to fetch content items:', error);
         // Fallback to mock data if API fails
@@ -110,11 +121,11 @@ export default function ContentCreation() {
       }
     },
     refetchInterval: 30000, // Refresh every 30 seconds
-    retry: 2,
+    retry: 1, // Reduced retries to show mock data faster
   });
 
   // Fetch content generation progress
-  const { data: progressData, refetch: refetchProgress } = useQuery({
+  const { data: progressData, refetch: refetchProgress, isError: progressError } = useQuery({
     queryKey: ['contentProgress'],
     queryFn: async () => {
       try {
@@ -130,7 +141,9 @@ export default function ContentCreation() {
   });
 
   useEffect(() => {
+    console.log('Content effect triggered with:', content);
     if (content) {
+      console.log('Setting contentItems to:', content);
       setContentItems(content);
     }
   }, [content]);
@@ -158,7 +171,7 @@ export default function ContentCreation() {
       case 'failed':
         return <XCircleIcon className="h-5 w-5 text-danger-500" />;
       default:
-        return <ClockIcon className="h-5 w-5 text-gray-400 dark:text-dark-400" />;
+        return <ClockIcon className="h-5 w-5 text-gray-400 dark:text-slate-400" />;
     }
   };
 
@@ -212,10 +225,12 @@ export default function ContentCreation() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-dark-400 truncate">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
                     Total Editorials
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">12</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {contentItems.filter(item => item.type === 'editorial').length}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -230,10 +245,12 @@ export default function ContentCreation() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-dark-400 truncate">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
                     Social Posts
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">28</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {contentItems.filter(item => item.type === 'social_post').length}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -248,10 +265,13 @@ export default function ContentCreation() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-dark-400 truncate">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
                     Generating
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">3</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {Array.isArray(generationProgress) ? 
+                      generationProgress.filter(item => item.status === 'generating').length : 0}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -266,7 +286,7 @@ export default function ContentCreation() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-dark-400 truncate">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
                     Game Summaries
                   </dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
@@ -286,10 +306,13 @@ export default function ContentCreation() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-dark-400 truncate">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
                     Posted Today
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">15</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {Array.isArray(generationProgress) ? 
+                      generationProgress.filter(item => item.status === 'completed').length : 0}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -310,7 +333,7 @@ export default function ContentCreation() {
                   <div className="relative pb-8">
                     {itemIdx !== (Array.isArray(generationProgress) ? generationProgress : []).length - 1 ? (
                       <span
-                        className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-dark-700"
+                        className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-slate-700"
                         aria-hidden="true"
                       />
                     ) : null}
@@ -320,17 +343,17 @@ export default function ContentCreation() {
                       </div>
                       <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-dark-400">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">
                             Generated {item.type} for{' '}
                             <span className="font-medium text-gray-900 dark:text-white">
                               {item.match}
                             </span>
                           </p>
-                          <p className="text-xs text-gray-400 dark:text-dark-500">
+                          <p className="text-xs text-gray-400 dark:text-slate-500">
                             Trigger: {item.trigger}
                           </p>
                         </div>
-                        <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-dark-400">
+                        <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-slate-400">
                           {formatTimestamp(item.timestamp)}
                         </div>
                       </div>
@@ -346,7 +369,11 @@ export default function ContentCreation() {
   );
 
   const renderContentList = (type) => {
+    console.log('renderContentList called with type:', type);
+    console.log('contentItems:', contentItems);
+    console.log('contentItems length:', contentItems?.length);
     const filteredContent = contentItems.filter(item => !type || item.type === type);
+    console.log('filteredContent for type', type, ':', filteredContent);
     
     const getContentTitle = (type) => {
       switch (type) {
@@ -374,7 +401,7 @@ export default function ContentCreation() {
               <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                 {getContentTitle(type)}
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 {getContentDescription(type)}
               </p>
             </div>
@@ -391,9 +418,9 @@ export default function ContentCreation() {
           <div className="space-y-4">
             {filteredContent.length === 0 ? (
               <div className="text-center py-12">
-                <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+                <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No content available</h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                   Content will appear here as it's generated during matches.
                 </p>
               </div>
@@ -401,8 +428,12 @@ export default function ContentCreation() {
               filteredContent.map((item) => (
                 <div
                   key={item.id}
-                  className="border border-gray-200 dark:border-dark-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer transition-colors duration-200 hover:shadow-sm"
-                  onClick={() => setSelectedContent(item)}
+                  className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer transition-colors duration-200 hover:shadow-sm"
+                  onClick={() => {
+                    console.log('Clicking content item:', item);
+                    console.log('Item structure:', JSON.stringify(item, null, 2));
+                    setSelectedContent(item);
+                  }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -416,11 +447,15 @@ export default function ContentCreation() {
                            : item.content.text.substring(0, 60) + '...'}
                         </h4>
                       </div>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                      <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                         {item.game_context?.teams?.home || 'Team A'} vs {item.game_context?.teams?.away || 'Team B'}
                       </p>
-                      <p className="mt-1 text-xs text-gray-400 dark:text-dark-500">
-                        Generated: {formatTimestamp(item.timestamp * 1000)}
+                      <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+                        Generated: {formatTimestamp(
+                          typeof item.timestamp === 'number' 
+                            ? item.timestamp * 1000 
+                            : item.timestamp
+                        )}
                       </p>
                     </div>
                     <div className="flex space-x-2">
@@ -463,7 +498,7 @@ export default function ContentCreation() {
   };
 
   const renderGenerationProgress = () => (
-    <div className="bg-white dark:bg-dark-800 shadow rounded-lg border border-gray-200 dark:border-dark-700">
+    <div className="bg-white dark:bg-slate-800 shadow rounded-lg border border-gray-200 dark:border-slate-700">
       <div className="px-4 py-5 sm:p-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-6">
           Content Generation Progress
@@ -472,7 +507,7 @@ export default function ContentCreation() {
           {(Array.isArray(generationProgress) ? generationProgress : []).map((item) => (
             <div
               key={item.id}
-              className="border border-gray-200 dark:border-dark-700 rounded-lg p-4"
+              className="border border-gray-200 dark:border-slate-700 rounded-lg p-4"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -481,13 +516,13 @@ export default function ContentCreation() {
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                       {item.type.charAt(0).toUpperCase() + item.type.slice(1)} - {item.match}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-dark-400">
+                    <p className="text-xs text-gray-500 dark:text-slate-400">
                       Trigger: {item.trigger}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
                     {formatTimestamp(item.timestamp)}
                   </p>
                   <span className={classNames(
@@ -502,10 +537,10 @@ export default function ContentCreation() {
               </div>
               {item.status === 'generating' && (
                 <div className="mt-3">
-                  <div className="bg-gray-200 dark:bg-dark-700 rounded-full h-2">
+                  <div className="bg-gray-200 dark:bg-slate-700 rounded-full h-2">
                     <div className="bg-warning-500 h-2 rounded-full animate-pulse" style={{ width: '65%' }}></div>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">Processing highlight content...</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Processing highlight content...</p>
                 </div>
               )}
             </div>
@@ -526,11 +561,23 @@ export default function ContentCreation() {
           <p className="page-subtitle">
             AI-generated editorials and social media posts from live match highlights
           </p>
+          
+          {/* Status indicators for API errors */}
+          {(contentError || progressError) && (
+            <div className="mt-2 flex items-center space-x-2 text-sm text-warning-600 dark:text-warning-400">
+              <XCircleIcon className="h-4 w-4" />
+              <span>
+                {contentError && progressError ? 'Using cached data - API unavailable' :
+                 contentError ? 'Content data unavailable - using mock data' :
+                 'Progress data unavailable - using mock data'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Navigation tabs */}
-      <div className="border-b border-gray-200 dark:border-dark-700">
+      <div className="border-b border-gray-200 dark:border-slate-700">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => (
             <button
@@ -539,7 +586,7 @@ export default function ContentCreation() {
               className={classNames(
                 selectedTab === tab.id
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-gray-500 dark:text-dark-400 hover:text-gray-700 dark:hover:text-dark-300 hover:border-gray-300 dark:hover:border-dark-600',
+                  : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-600',
                 'whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200'
               )}
             >
@@ -573,21 +620,51 @@ export default function ContentCreation() {
 
 // Content Detail Modal Component
 function ContentDetailModal({ content, onClose, onSocialPost }) {
+  // Debug: Log the received content
+  console.log('Modal received content:', content);
+  console.log('Content type:', content?.type);
+  console.log('Content structure:', JSON.stringify(content, null, 2));
+  
+  if (!content) {
+    console.log('No content provided to modal');
+    return null;
+  }
+  
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div 
-          className="modal-overlay"
-          onClick={onClose}
-        ></div>
-
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-
-        <div className="modal-content sm:max-w-4xl sm:w-full">
+    <div 
+      className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 1000,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      onClick={onClose}
+    >
+      <div 
+        className="relative mx-auto p-5 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white dark:bg-slate-800"
+        style={{
+          backgroundColor: 'white',
+          maxWidth: '1400px',
+          width: '98%',
+          padding: '2rem',
+          borderRadius: '0.5rem',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          position: 'relative',
+          zIndex: 1001
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
           <div className="absolute top-0 right-0 pt-4 pr-4">
             <button
               type="button"
-              className="bg-white dark:bg-dark-800 rounded-md text-gray-400 dark:text-dark-400 hover:text-gray-500 dark:hover:text-dark-300 transition-colors duration-200"
+              className="bg-white dark:bg-slate-800 rounded-md text-gray-400 dark:text-slate-400 hover:text-gray-500 dark:hover:text-slate-300 transition-colors duration-200"
               onClick={onClose}
             >
               <span className="sr-only">Close</span>
@@ -595,101 +672,104 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
             </button>
           </div>
 
-          <div className="bg-white dark:bg-dark-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="sm:flex sm:items-start">
-              <div className="w-full">
-                <div className="mt-3 sm:mt-0 sm:text-left">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                    {content.type === 'editorial' ? 'Editorial Content' 
-                     : content.type === 'match_summary' ? 'Game Summary'
-                     : 'Social Media Post'}
-                  </h3>
+        
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          {content?.type === 'editorial' ? 'Editorial Content' 
+           : content?.type === 'match_summary' ? 'Game Summary'
+           : 'Social Media Post'}
+        </h3>
                   
                   <div className="mt-4 space-y-4">
                     {/* Meta information */}
-                    <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg border border-gray-200 dark:border-dark-600">
+                    <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg border border-gray-200 dark:border-slate-600">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="font-medium text-gray-500 dark:text-dark-400">Match:</span>
+                          <span className="font-medium text-gray-500 dark:text-slate-400">Match:</span>
                           <p className="text-gray-900 dark:text-white">
-                            {content.game_context?.teams?.home || 'Team A'} vs {content.game_context?.teams?.away || 'Team B'}
+                            {content?.game_context?.teams?.home || 'Team A'} vs {content?.game_context?.teams?.away || 'Team B'}
                           </p>
                         </div>
                         <div>
-                          <span className="font-medium text-gray-500 dark:text-dark-400">Generated:</span>
+                          <span className="font-medium text-gray-500 dark:text-slate-400">Generated:</span>
                           <p className="text-gray-900 dark:text-white">
-                            {new Date(content.timestamp * 1000).toLocaleString()}
+                            {content?.timestamp ? new Date(
+                              typeof content.timestamp === 'number' 
+                                ? content.timestamp * 1000 
+                                : content.timestamp
+                            ).toLocaleString() : 'N/A'}
                           </p>
                         </div>
                         <div className="col-span-2">
-                          <span className="font-medium text-gray-500 dark:text-dark-400">
+                          <span className="font-medium text-gray-500 dark:text-slate-400">
                             {content.type === 'match_summary' ? 'Summary Type:' : 'Trigger:'}
                           </span>
                           <p className="text-gray-900 dark:text-white">
-                            {content.type === 'match_summary' 
-                              ? `${content.content?.type || 'fulltime'} - Covers ${content.content?.highlights_covered || 'N/A'} highlights`
-                              : content.trigger_highlight}
+                            {content?.type === 'match_summary' 
+                              ? `${content?.content?.type || 'fulltime'} - Covers ${content?.content?.highlights_covered || 'N/A'} highlights`
+                              : (content?.trigger_highlight || 'N/A')}
                           </p>
                         </div>
                       </div>
                     </div>
 
                     {/* Content sections */}
-                    {content.type === 'editorial' ? (
+                    {content?.type === 'editorial' ? (
                       <div className="space-y-4">
                         <div>
                           <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                            {content.content.headline}
+                            {content?.content?.headline || 'Editorial Title'}
                           </h4>
                           <div className="prose dark:prose-invert max-w-none">
-                            <div className="whitespace-pre-line text-gray-700 dark:text-dark-300">
-                              {content.content.body}
+                            <div className="whitespace-pre-line text-gray-700 dark:text-slate-300">
+                              {content?.content?.body || 'Editorial content not available'}
                             </div>
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 text-sm">
                           <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded-md">
-                            {content.content.word_count} words
+                            {content?.content?.word_count || 0} words
                           </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200 rounded-md">
-                            {content.content.style}
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                            {content?.content?.style || 'professional'}
                           </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200 rounded-md">
-                            {content.content.tone}
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                            {content?.content?.tone || 'neutral'}
                           </span>
                         </div>
                       </div>
-                    ) : content.type === 'social_post' ? (
+                    ) : content?.type === 'social_post' ? (
                       <div className="space-y-4">
-                        <div className="bg-gray-50 dark:bg-dark-700 p-4 rounded-lg border border-gray-200 dark:border-dark-600">
-                          <p className="text-gray-900 dark:text-white">{content.content.text}</p>
+                        <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg border border-gray-200 dark:border-slate-600">
+                          <p className="text-gray-900 dark:text-white">{content?.content?.text || 'Social post content not available'}</p>
                         </div>
                         <div className="flex flex-wrap gap-2 text-sm">
                           <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded-md">
-                            {content.content.character_count} characters
+                            {content?.content?.character_count || 0} characters
                           </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200 rounded-md">
-                            {content.content.tone}
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                            {content?.content?.tone || 'neutral'}
                           </span>
                           <span className="px-2 py-1 bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-200 rounded-md">
-                            {content.content.engagement_potential}
+                            {content?.content?.engagement_potential || 'medium'}
                           </span>
                         </div>
                         
                         {/* Social media posting buttons */}
-                        <div className="pt-4 border-t border-gray-200 dark:border-dark-600">
+                        <div className="pt-4 border-t border-gray-200 dark:border-slate-600">
                           <h5 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Post to Social Media:</h5>
                           <div className="flex space-x-3">
-                            {content.platforms?.map((platform) => (
+                            {content?.platforms?.map((platform) => (
                               <button
                                 key={platform}
-                                onClick={() => onSocialPost(platform, content.content.text, content.id)}
+                                onClick={() => onSocialPost(platform, content?.content?.text, content?.id)}
                                 className="btn btn-secondary flex items-center space-x-2"
                               >
                                 <SocialIcon platform={platform} className="w-4 h-4" />
                                 <span className="capitalize">{platform}</span>
                               </button>
-                            ))}
+                            )) || (
+                              <p className="text-gray-500 dark:text-slate-400 text-sm">No platforms available</p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -698,22 +778,22 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
                       <div className="space-y-4">
                         <div>
                           <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                            {content.game_context?.teams?.home || 'Team A'} vs {content.game_context?.teams?.away || 'Team B'} - Final Summary
+                            {content?.game_context?.teams?.home || 'Team A'} vs {content?.game_context?.teams?.away || 'Team B'} - Final Summary
                           </h4>
                           <div className="prose dark:prose-invert max-w-none">
-                            <div className="whitespace-pre-line text-gray-700 dark:text-dark-300">
-                              {content.content?.content || 'No summary content available'}
+                            <div className="whitespace-pre-line text-gray-700 dark:text-slate-300">
+                              {content?.content?.content || 'No summary content available'}
                             </div>
                           </div>
                         </div>
                         
-                        {content.content?.key_moments && content.content.key_moments.length > 0 && (
+                        {content?.content?.key_moments && content?.content?.key_moments?.length > 0 && (
                           <div>
                             <h5 className="text-md font-semibold text-gray-900 dark:text-white mb-2">Key Moments</h5>
                             <div className="space-y-2">
-                              {content.content.key_moments.map((moment, index) => (
-                                <div key={index} className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg border border-gray-200 dark:border-dark-600">
-                                  <p className="text-sm text-gray-700 dark:text-dark-300">{moment}</p>
+                              {content?.content?.key_moments?.map((moment, index) => (
+                                <div key={index} className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-200 dark:border-slate-600">
+                                  <p className="text-sm text-gray-700 dark:text-slate-300">{moment}</p>
                                 </div>
                               ))}
                             </div>
@@ -722,26 +802,21 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
                         
                         <div className="flex flex-wrap gap-2 text-sm">
                           <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded-md">
-                            {content.content?.type || 'fulltime'} summary
+                            {content?.content?.type || 'fulltime'} summary
                           </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200 rounded-md">
-                            {content.content?.highlights_covered || 0} highlights covered
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                            {content?.content?.highlights_covered || 0} highlights covered
                           </span>
-                          {content.content?.match_rating && (
+                          {content?.content?.match_rating && (
                             <span className="px-2 py-1 bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-200 rounded-md flex items-center space-x-1">
                               <StarIcon className="h-3 w-3" />
-                              <span>{content.content.match_rating}/5.0</span>
+                              <span>{content?.content?.match_rating}/5.0</span>
                             </span>
                           )}
                         </div>
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
