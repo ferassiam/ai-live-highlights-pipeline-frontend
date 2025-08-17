@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { 
   Bars3Icon, 
   BellIcon, 
@@ -37,6 +38,7 @@ export default function Header({ setSidebarOpen, onLogout }) {
   const orchestratorRunning = status?.orchestrator_running || false;
   const activeChannels = Object.keys(status?.orchestrator_status?.active_channels || {}).length;
   const activePipelines = status?.orchestrator_status?.active_pipelines?.length || 0;
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (e) => {
     e.preventDefault();
