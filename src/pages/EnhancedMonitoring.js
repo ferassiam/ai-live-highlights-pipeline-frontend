@@ -395,11 +395,11 @@ export default function EnhancedMonitoring() {
 
             {activePipelines.length === 0 ? (
               <div className="text-center py-12">
-                <PlayIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+                <PlayIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                   No Active Pipelines
                 </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                   Start the orchestrator to begin pipeline monitoring
                 </p>
               </div>
@@ -418,13 +418,13 @@ export default function EnhancedMonitoring() {
                     <div className="card-body">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500 dark:text-dark-400">Status</span>
+                          <span className="text-sm text-gray-500 dark:text-slate-400">Status</span>
                           <span className="text-sm font-medium text-success-600 dark:text-success-400">
                             Running
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500 dark:text-dark-400">Uptime</span>
+                          <span className="text-sm text-gray-500 dark:text-slate-400">Uptime</span>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">
                             {/* Calculate uptime - placeholder */}
                             Active
@@ -459,25 +459,25 @@ export default function EnhancedMonitoring() {
                       <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                         {formatNumber(pipelineStats.highlights_generated || 0)}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-dark-400">Highlights Generated</div>
+                      <div className="text-sm text-gray-500 dark:text-slate-400">Highlights Generated</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-success-600 dark:text-success-400">
                         {pipelineStats.success_rate ? `${pipelineStats.success_rate.toFixed(1)}%` : '0%'}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-dark-400">Success Rate</div>
+                      <div className="text-sm text-gray-500 dark:text-slate-400">Success Rate</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-warning-600 dark:text-warning-400">
                         {pipelineStats.avg_processing_time ? `${pipelineStats.avg_processing_time.toFixed(1)}s` : '0s'}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-dark-400">Avg Processing</div>
+                      <div className="text-sm text-gray-500 dark:text-slate-400">Avg Processing</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-danger-600 dark:text-danger-400">
                         {formatNumber(pipelineStats.errors || 0)}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-dark-400">Errors</div>
+                      <div className="text-sm text-gray-500 dark:text-slate-400">Errors</div>
                     </div>
                   </div>
                 </div>
@@ -497,7 +497,7 @@ export default function EnhancedMonitoring() {
               </div>
               <div className="card-body">
                 {recentHighlights?.highlights?.length === 0 ? (
-                  <p className="text-center text-gray-500 dark:text-dark-400 py-8">
+                  <p className="text-center text-gray-500 dark:text-slate-400 py-8">
                     No recent highlights found
                   </p>
                 ) : (
@@ -505,19 +505,19 @@ export default function EnhancedMonitoring() {
                     {recentHighlights?.highlights?.slice(0, 10).map((highlight) => (
                       <div
                         key={highlight.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 dark:border-dark-600 rounded-lg"
+                        className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-600 rounded-lg"
                       >
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
                             {highlight.title || `Highlight ${highlight.id}`}
                           </p>
-                          <p className="text-sm text-gray-500 dark:text-dark-400">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">
                             Schedule: {highlight.schedule_id} • 
                             Confidence: {highlight.confidence?.toFixed(2) || 'N/A'}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-500 dark:text-dark-400">
+                          <p className="text-sm text-gray-500 dark:text-slate-400">
                             {new Date(highlight.created_at).toLocaleString()}
                           </p>
                           <span className={cn(
@@ -552,7 +552,7 @@ export default function EnhancedMonitoring() {
                 <div className="card-body">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Status</span>
+                      <span className="text-sm text-gray-500 dark:text-slate-400">Status</span>
                       <span className={cn(
                         'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                         systemStatus?.orchestrator_running
@@ -563,12 +563,12 @@ export default function EnhancedMonitoring() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Backend Enabled</span>
+                      <span className="text-sm text-gray-500 dark:text-slate-400">Backend Enabled</span>
                       <span className={cn(
                         'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                         systemStatus?.orchestrator_status?.highlights_backend_enabled
                           ? 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200'
-                          : 'bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200'
+                          : 'bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200'
                       )}>
                         {systemStatus?.orchestrator_status?.highlights_backend_enabled ? 'Yes' : 'No'}
                       </span>
@@ -587,21 +587,21 @@ export default function EnhancedMonitoring() {
                 <div className="card-body">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Memory Usage</span>
+                      <span className="text-sm text-gray-500 dark:text-slate-400">Memory Usage</span>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {/* Placeholder - would need actual metrics */}
                         Normal
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">CPU Usage</span>
+                      <span className="text-sm text-gray-500 dark:text-slate-400">CPU Usage</span>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {/* Placeholder - would need actual metrics */}
                         Normal
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-dark-400">Disk Usage</span>
+                      <span className="text-sm text-gray-500 dark:text-slate-400">Disk Usage</span>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {/* Placeholder - would need actual metrics */}
                         Normal

@@ -78,7 +78,7 @@ export default function Settings() {
           <h1 className="page-title">
             Settings
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
+          <p className="page-subtitle">
             Configure system settings and integrations
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function Settings() {
               >
                 <tab.icon
                   className={`flex-shrink-0 -ml-1 mr-3 h-6 w-6 ${
-                    activeTab === tab.id ? 'text-primary-700 dark:text-primary-400' : 'text-gray-400 dark:text-dark-500 group-hover:text-gray-500 dark:group-hover:text-dark-300'
+                    activeTab === tab.id ? 'text-primary-700 dark:text-primary-400' : 'text-gray-400 dark:text-slate-500 group-hover:text-gray-500 dark:group-hover:text-slate-300'
                   }`}
                 />
                 <span className="truncate">{tab.name}</span>
@@ -113,8 +113,8 @@ export default function Settings() {
           {activeTab === 'global' && (
             <div className="card">
               <div className="card-header">
-                <h3 className="text-lg font-medium text-gray-900">Global Configuration</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Global Configuration</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">
                   Configure global settings for the pipeline system
                 </p>
               </div>
@@ -122,26 +122,26 @@ export default function Settings() {
                 <form onSubmit={handleConfigSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="form-label">
                         Storage Account Name
                       </label>
                       <input
                         type="text"
                         value={configForm.storage_account_name || ''}
                         onChange={(e) => handleConfigChange('storage_account_name', e.target.value)}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="form-input"
                         placeholder="Storage account name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="form-label">
                         Logging Level
                       </label>
                       <select
                         value={configForm.logging_level || 'INFO'}
                         onChange={(e) => handleConfigChange('logging_level', e.target.value)}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="form-select"
                       >
                         <option value="DEBUG">Debug</option>
                         <option value="INFO">Info</option>
@@ -151,42 +151,42 @@ export default function Settings() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="form-label">
                         Max Retries
                       </label>
                       <input
                         type="number"
                         value={configForm.max_retries || 3}
                         onChange={(e) => handleConfigChange('max_retries', parseInt(e.target.value))}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="form-input"
                         min="1"
                         max="10"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="form-label">
                         Retry Delay (seconds)
                       </label>
                       <input
                         type="number"
                         value={configForm.retry_delay || 5}
                         onChange={(e) => handleConfigChange('retry_delay', parseInt(e.target.value))}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="form-input"
                         min="1"
                         max="60"
                       />
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="form-label">
                         Notification Webhook URL
                       </label>
                       <input
                         type="url"
                         value={configForm.notification_webhook || ''}
                         onChange={(e) => handleConfigChange('notification_webhook', e.target.value)}
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="form-input"
                         placeholder="https://example.com/webhook"
                       />
                     </div>
@@ -198,9 +198,9 @@ export default function Settings() {
                         type="checkbox"
                         checked={configForm.create_cu_locator || false}
                         onChange={(e) => handleConfigChange('create_cu_locator', e.target.checked)}
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        className="form-checkbox"
                       />
-                      <label className="ml-2 block text-sm text-gray-900">
+                      <label className="ml-2 block text-sm text-gray-900 dark:text-white">
                         Create Content Understanding Locator
                       </label>
                     </div>
@@ -225,45 +225,45 @@ export default function Settings() {
             <div className="space-y-6">
               <div className="card">
                 <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900">System Status</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">System Status</h3>
                 </div>
                 <div className="card-body">
                   <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Orchestrator Status</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dt className="text-sm font-medium text-gray-500 dark:text-slate-400">Orchestrator Status</dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         <span className={`status-indicator ${status?.orchestrator_running ? 'status-running' : 'status-stopped'}`}>
                           {status?.orchestrator_running ? 'Running' : 'Stopped'}
                         </span>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Active Connections</dt>
-                      <dd className="mt-1 text-sm text-gray-900">{status?.active_connections || 0}</dd>
+                      <dt className="text-sm font-medium text-gray-500 dark:text-slate-400">Active Connections</dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">{status?.active_connections || 0}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Schedules Loaded</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dt className="text-sm font-medium text-gray-500 dark:text-slate-400">Schedules Loaded</dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {status?.orchestrator_status?.schedules_loaded || 0}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Highlights Backend</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dt className="text-sm font-medium text-gray-500 dark:text-slate-400">Highlights Backend</dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         <span className={`status-indicator ${status?.orchestrator_status?.highlights_backend_enabled ? 'status-running' : 'status-stopped'}`}>
                           {status?.orchestrator_status?.highlights_backend_enabled ? 'Enabled' : 'Disabled'}
                         </span>
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Active Channels</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dt className="text-sm font-medium text-gray-500 dark:text-slate-400">Active Channels</dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {Object.keys(status?.orchestrator_status?.active_channels || {}).length}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Active Pipelines</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dt className="text-sm font-medium text-gray-500 dark:text-slate-400">Active Pipelines</dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-white">
                         {status?.orchestrator_status?.active_pipelines?.length || 0}
                       </dd>
                     </div>
@@ -273,13 +273,13 @@ export default function Settings() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900">Environment Information</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Environment Information</h3>
                 </div>
                 <div className="card-body">
                   <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Required Environment Variables</h4>
-                      <div className="grid grid-cols-1 gap-2 text-xs font-mono">
+                    <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Required Environment Variables</h4>
+                      <div className="grid grid-cols-1 gap-2 text-xs font-mono text-gray-700 dark:text-slate-300">
                         <div>API_KEY</div>
                         <div>MKIO_JWT</div>
                         <div>MKIO_PROJECT_NAME</div>
@@ -289,9 +289,9 @@ export default function Settings() {
                         <div>AZURE_OPENAI_API_KEY</div>
                       </div>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Optional Environment Variables</h4>
-                      <div className="grid grid-cols-1 gap-2 text-xs font-mono">
+                    <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Optional Environment Variables</h4>
+                      <div className="grid grid-cols-1 gap-2 text-xs font-mono text-gray-700 dark:text-slate-300">
                         <div>HIGHLIGHTS_BACKEND_URL</div>
                         <div>SEGMENT_DURATION</div>
                         <div>QUIET_MODE</div>
@@ -309,49 +309,49 @@ export default function Settings() {
           {activeTab === 'api' && (
             <div className="card">
               <div className="card-header">
-                <h3 className="text-lg font-medium text-gray-900">API Configuration</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">API Configuration</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">
                   API server settings and endpoints
                 </p>
               </div>
               <div className="card-body">
                 <div className="space-y-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">API Endpoints</h4>
-                    <div className="space-y-2 text-sm">
+                  <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">API Endpoints</h4>
+                    <div className="space-y-2 text-sm text-gray-900 dark:text-white">
                       <div className="flex justify-between">
                         <span>Health Check:</span>
-                        <span className="font-mono text-gray-600">GET /health</span>
+                        <span className="font-mono text-gray-600 dark:text-slate-300">GET /health</span>
                       </div>
                       <div className="flex justify-between">
                         <span>System Status:</span>
-                        <span className="font-mono text-gray-600">GET /status</span>
+                        <span className="font-mono text-gray-600 dark:text-slate-300">GET /status</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Interactive Docs:</span>
-                        <span className="font-mono text-gray-600">GET /docs</span>
+                        <span className="font-mono text-gray-600 dark:text-slate-300">GET /docs</span>
                       </div>
                       <div className="flex justify-between">
                         <span>WebSocket:</span>
-                        <span className="font-mono text-gray-600">WS /ws</span>
+                        <span className="font-mono text-gray-600 dark:text-slate-300">WS /ws</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">Authentication</h4>
-                    <div className="space-y-2 text-sm text-gray-600">
+                  <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Authentication</h4>
+                    <div className="space-y-2 text-sm text-gray-600 dark:text-slate-300">
                       <p>The API uses Bearer token authentication.</p>
                       <p>Include your API key in the Authorization header:</p>
-                      <div className="mt-2 p-2 bg-gray-100 rounded font-mono text-xs">
+                      <div className="mt-2 p-2 bg-gray-100 dark:bg-slate-700 rounded font-mono text-xs text-gray-800 dark:text-slate-200">
                         Authorization: Bearer your_api_key_here
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">Rate Limiting</h4>
-                    <div className="text-sm text-gray-600">
+                  <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Rate Limiting</h4>
+                    <div className="text-sm text-gray-600 dark:text-slate-300">
                       <p>No rate limiting is currently configured.</p>
                       <p>Consider implementing rate limiting for production deployments.</p>
                     </div>
@@ -366,26 +366,26 @@ export default function Settings() {
             <div className="space-y-6">
               <div className="card">
                 <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900">Azure Services</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Azure Services</h3>
                 </div>
                 <div className="card-body">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
                       <div className="flex items-center">
                         <CloudIcon className="h-5 w-5 text-primary-500 mr-3" />
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900">Azure AI Services</h4>
-                          <p className="text-sm text-gray-500">Content Understanding API</p>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">Azure AI Services</h4>
+                          <p className="text-sm text-gray-500 dark:text-slate-400">Content Understanding API</p>
                         </div>
                       </div>
                       <span className="status-running">Connected</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
                       <div className="flex items-center">
                         <CloudIcon className="h-5 w-5 text-primary-500 mr-3" />
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900">Azure OpenAI</h4>
-                          <p className="text-sm text-gray-500">GPT models for highlight generation</p>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">Azure OpenAI</h4>
+                          <p className="text-sm text-gray-500 dark:text-slate-400">GPT models for highlight generation</p>
                         </div>
                       </div>
                       <span className="status-running">Connected</span>
@@ -396,15 +396,15 @@ export default function Settings() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900">MKIO Platform</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">MKIO Platform</h3>
                 </div>
                 <div className="card-body">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
                       <ServerIcon className="h-5 w-5 text-primary-500 mr-3" />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">MKIO Channel Management</h4>
-                        <p className="text-sm text-gray-500">Live streaming channel operations</p>
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">MKIO Channel Management</h4>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">Live streaming channel operations</p>
                       </div>
                     </div>
                     <span className="status-running">Connected</span>
@@ -414,15 +414,15 @@ export default function Settings() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900">Highlights Backend</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Highlights Backend</h3>
                 </div>
                 <div className="card-body">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
                       <BellIcon className="h-5 w-5 text-gray-400 mr-3" />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">Highlights Publishing</h4>
-                        <p className="text-sm text-gray-500">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">Highlights Publishing</h4>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">
                           {status?.orchestrator_status?.highlights_backend_enabled 
                             ? 'Publishing highlights to backend'
                             : 'Set HIGHLIGHTS_BACKEND_URL to enable'
@@ -439,15 +439,15 @@ export default function Settings() {
 
               <div className="card">
                 <div className="card-header">
-                  <h3 className="text-lg font-medium text-gray-900">Webhook Notifications</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Webhook Notifications</h3>
                 </div>
                 <div className="card-body">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center">
-                      <BellIcon className={`h-5 w-5 mr-3 ${configForm.notification_webhook ? 'text-success-500' : 'text-gray-400 dark:text-dark-500'}`} />
+                      <BellIcon className={`h-5 w-5 mr-3 ${configForm.notification_webhook ? 'text-success-500' : 'text-gray-400 dark:text-slate-500'}`} />
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">Event Notifications</h4>
-                        <p className="text-sm text-gray-500">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">Event Notifications</h4>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">
                           {configForm.notification_webhook 
                             ? `Sending to ${configForm.notification_webhook}`
                             : 'Configure webhook URL in Global Config'
@@ -456,7 +456,7 @@ export default function Settings() {
                       </div>
                     </div>
                     <span className={configForm.notification_webhook ? 'connection-connected' : 'connection-disabled'}>
-                      <div className={`w-2 h-2 rounded-full mr-2 ${configForm.notification_webhook ? 'bg-success-500' : 'bg-gray-400 dark:bg-dark-500'}`}></div>
+                      <div className={`w-2 h-2 rounded-full mr-2 ${configForm.notification_webhook ? 'bg-success-500' : 'bg-gray-400 dark:bg-slate-500'}`}></div>
                       {configForm.notification_webhook ? 'Connected' : 'Not configured'}
                     </span>
                   </div>

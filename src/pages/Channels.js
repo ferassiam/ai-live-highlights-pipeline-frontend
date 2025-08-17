@@ -64,7 +64,7 @@ export default function Channels() {
           <h1 className="page-title">
             Channels
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
             Monitor and control active streaming channels
           </p>
         </div>
@@ -140,9 +140,9 @@ export default function Channels() {
         <div className="card-body p-0">
           {Object.keys(activeChannels).length === 0 ? (
             <div className="text-center py-12">
-              <TvIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+              <TvIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
               <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No active channels</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 {orchestratorRunning 
                   ? 'Channels will appear here when schedules are active and running.'
                   : 'Start the orchestrator to see active channels.'}
@@ -171,10 +171,10 @@ export default function Channels() {
                           </span>
                         </div>
                         <div className="mt-1 space-y-1">
-                          <p className="text-sm text-gray-600 dark:text-dark-400">Schedule: {scheduleId}</p>
-                          <p className="text-sm text-gray-600 dark:text-dark-400">Channel ID: {channel.channel_id}</p>
+                          <p className="text-sm text-gray-600 dark:text-slate-400">Schedule: {scheduleId}</p>
+                          <p className="text-sm text-gray-600 dark:text-slate-400">Channel ID: {channel.channel_id}</p>
                           {channel.video_id && (
-                            <p className="text-sm text-gray-600 dark:text-dark-400">Video ID: {channel.video_id}</p>
+                            <p className="text-sm text-gray-600 dark:text-slate-400">Video ID: {channel.video_id}</p>
                           )}
                         </div>
                       </div>
@@ -188,7 +188,7 @@ export default function Channels() {
                           channel.status === 'running' ? 'bg-success-500 animate-pulse-fast' : 
                           channel.status === 'stopped' ? 'bg-gray-400 dark:bg-dark-500' : 'bg-warning-500'
                         }`}></div>
-                        <span className="text-sm text-gray-600 dark:text-dark-400 capitalize">{channel.status}</span>
+                        <span className="text-sm text-gray-600 dark:text-slate-400 capitalize">{channel.status}</span>
                       </div>
 
                       {/* Manual controls */}
@@ -220,8 +220,8 @@ export default function Channels() {
 
                   {/* Additional channel details */}
                   <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg border border-gray-200 dark:border-dark-600">
-                      <div className="text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wide">
+                    <div className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-200 dark:border-slate-600">
+                      <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide">
                         Channel Name
                       </div>
                       <div className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
@@ -229,8 +229,8 @@ export default function Channels() {
                       </div>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg border border-gray-200 dark:border-dark-600">
-                      <div className="text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wide">
+                    <div className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-200 dark:border-slate-600">
+                      <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide">
                         Channel ID
                       </div>
                       <div className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
@@ -239,8 +239,8 @@ export default function Channels() {
                     </div>
 
                     {channel.video_id && (
-                      <div className="bg-gray-50 dark:bg-dark-700 p-3 rounded-lg border border-gray-200 dark:border-dark-600">
-                        <div className="text-xs font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wide">
+                      <div className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-200 dark:border-slate-600">
+                        <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wide">
                           Video ID
                         </div>
                         <div className="mt-1 text-sm text-gray-900 dark:text-white font-mono">

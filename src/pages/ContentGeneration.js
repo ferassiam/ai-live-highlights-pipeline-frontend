@@ -226,7 +226,7 @@ export default function ContentGeneration() {
             <PencilSquareIcon className="h-8 w-8 mr-3" />
             Content Generation
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-dark-400">
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
             Manage AI-powered content generation for live matches
           </p>
         </div>
@@ -303,11 +303,11 @@ export default function ContentGeneration() {
                 </div>
               ) : activeMatches.length === 0 ? (
                 <div className="text-center py-12">
-                  <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+                  <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                     No Active Matches
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                  <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                     Initialize a new match to start content generation
                   </p>
                   <div className="mt-6">
@@ -327,7 +327,7 @@ export default function ContentGeneration() {
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                               {match.match_id}
                             </h3>
-                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                            <p className="text-sm text-gray-500 dark:text-slate-400">
                               {match.home_team} vs {match.away_team}
                             </p>
                           </div>
@@ -336,7 +336,7 @@ export default function ContentGeneration() {
                             getMatchStatus(match) === 'success' && 'bg-success-100 dark:bg-success-900 text-success-800 dark:text-success-200',
                             getMatchStatus(match) === 'warning' && 'bg-warning-100 dark:bg-warning-900 text-warning-800 dark:text-warning-200',
                             getMatchStatus(match) === 'danger' && 'bg-danger-100 dark:bg-danger-900 text-danger-800 dark:text-danger-200',
-                            getMatchStatus(match) === 'gray' && 'bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200'
+                            getMatchStatus(match) === 'gray' && 'bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200'
                           )}>
                             {match.status}
                           </span>
@@ -344,20 +344,20 @@ export default function ContentGeneration() {
                       </div>
                       <div className="card-body">
                         <div className="space-y-3">
-                          <div className="text-sm text-gray-500 dark:text-dark-400">
+                          <div className="text-sm text-gray-500 dark:text-slate-400">
                             Started: {formatDateTime(match.created_at)}
                           </div>
                           
                           {match.progress && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
-                                <span className="text-gray-600 dark:text-dark-400">Content Generated:</span>
+                                <span className="text-gray-600 dark:text-slate-400">Content Generated:</span>
                                 <span className="font-medium text-gray-900 dark:text-white">
                                   {match.progress.total_content || 0}
                                 </span>
                               </div>
                               <div className="flex justify-between text-sm">
-                                <span className="text-gray-600 dark:text-dark-400">Published:</span>
+                                <span className="text-gray-600 dark:text-slate-400">Published:</span>
                                 <span className="font-medium text-gray-900 dark:text-white">
                                   {match.progress.published_content || 0}
                                 </span>
@@ -418,25 +418,25 @@ export default function ContentGeneration() {
                         <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                           {contentProgress.highlights_processed || 0}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-dark-400">Highlights Processed</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400">Highlights Processed</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-success-600 dark:text-success-400">
                           {contentProgress.editorials_generated || 0}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-dark-400">Editorials</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400">Editorials</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-warning-600 dark:text-warning-400">
                           {contentProgress.social_posts_generated || 0}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-dark-400">Social Posts</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400">Social Posts</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-danger-600 dark:text-danger-400">
                           {contentProgress.errors || 0}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-dark-400">Errors</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400">Errors</div>
                       </div>
                     </div>
                   </div>
@@ -454,11 +454,11 @@ export default function ContentGeneration() {
                 </div>
               ) : contentItems.length === 0 ? (
                 <div className="text-center py-12">
-                  <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+                  <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
                     No Generated Content
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                  <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                     Content will appear here once matches start generating content
                   </p>
                 </div>
@@ -472,7 +472,7 @@ export default function ContentGeneration() {
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                               {item.title || `Content ${item.id}`}
                             </h3>
-                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                            <p className="text-sm text-gray-500 dark:text-slate-400">
                               {item.type} • Match: {item.match_id}
                             </p>
                           </div>
@@ -495,11 +495,11 @@ export default function ContentGeneration() {
                       </div>
                       <div className="card-body">
                         <div className="space-y-3">
-                          <p className="text-sm text-gray-600 dark:text-dark-400">
+                          <p className="text-sm text-gray-600 dark:text-slate-400">
                             {item.content}
                           </p>
                           
-                          <div className="text-xs text-gray-500 dark:text-dark-400">
+                          <div className="text-xs text-gray-500 dark:text-slate-400">
                             Created: {formatDateTime(item.created_at)}
                           </div>
 
@@ -536,7 +536,7 @@ export default function ContentGeneration() {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     Initialize Content Generation
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
                     Set up a new match for AI-powered content generation
                   </p>
                 </div>

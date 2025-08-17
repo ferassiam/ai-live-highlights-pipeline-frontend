@@ -413,9 +413,9 @@ export default function Schedules() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {schedules.length === 0 ? (
           <div className="col-span-2 text-center py-12">
-            <CalendarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-dark-500" />
+            <CalendarIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No schedules</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-dark-400">
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
               Get started by creating a new schedule.
             </p>
             <div className="mt-6">

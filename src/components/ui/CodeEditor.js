@@ -79,20 +79,20 @@ export function CodeEditor({
       className={cn('relative border rounded-lg overflow-hidden', className, {
         'border-primary-300 dark:border-primary-600': isFocused && !error,
         'border-danger-300 dark:border-danger-600': error,
-        'border-gray-200 dark:border-dark-600': !isFocused && !error
+        'border-gray-200 dark:border-slate-600': !isFocused && !error
       })}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-dark-700 border-b border-gray-200 dark:border-dark-600">
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
         <div className="flex items-center space-x-2">
           <span className="text-xs font-medium text-gray-500 dark:text-dark-400">
             {getLanguageLabel()}
           </span>
           {readOnly && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-dark-600 text-gray-800 dark:text-dark-200">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200">
               Read-only
             </span>
           )}
@@ -127,11 +127,11 @@ export function CodeEditor({
           spellCheck={false}
           className={cn(
             'w-full h-full p-4 border-none outline-none resize-none',
-            'bg-white dark:bg-dark-800 text-gray-900 dark:text-white',
+            'bg-white dark:bg-slate-800 text-gray-900 dark:text-white',
             'font-mono text-sm leading-relaxed',
             'placeholder-gray-400 dark:placeholder-dark-500',
             {
-              'cursor-not-allowed bg-gray-50 dark:bg-dark-700/50': readOnly
+              'cursor-not-allowed bg-gray-50 dark:bg-slate-700/50': readOnly
             }
           )}
           style={{

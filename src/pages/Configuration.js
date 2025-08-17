@@ -469,7 +469,7 @@ export default function Configuration() {
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                         Prompt Configuration
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-dark-400">
+                      <p className="text-sm text-gray-500 dark:text-slate-400">
                         Edit sport-specific prompts for AI processing
                       </p>
                     </div>
@@ -535,7 +535,7 @@ export default function Configuration() {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                     Schema Configuration
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-dark-400">
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
                     Edit JSON schemas for data validation and structure
                   </p>
                 </div>
@@ -597,7 +597,7 @@ export default function Configuration() {
                 </div>
                 <div className="card-body">
                   {promptHistory.length === 0 ? (
-                    <p className="text-gray-500 dark:text-dark-400 text-center py-4">
+                    <p className="text-gray-500 dark:text-slate-400 text-center py-4">
                       No version history available
                     </p>
                   ) : (
@@ -605,7 +605,7 @@ export default function Configuration() {
                       {promptHistory.map((version, index) => (
                         <div
                           key={version.version}
-                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-dark-600 rounded-lg"
+                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-600 rounded-lg"
                         >
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
@@ -616,7 +616,7 @@ export default function Configuration() {
                                 </span>
                               )}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                            <p className="text-sm text-gray-500 dark:text-slate-400">
                               {new Date(version.created_at).toLocaleString()}
                             </p>
                           </div>
@@ -646,7 +646,7 @@ export default function Configuration() {
                 </div>
                 <div className="card-body">
                   {schemaHistory.length === 0 ? (
-                    <p className="text-gray-500 dark:text-dark-400 text-center py-4">
+                    <p className="text-gray-500 dark:text-slate-400 text-center py-4">
                       No version history available
                     </p>
                   ) : (
@@ -654,7 +654,7 @@ export default function Configuration() {
                       {schemaHistory.map((version, index) => (
                         <div
                           key={version.version}
-                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-dark-600 rounded-lg"
+                          className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-600 rounded-lg"
                         >
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
@@ -665,7 +665,7 @@ export default function Configuration() {
                                 </span>
                               )}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-dark-400">
+                            <p className="text-sm text-gray-500 dark:text-slate-400">
                               {new Date(version.created_at).toLocaleString()}
                             </p>
                           </div>
@@ -698,7 +698,7 @@ export default function Configuration() {
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                         Content Generation Prompts
                       </h3>
-                      <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                         Configure prompts for AI content generation across different content types
                       </p>
                     </div>
@@ -731,14 +731,14 @@ export default function Configuration() {
                         const isEditing = editingPrompt?.type === promptType.key;
                         
                         return (
-                          <div key={promptType.key} className="border border-gray-200 dark:border-dark-700 rounded-lg">
-                            <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+                          <div key={promptType.key} className="border border-gray-200 dark:border-slate-700 rounded-lg">
+                            <div className="p-4 border-b border-gray-200 dark:border-slate-700">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <h4 className="text-md font-medium text-gray-900 dark:text-white">
                                     {promptType.name}
                                   </h4>
-                                  <p className="text-sm text-gray-500 dark:text-dark-400 mt-1">
+                                  <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                                     {promptType.description}
                                   </p>
                                 </div>
@@ -783,8 +783,8 @@ export default function Configuration() {
                               </div>
                             ) : (
                               <div className="p-4">
-                                <div className="bg-gray-50 dark:bg-dark-700 rounded-md p-3 border border-gray-200 dark:border-dark-600">
-                                  <pre className="text-sm text-gray-700 dark:text-dark-300 whitespace-pre-wrap font-mono">
+                                <div className="bg-gray-50 dark:bg-slate-700 rounded-md p-3 border border-gray-200 dark:border-slate-600">
+                                  <pre className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-wrap font-mono">
                                     {promptContent || 'No prompt configured'}
                                   </pre>
                                 </div>
@@ -796,7 +796,7 @@ export default function Configuration() {
                       
                       {(!contentPromptTypes?.types || contentPromptTypes.types.length === 0) && (
                         <div className="text-center py-8">
-                          <p className="text-gray-500 dark:text-dark-400">No content prompt types available</p>
+                          <p className="text-gray-500 dark:text-slate-400">No content prompt types available</p>
                         </div>
                       )}
                     </div>
