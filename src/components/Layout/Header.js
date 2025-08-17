@@ -209,5 +209,5 @@ export default function Header({ setSidebarOpen, onLogout }) {
           </Menu>
         </div>
       </div>
-  );
+    </motion.div>
 }
