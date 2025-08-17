@@ -8,12 +8,15 @@ const selectSizes = {
   lg: 'h-12 px-4 py-3 text-base pr-10'
 };
 
+/**
+ * Select component for sports operations UI
+ * Supports both controlled and option-based usage patterns
+ */
 export const Select = React.forwardRef(({ 
   className, 
   children,
-  error = false,
-  success = false,
-  size = 'default',
+  error,
+  label,
   value,
   onChange,
   options = [],
@@ -22,38 +25,6 @@ export const Select = React.forwardRef(({
   leftIcon = null,
   ...props 
 }, ref) => {
-  const baseClasses = [
-    'block w-full rounded-lg border transition-all duration-200',
-    'font-medium tracking-tight appearance-none cursor-pointer',
-    'focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-slate-50',
-    'disabled:cursor-not-allowed disabled:opacity-50',
-  'dark:focus:ring-offset-slate-950'
-  ];
-
-  const stateClasses = error 
-    ? [
-        'border-danger-300 text-danger-900',
-        'focus:border-danger-500 focus:ring-danger-500/20',
-        'bg-danger-50',
-  'dark:border-danger-700 dark:text-danger-100',
-  'dark:bg-danger-950/50'
-      ]
-    : success
-    ? [
-        'border-success-300 text-success-900',
-        'focus:border-success-500 focus:ring-success-500/20',
-        'bg-success-50',
-  'dark:border-success-700 dark:text-success-100',
-  'dark:bg-success-950/50'
-      ]
-    : [
-        'border-stone-200 text-slate-900',
-        'focus:border-primary-500 focus:ring-primary-500/20',
-        'bg-slate-50 focus:bg-white',
-  'dark:border-stone-600 dark:text-slate-100',
-  'dark:bg-slate-900 dark:focus:bg-slate-800'
-      ];
-
   const handleChange = (e) => {
     if (onChange) {
       // Parse value as number if it's numeric, otherwise keep as string
@@ -63,21 +34,20 @@ export const Select = React.forwardRef(({
   };
 
   return (
-    <div className="relative">
-      {leftIcon && (
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-          <span className="w-4 h-4 text-slate-500 dark:text-slate-400">
-            {leftIcon}
-          </span>
-        </div>
+    <div className="space-y-1">
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300">
+          {label}
+        </label>
       )}
-      
       <select
         className={cn(
-          baseClasses,
-          stateClasses,
-          selectSizes[size],
-          leftIcon && 'pl-10',
+          'flex h-10 w-full rounded-md border border-gray-300 dark:border-dark-600',
+          'bg-white dark:bg-dark-800 px-3 py-2 text-sm',
+          'text-gray-900 dark:text-white',
+          'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          error && 'border-danger-500 focus:border-danger-500 focus:ring-danger-500',
           className
         )}
         ref={ref}
@@ -87,29 +57,20 @@ export const Select = React.forwardRef(({
         {...props}
       >
         {placeholder && (
-          <option value="" disabled hidden>
+          <option value="" disabled>
             {placeholder}
           </option>
         )}
-        {options.map((option, index) => (
-          <option 
-            key={option.value || index} 
-            value={option.value}
-            disabled={option.disabled}
-          >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
         {children}
       </select>
-
-      {/* Custom dropdown arrow */}
-      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-        <ChevronDownIcon 
-          className="w-4 h-4 text-slate-500 dark:text-slate-400" 
-          aria-hidden="true" 
-        />
-      </div>
+      {error && (
+        <p className="text-sm text-danger-600 dark:text-danger-400">{error}</p>
+      )}
     </div>
   );
 });

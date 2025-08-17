@@ -3,61 +3,13 @@
 @tailwind utilities;
 
 @layer base {
-  /* CSS Variables for theming */
-  :root {
-    /* Light theme */
-    --surface: 248 250 252; /* slate-50 */
-    --surface-elevated: 241 245 249; /* slate-100 */
-    --surface-hover: 226 232 240; /* slate-200 */
-    --border: 231 229 228; /* stone-200 */
-    --border-subtle: 245 245 244; /* stone-100 */
-    --text: 15 23 42; /* slate-900 */
-    --text-muted: 100 116 139; /* slate-500 */
-    --text-subtle: 148 163 184; /* slate-400 */
-  }
-
-  [data-theme="dark"] {
-    /* Dark theme */
-    --surface: 2 6 23; /* slate-950 */
-    --surface-elevated: 15 23 42; /* slate-900 */
-    --surface-hover: 30 41 59; /* slate-800 */
-    --border: 68 64 60; /* stone-600 */
-    --border-subtle: 87 83 78; /* stone-500 */
-    --text: 248 250 252; /* slate-50 */
-    --text-muted: 148 163 184; /* slate-400 */
-    --text-subtle: 100 116 139; /* slate-500 */
-  }
-
   html {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    font-variant-numeric: tabular-nums;
-    scroll-behavior: smooth;
+    font-family: 'Inter', system-ui, sans-serif;
   }
   
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
-  }
-
-  [data-theme="dark"] body {
-    @apply bg-slate-950 text-slate-50;
-  }
-
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    ::before,
-    ::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-  
-  /* Smooth transitions for theme changes */
+  /* Smooth transitions for dark mode */
   * {
-    @apply transition-colors duration-200 ease-smooth;
+    @apply transition-colors duration-200;
   }
 
   /* Professional scrollbar styling */
@@ -67,556 +19,201 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-slate-100;
-  }
-
-  [data-theme="dark"] ::-webkit-scrollbar-track {
-    @apply bg-slate-800;
+    @apply bg-gray-100 dark:bg-dark-800;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full;
-  }
-
-  [data-theme="dark"] ::-webkit-scrollbar-thumb {
-    @apply bg-slate-600 rounded-full;
+    @apply bg-gray-300 dark:bg-dark-600 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-400;
-  }
-
-  [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-    @apply bg-slate-500;
-  }
-
-  /* Focus ring styles for accessibility */
-  .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-slate-50;
-  }
-
-  [data-theme="dark"] .focus-ring {
-    @apply focus:ring-offset-slate-950;
-  }
-
-  /* Typography improvements */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-tight;
-  }
-
-  /* High contrast text for better readability */
-  .text-contrast {
-    @apply text-slate-950;
-  }
-
-  [data-theme="dark"] .text-contrast {
-    @apply text-slate-50;
-  }
-
-  .text-contrast-muted {
-    @apply text-slate-600;
-  }
-
-  [data-theme="dark"] .text-contrast-muted {
-    @apply text-slate-400;
+    @apply bg-gray-400 dark:bg-dark-500;
   }
 }
 
 @layer components {
-  /* Professional card styles */
-  .ops-card {
-    @apply bg-slate-50 border border-stone-200 rounded-lg overflow-hidden shadow-subtle hover:shadow-elevation transition-all duration-200;
+  .metric-card {
+    @apply bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700 p-6 hover:shadow-md transition-shadow duration-200;
   }
-
-  [data-theme="dark"] .ops-card {
-    @apply bg-slate-900 border-stone-600 hover:border-stone-500;
+  
+  .card {
+    @apply bg-white dark:bg-dark-800 rounded-lg shadow-sm border border-gray-200 dark:border-dark-700 overflow-hidden;
   }
-
-  .ops-card-header {
-    @apply px-6 py-4 border-b border-stone-200 bg-slate-50/50 backdrop-blur-sm;
+  
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-700/50;
   }
-
-  [data-theme="dark"] .ops-card-header {
-    @apply border-stone-600 bg-slate-800/50;
-  }
-
-  .ops-card-content {
+  
+  .card-body {
     @apply p-6;
   }
-
-  .ops-card-dense {
-    @apply p-4;
+  
+  /* Button styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-dark-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md;
   }
-
-  .ops-card-footer {
-    @apply px-6 py-4 border-t border-stone-200 bg-slate-50/30;
+  
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 border border-transparent;
   }
-
-  [data-theme="dark"] .ops-card-footer {
-    @apply border-stone-600 bg-slate-800/30;
+  
+  .btn-secondary {
+    @apply bg-white dark:bg-dark-800 text-gray-900 dark:text-white border border-gray-300 dark:border-dark-600 hover:bg-gray-50 dark:hover:bg-dark-700 focus:ring-primary-500;
   }
-
-  /* Professional button system */
-  .ops-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg font-subheading text-sm tracking-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-slate-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-subtle active:scale-[0.98];
+  
+  .btn-success {
+    @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500 border border-transparent;
   }
-
-  [data-theme="dark"] .ops-btn {
-    @apply focus:ring-offset-slate-950;
+  
+  .btn-danger {
+    @apply bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500 border border-transparent;
   }
-
-  /* Button sizes */
-  .ops-btn-sm {
-    @apply px-3 py-1.5 text-xs rounded-md;
+  
+  .btn-warning {
+    @apply bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500 border border-transparent;
   }
-
-  .ops-btn-md {
+  
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  
+  .btn:not(.btn-sm) {
     @apply px-4 py-2 text-sm;
   }
-
-  .ops-btn-lg {
-    @apply px-6 py-3 text-base;
+  
+  /* Modal styles */
+  .modal-overlay {
+    @apply fixed inset-0 bg-gray-900/75 dark:bg-black/80 transition-opacity;
   }
-
-  /* Button variants */
-  .ops-btn-primary {
-    @apply bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 border border-primary-600;
+  
+  .modal-content {
+    @apply relative transform overflow-hidden rounded-lg bg-white dark:bg-dark-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-200 dark:border-dark-700;
   }
-
-  .ops-btn-secondary {
-    @apply bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-stone-200;
-  }
-
-  [data-theme="dark"] .ops-btn-secondary {
-    @apply bg-slate-800 text-slate-100 hover:bg-slate-700 active:bg-slate-600 border-stone-600;
-  }
-
-  .ops-btn-subtle {
-    @apply bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-200 border border-transparent;
-  }
-
-  [data-theme="dark"] .ops-btn-subtle {
-    @apply text-slate-300 hover:bg-slate-800 active:bg-slate-700;
-  }
-
-  .ops-btn-destructive {
-    @apply bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700 border border-danger-600;
-  }
-
-  .ops-btn-ghost {
-    @apply bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent;
-  }
-
-  [data-theme="dark"] .ops-btn-ghost {
-    @apply text-slate-400 hover:bg-slate-800 hover:text-slate-100;
-  }
-
-  /* Status badge system for sports operators */
-  .status-badge {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-subheading tracking-tight border;
-  }
-
-  .status-live {
-    @apply status-badge bg-success-50 text-success-900 border-success-200;
-  }
-
-  [data-theme="dark"] .status-live {
-    @apply bg-success-950 text-success-100 border-success-800;
-  }
-
-  .status-scheduled {
-    @apply status-badge bg-secondary-50 text-secondary-900 border-secondary-200;
-  }
-
-  [data-theme="dark"] .status-scheduled {
-    @apply bg-secondary-950 text-secondary-100 border-secondary-800;
-  }
-
-  .status-processing {
-    @apply status-badge bg-warning-50 text-warning-900 border-warning-200;
-  }
-
-  [data-theme="dark"] .status-processing {
-    @apply bg-warning-950 text-warning-100 border-warning-800;
-  }
-
-  .status-failed {
-    @apply status-badge bg-danger-50 text-danger-900 border-danger-200;
-  }
-
-  [data-theme="dark"] .status-failed {
-    @apply bg-danger-950 text-danger-100 border-danger-800;
-  }
-
-  .status-paused {
-    @apply status-badge bg-slate-100 text-slate-900 border-slate-200;
-  }
-
-  [data-theme="dark"] .status-paused {
-    @apply bg-slate-800 text-slate-100 border-slate-700;
-  }
-
-  .status-completed {
-    @apply status-badge bg-info-50 text-info-900 border-info-200;
-  }
-
-  [data-theme="dark"] .status-completed {
-    @apply bg-info-950 text-info-100 border-info-800;
-  }
-
-  /* Professional form controls */
-  .ops-input {
-    @apply block w-full rounded-lg border border-stone-200 bg-slate-50 px-4 py-2.5 text-slate-900 placeholder:text-slate-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:bg-white text-sm tracking-tight transition-all duration-200;
-  }
-
-  [data-theme="dark"] .ops-input {
-    @apply border-stone-600 bg-slate-900 text-slate-100 placeholder:text-slate-400 focus:bg-slate-800;
-  }
-
-  .ops-select {
-    @apply ops-input pr-10;
-  }
-
-  .ops-textarea {
-    @apply ops-input resize-y min-h-[100px];
-  }
-
-  .ops-label {
-    @apply block text-sm font-subheading text-slate-700 mb-2 tracking-tight;
-  }
-
-  [data-theme="dark"] .ops-label {
-    @apply text-slate-300;
-  }
-
-  .ops-help-text {
-    @apply text-xs text-slate-500 mt-1;
-  }
-
-  [data-theme="dark"] .ops-help-text {
-    @apply text-slate-400;
-  }
-
-  /* Form utility classes for backward compatibility */
+  
+  /* Form styles */
   .form-input {
-    @apply ops-input;
+    @apply block w-full rounded-md border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-dark-400 focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
 
   .form-select {
-    @apply ops-select;
+    @apply block w-full rounded-md border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
 
   .form-textarea {
-    @apply ops-textarea;
-  }
-
-  .form-label {
-    @apply ops-label;
+    @apply block w-full rounded-md border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-800 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-dark-400 focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
 
   .form-checkbox {
-    @apply h-4 w-4 text-primary-600 focus:ring-primary-500 border-stone-300 rounded transition-colors duration-200;
+    @apply h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-dark-600 rounded bg-white dark:bg-dark-800;
   }
-
-  [data-theme="dark"] .form-checkbox {
-    @apply border-stone-600 bg-slate-800;
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1;
   }
-
-  /* Metrics and KPIs for operations dashboard */
-  .ops-metric {
-    @apply text-3xl font-bold text-slate-900 tracking-tight tabular-nums;
-  }
-
-  [data-theme="dark"] .ops-metric {
-    @apply text-slate-100;
-  }
-
-  .ops-metric-sm {
-    @apply text-xl font-bold text-slate-900 tracking-tight tabular-nums;
-  }
-
-  [data-theme="dark"] .ops-metric-sm {
-    @apply text-slate-100;
-  }
-
-  .ops-metric-label {
-    @apply text-sm font-subheading text-slate-600 tracking-tight;
-  }
-
-  [data-theme="dark"] .ops-metric-label {
-    @apply text-slate-400;
-  }
-
-  .ops-trend-up {
-    @apply inline-flex items-center gap-1 text-xs font-subheading text-success-700 tracking-tight;
-  }
-
-  [data-theme="dark"] .ops-trend-up {
-    @apply text-success-400;
-  }
-
-  .ops-trend-down {
-    @apply inline-flex items-center gap-1 text-xs font-subheading text-danger-700 tracking-tight;
-  }
-
-  [data-theme="dark"] .ops-trend-down {
-    @apply text-danger-400;
-  }
-
-  /* Table styles for dense operations data */
-  .ops-table {
-    @apply w-full border-collapse border-spacing-0;
-  }
-
-  .ops-table th {
-    @apply px-4 py-3 text-left text-xs font-subheading text-slate-600 uppercase tracking-wider border-b border-stone-200 bg-slate-50;
-  }
-
-  [data-theme="dark"] .ops-table th {
-    @apply text-slate-400 border-stone-600 bg-slate-800;
-  }
-
-  .ops-table td {
-    @apply px-4 py-3 text-sm text-slate-900 border-b border-stone-100 leading-dense tabular-nums;
-  }
-
-  [data-theme="dark"] .ops-table td {
-    @apply text-slate-100 border-stone-700;
-  }
-
-  .ops-table tr:hover td {
-    @apply bg-slate-50;
-  }
-
-  [data-theme="dark"] .ops-table tr:hover td {
-    @apply bg-slate-800;
-  }
-
-  /* Page layout for operations UI */
-  .ops-page {
-    @apply min-h-screen bg-slate-50;
-  }
-
-  [data-theme="dark"] .ops-page {
-    @apply bg-slate-950;
-  }
-
-  .ops-page-header {
-    @apply flex items-center justify-between gap-4 mb-8;
-  }
-
-  .ops-page-title {
-    @apply text-2xl font-heading text-slate-900 tracking-tight;
-  }
-
-  [data-theme="dark"] .ops-page-title {
-    @apply text-slate-100;
-  }
-
-  .ops-page-subtitle {
-    @apply text-sm text-slate-600 mt-1;
-  }
-
-  [data-theme="dark"] .ops-page-subtitle {
-    @apply text-slate-400;
-  }
-
-  /* Navigation styles */
-  .ops-nav-link {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-subheading text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-all duration-200 tracking-tight;
-  }
-
-  [data-theme="dark"] .ops-nav-link {
-    @apply text-slate-300 hover:bg-slate-800 hover:text-slate-100;
-  }
-
-  .ops-nav-link-active {
-    @apply ops-nav-link bg-primary-50 text-primary-900 hover:bg-primary-100;
-  }
-
-  [data-theme="dark"] .ops-nav-link-active {
-    @apply bg-primary-950 text-primary-100 hover:bg-primary-900;
-  }
-
-  /* Modal and overlay styles */
-  .ops-modal-overlay {
-    @apply fixed inset-0 bg-slate-950/80 backdrop-blur-sm;
-  }
-
-  .ops-modal-content {
-    @apply bg-slate-50 border border-stone-200 rounded-xl shadow-elevated max-w-lg w-full mx-4;
-  }
-
-  [data-theme="dark"] .ops-modal-content {
-    @apply bg-slate-900 border-stone-600;
-  }
-
-  /* Toast notification styles */
-  .ops-toast {
-    @apply bg-slate-50 border border-stone-200 rounded-lg shadow-elevated p-4 max-w-sm;
-  }
-
-  [data-theme="dark"] .ops-toast {
-    @apply bg-slate-900 border-stone-600;
-  }
-
-  .ops-toast-success {
-    @apply ops-toast border-l-4 border-l-success-500;
-  }
-
-  .ops-toast-warning {
-    @apply ops-toast border-l-4 border-l-warning-500;
-  }
-
-  .ops-toast-error {
-    @apply ops-toast border-l-4 border-l-danger-500;
-  }
-
-  .ops-toast-info {
-    @apply ops-toast border-l-4 border-l-info-500;
-  }
-
-  /* Additional modal utility classes for consistency */
-  .modal-overlay {
-    @apply ops-modal-overlay;
-  }
-
-  .modal-content {
-    @apply ops-modal-content;
-  }
-
-  /* Page layout utility classes */
-  .page-header {
-    @apply ops-page-header;
-  }
-
-  .page-title {
-    @apply ops-page-title;
-  }
-
-  .page-subtitle {
-    @apply ops-page-subtitle;
-  }
-
-  /* Card utility classes for consistency */
-  .card {
-    @apply ops-card;
-  }
-
-  .card-header {
-    @apply ops-card-header;
-  }
-
-  .card-body {
-    @apply ops-card-content;
-  }
-
-  .card-content {
-    @apply ops-card-content;
-  }
-
-  .card-footer {
-    @apply ops-card-footer;
-  }
-
-  /* Button utility classes */
-  .btn {
-    @apply ops-btn ops-btn-md;
-  }
-
-  .btn-primary {
-    @apply ops-btn-primary;
-  }
-
-  .btn-secondary {
-    @apply ops-btn-secondary;
-  }
-
-  .btn-subtle {
-    @apply ops-btn-subtle;
-  }
-
-  .btn-ghost {
-    @apply ops-btn-ghost;
-  }
-
-  .btn-destructive {
-    @apply ops-btn-destructive;
-  }
-
-  .btn-sm {
-    @apply ops-btn-sm;
-  }
-
-  .btn-lg {
-    @apply ops-btn-lg;
-  }
-
-  /* Metric utility classes */
-  .metric-card {
-    @apply card p-5;
-  }
-
-  .metric-value {
-    @apply ops-metric;
-  }
-
-  .metric-label {
-    @apply ops-metric-label;
-  }
-
-  /* Settings page navigation classes */
-  .nav-link-settings {
-    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200;
-  }
-
-  [data-theme="dark"] .nav-link-settings {
-    @apply text-slate-400 hover:text-slate-100 hover:bg-slate-800;
-  }
-
-  .nav-link-settings-active {
-    @apply bg-primary-50 border-r-2 border-primary-500 text-primary-700;
-  }
-
-  [data-theme="dark"] .nav-link-settings-active {
-    @apply bg-primary-950 border-primary-400 text-primary-100;
-  }
-
-  /* Status indicator classes */
+  
+  /* Status indicators */
   .status-indicator {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
-
+  
   .status-running {
-    @apply status-indicator bg-success-100 text-success-800;
+    @apply status-indicator bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-300;
   }
-
-  [data-theme="dark"] .status-running {
-    @apply bg-success-900 text-success-200;
-  }
-
+  
   .status-stopped {
-    @apply status-indicator bg-gray-100 text-gray-800;
+    @apply status-indicator bg-gray-100 text-gray-800 dark:bg-dark-700 dark:text-dark-300;
   }
-
-  [data-theme="dark"] .status-stopped {
-    @apply bg-gray-800 text-gray-200;
+  
+  .status-warning {
+    @apply status-indicator bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-300;
   }
-
-  /* Connection status classes */
+  
+  .status-error {
+    @apply status-indicator bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-300;
+  }
+  
+  /* Connection status indicators */
   .connection-connected {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-300 border border-success-200 dark:border-success-700;
   }
-
-  [data-theme="dark"] .connection-connected {
-    @apply bg-success-900 text-success-200;
+  
+  .connection-disconnected {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-300 border border-danger-200 dark:border-danger-700;
   }
-
+  
   .connection-disabled {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-dark-700 dark:text-dark-300 border border-gray-200 dark:border-dark-600;
+  }
+  
+  .metric-value {
+    @apply text-2xl font-bold text-gray-900 dark:text-white;
+  }
+  
+  .metric-label {
+    @apply text-sm font-medium text-gray-500 dark:text-dark-400;
+  }
+  
+  .metric-trend {
+    @apply text-sm font-medium;
+  }
+  
+  .metric-trend-up {
+    @apply metric-trend text-success-600 dark:text-success-400;
+  }
+  
+  .metric-trend-down {
+    @apply metric-trend text-danger-600 dark:text-danger-400;
+  }
+  
+  /* Social media icons */
+  .social-icon {
+    @apply w-5 h-5 transition-transform duration-200 hover:scale-110;
+  }
+  
+  .social-icon-twitter {
+    @apply text-blue-400 hover:text-blue-500;
+  }
+  
+  .social-icon-facebook {
+    @apply text-blue-600 hover:text-blue-700;
+  }
+  
+  .social-icon-instagram {
+    @apply text-pink-500 hover:text-pink-600;
+  }
+  
+  .social-icon-linkedin {
+    @apply text-blue-700 hover:text-blue-800;
+  }
+  
+  /* Content area enhancements */
+  .content-area {
+    @apply bg-gray-50 dark:bg-dark-900 min-h-screen;
+  }
+  
+  .page-header {
+    @apply md:flex md:items-center md:justify-between mb-6;
+  }
+  
+  .page-title {
+    @apply text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight;
+  }
+  
+  .page-subtitle {
+    @apply mt-1 text-sm text-gray-500 dark:text-dark-400;
   }
 
-  [data-theme="dark"] .connection-disabled {
-    @apply bg-gray-800 text-gray-200;
+  /* Settings navigation */
+  .nav-link-settings {
+    @apply rounded-md px-3 py-2 flex items-center text-sm font-medium text-gray-600 dark:text-dark-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-700 transition-all duration-200;
+  }
+
+  .nav-link-settings-active {
+    @apply bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-300;
+  }
+
+  /* Form styling */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-dark-300 mb-1;
   }
 }
