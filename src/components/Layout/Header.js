@@ -119,7 +119,6 @@ export default function Header({ setSidebarOpen, onLogout }) {
                 </span>
               )}
             </Menu.Button>
-            </Menu.Button>
             <Transition
               as={Fragment}
               enter="transition ease-out duration-100"
