@@ -10,7 +10,7 @@
   }
   
   body {
-    @apply text-neutral-900 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-900;
+    @apply text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900;
   }
   
   /* Minimal transitions for performance */
@@ -25,29 +25,29 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-neutral-100 dark:bg-neutral-800;
+    @apply bg-slate-100 dark:bg-slate-800;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-neutral-300 dark:bg-neutral-600;
+    @apply bg-slate-300 dark:bg-slate-600;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-neutral-400 dark:bg-neutral-500;
+    @apply bg-slate-400 dark:bg-slate-500;
   }
 }
 
 @layer components {
   .metric-card {
-    @apply bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-6;
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
   }
   
   .card {
-    @apply bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 overflow-hidden;
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden rounded-lg shadow-sm;
   }
   
   .card-header {
-    @apply px-6 py-5 border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50;
+    @apply px-6 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50;
   }
   
   .card-body {
@@ -56,15 +56,15 @@
   
   /* Button styles */
   .btn {
-    @apply inline-flex items-center justify-center font-medium transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-offset-1 dark:focus:ring-offset-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-md;
   }
   
   .btn-primary {
-    @apply bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500 border border-transparent;
+    @apply bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 border border-transparent shadow-sm hover:shadow-md;
   }
   
   .btn-secondary {
-    @apply bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:ring-brand-500;
+    @apply bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 focus:ring-emerald-500 shadow-sm;
   }
   
   .btn-success {
@@ -98,23 +98,23 @@
   
   /* Form styles */
   .form-input {
-    @apply block w-full border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:border-brand-500 focus:ring-brand-500 sm:text-sm;
+    @apply block w-full border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm rounded-md;
   }
 
   .form-select {
-    @apply block w-full border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:border-brand-500 focus:ring-brand-500 sm:text-sm;
+    @apply block w-full border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm rounded-md;
   }
 
   .form-textarea {
-    @apply block w-full border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400 focus:border-brand-500 focus:ring-brand-500 sm:text-sm;
+    @apply block w-full border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm rounded-md;
   }
 
   .form-checkbox {
-    @apply h-4 w-4 text-brand-600 focus:ring-brand-500 border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800;
+    @apply h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded;
   }
   
   .form-label {
-    @apply block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2;
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2;
   }
   
   /* Status indicators */
@@ -127,7 +127,7 @@
   }
   
   .status-stopped {
-    @apply status-indicator bg-neutral-50 text-neutral-700 border-neutral-200 dark:bg-neutral-800/50 dark:text-neutral-300 dark:border-neutral-700;
+    @apply status-indicator bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:border-slate-700;
   }
   
   .status-warning {
@@ -194,7 +194,7 @@
   
   /* Content area enhancements */
   .content-area {
-    @apply bg-neutral-50 dark:bg-neutral-900 min-h-screen;
+    @apply bg-slate-50 dark:bg-slate-900 min-h-screen;
   }
   
   .page-header {
@@ -202,11 +202,11 @@
   }
   
   .page-title {
-    @apply text-2xl font-semibold leading-tight text-neutral-900 dark:text-white sm:text-3xl tracking-tight;
+    @apply text-2xl font-semibold leading-tight text-slate-900 dark:text-white sm:text-3xl tracking-tight;
   }
   
   .page-subtitle {
-    @apply mt-2 text-sm text-neutral-600 dark:text-neutral-400;
+    @apply mt-2 text-sm text-slate-600 dark:text-slate-400;
   }
 
   /* Settings navigation */
@@ -215,39 +215,110 @@
   }
 
   .nav-link-settings-active {
-    @apply bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 hover:text-primary-700 dark:hover:text-primary-300;
+    @apply bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 hover:text-emerald-700 dark:hover:text-emerald-300;
   }
 
   /* Form styling */
   .form-label {
     @apply block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1;
   }
+
+  /* Professional data table styles */
+  .data-table {
+    @apply min-w-full divide-y divide-slate-200 dark:divide-slate-700;
+  }
+
+  .data-table-header {
+    @apply bg-slate-50 dark:bg-slate-800/50;
+  }
+
+  .data-table-header-cell {
+    @apply px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider;
+  }
+
+  .data-table-row {
+    @apply bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-150;
+  }
+
+  .data-table-cell {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100;
+  }
+
+  /* Professional metric cards */
+  .metric-card-professional {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  .metric-card-professional .metric-icon {
+    @apply w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center;
+  }
+
+  .metric-card-professional .metric-value {
+    @apply text-3xl font-bold text-slate-900 dark:text-white tabular-nums;
+  }
+
+  .metric-card-professional .metric-label {
+    @apply text-sm font-medium text-slate-600 dark:text-slate-400;
+  }
+
+  .metric-card-professional .metric-trend {
+    @apply text-xs font-medium text-slate-500 dark:text-slate-400;
+  }
 }
 
 /* Professional Base Theme */
 @layer components {
   .theme-page-bg {
-    @apply bg-neutral-50 dark:bg-neutral-900;
+    @apply bg-slate-50 dark:bg-slate-900;
   }
 
   .theme-card {
-    @apply bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700;
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm;
   }
 
   .theme-header {
-    @apply bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700;
+    @apply bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700;
   }
 
   .theme-card-title {
-    @apply text-neutral-900 dark:text-white font-semibold;
+    @apply text-slate-900 dark:text-white font-semibold;
   }
 
   .theme-card-text {
-    @apply text-neutral-600 dark:text-neutral-400;
+    @apply text-slate-600 dark:text-slate-400;
   }
 
   .theme-header-text {
-    @apply text-neutral-900 dark:text-white;
+    @apply text-slate-900 dark:text-white;
+  }
+
+  /* Professional status badges */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-badge-live {
+    @apply status-badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300;
+  }
+
+  .status-badge-processing {
+    @apply status-badge bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+  }
+
+  .status-badge-completed {
+    @apply status-badge bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-300;
+  }
+
+  .status-badge-failed {
+    @apply status-badge bg-danger-100 text-danger-800 dark:bg-danger-900/30 dark:text-danger-300;
+  }
+
+  .status-badge-paused {
+    @apply status-badge bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-300;
+  }
+
+  .status-badge-scheduled {
+    @apply status-badge bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300;
   }
 }
 

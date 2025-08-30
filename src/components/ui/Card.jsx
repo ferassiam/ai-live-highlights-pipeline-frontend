@@ -6,7 +6,7 @@ export const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-  'border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800',
+  'border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200',
       className
     )}
     {...props}
@@ -26,7 +26,7 @@ export const CardHeader = React.forwardRef(({
     ref={ref}
     className={cn(
       'p-6',
-      divided && 'border-b border-gray-200 dark:border-slate-700',
+      divided && 'border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50',
       actions ? 'flex items-center justify-between' : 'flex flex-col space-y-1.5',
       className
     )}
@@ -48,7 +48,7 @@ CardHeader.displayName = 'CardHeader';
 export const CardTitle = React.forwardRef(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
-  className={cn('text-lg font-semibold leading-tight text-neutral-900 dark:text-white', className)}
+  className={cn('text-lg font-semibold leading-tight text-slate-900 dark:text-white', className)}
     {...props}
   >
     {children}
@@ -64,7 +64,7 @@ export const CardSubtitle = React.forwardRef(({
 }, ref) => (
   <p
     ref={ref}
-  className={cn('text-sm text-neutral-600 dark:text-neutral-400', className)}
+  className={cn('text-sm text-slate-600 dark:text-slate-400', className)}
     {...props}
   >
     {children}
@@ -90,7 +90,7 @@ export const CardFooter = React.forwardRef(({
     ref={ref}
     className={cn(
       'flex items-center p-6 pt-0',
-      divided && 'border-t border-neutral-200 dark:border-neutral-700',
+      divided && 'border-t border-slate-200 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/30',
       justify === 'end' && 'justify-end',
       justify === 'center' && 'justify-center',
       justify === 'between' && 'justify-between',

@@ -3,16 +3,16 @@ import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn.jsx';
 
 const buttonVariants = {
-  default: 'bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500',
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500',
-  secondary: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:ring-brand-500',
-  outline: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:ring-brand-500',
+  default: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm hover:shadow-md',
+  primary: 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm hover:shadow-md',
+  secondary: 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 focus:ring-emerald-500 shadow-sm',
+  outline: 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 focus:ring-emerald-500 shadow-sm',
   success: 'bg-success-600 text-white hover:bg-success-700 focus:ring-success-500',
   danger: 'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500',
   destructive: 'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500',
   warning: 'bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500',
-  ghost: 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 focus:ring-brand-500',
-  link: 'text-brand-600 dark:text-brand-400 underline-offset-4 hover:underline focus:ring-brand-500',
+  ghost: 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 focus:ring-emerald-500',
+  link: 'text-emerald-600 dark:text-emerald-400 underline-offset-4 hover:underline focus:ring-emerald-500',
 };
 
 const sizeVariants = {
@@ -39,8 +39,8 @@ export const Button = React.forwardRef(({
   <button
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors duration-150',
-  'focus:outline-none focus:ring-1 focus:ring-offset-1 dark:focus:ring-offset-neutral-800',
+        'inline-flex items-center justify-center font-medium transition-all duration-200 rounded-md',
+  'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         buttonVariants[variant],
         sizeVariants[size],

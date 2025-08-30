@@ -97,9 +97,9 @@ const NavigationItem = ({ item, isActive, isMobile = false }) => {
         cn(
           'group relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200',
           active || isActive
-            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+            ? 'bg-emerald-600 text-white shadow-md'
             : 'text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900'
+          'focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900'
         )
       }
     >
@@ -120,7 +120,7 @@ const NavigationItem = ({ item, isActive, isMobile = false }) => {
             {!isMobile && (
               <div className={cn(
                 'text-xs mt-0.5',
-                active ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
+                active ? 'text-emerald-100' : 'text-gray-500 dark:text-gray-400'
               )}>
                 {item.description}
               </div>
@@ -147,11 +147,11 @@ const SidebarContent = ({ isMobile = false, onClose }) => {
     <div className="flex flex-col h-full">
       {/* Logo and brand */}
       <div className="flex items-center justify-between px-4 py-6 border-b border-gray-200 dark:border-gray-700">
-        <Logo className="h-8 w-auto" />
+        <Logo size="default" />
         {isMobile && (
           <button
             type="button"
-            className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="ml-1 flex items-center justify-center h-10 w-10 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 hover:bg-slate-100 dark:hover:bg-slate-700"
             onClick={onClose}
           >
             <span className="sr-only">Close sidebar</span>
@@ -162,14 +162,14 @@ const SidebarContent = ({ isMobile = false, onClose }) => {
 
       {/* System status indicator */}
       <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+        <div className="flex items-center space-x-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
           <div className="relative">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-            <div className="absolute inset-0 w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75" />
+            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+            <div className="absolute inset-0 w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-75" />
           </div>
           <div className="flex-1">
-            <div className="text-sm font-medium text-gray-900 dark:text-white">System Online</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">All services operational</div>
+            <div className="text-sm font-medium text-emerald-900 dark:text-emerald-100">System Online</div>
+            <div className="text-xs text-emerald-700 dark:text-emerald-300">All services operational</div>
           </div>
         </div>
       </div>
@@ -196,12 +196,12 @@ const SidebarContent = ({ isMobile = false, onClose }) => {
 
       {/* Footer info */}
       <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center space-x-3 text-xs text-slate-500 dark:text-slate-400">
           <SignalIcon className="w-4 h-4" />
-          <span>AI Highlights Pipeline</span>
+          <span>MediaKind Sports Operations</span>
         </div>
-        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-          v2.0.0 • Sports Operations
+        <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+          v2.1.0 • Live Highlights Platform
         </div>
       </div>
     </div>

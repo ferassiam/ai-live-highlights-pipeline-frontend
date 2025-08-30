@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { 
   DocumentTextIcon,
@@ -12,6 +13,9 @@ import {
   DocumentChartBarIcon,
   StarIcon,
   ClockIcon,
+  FunnelIcon,
+  CalendarIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 // Import real social media icons
@@ -26,6 +30,12 @@ import {
 import { FaXTwitter } from 'react-icons/fa6';
 
 import { apiService } from '../services/api';
+import { ProfessionalMetricCard } from '../components/ui/ProfessionalMetricCard.jsx';
+import { FilterBar } from '../components/ui/FilterBar.jsx';
+import { DataTable } from '../components/ui/DataTable.jsx';
+import { Badge } from '../components/ui/Badge.jsx';
+import { Button } from '../components/ui/Button.jsx';
+import { Select } from '../components/ui/Select.jsx';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -93,10 +103,17 @@ export default function ContentCreation() {
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentItems, setContentItems] = useState(mockContentItems);
   const [generationProgress, setGenerationProgress] = useState([]);
+  const [filters, setFilters] = useState({
+    match_id: '',
+    content_type: '',
+    date_from: '',
+    date_to: '',
+    status: ''
+  });
+  const [selectedMatch, setSelectedMatch] = useState('');
 
   // Fetch active content matches
-  // eslint-disable-next-line no-unused-vars
-  const { data: activeMatches } = useQuery({
+  const { data: activeMatches = [] } = useQuery({
     queryKey: ['activeContentMatches'],
     queryFn: () => apiService.getActiveContentMatches(),
     refetchInterval: 15000, // Refresh every 15 seconds
@@ -141,9 +158,7 @@ export default function ContentCreation() {
   });
 
   useEffect(() => {
-    console.log('Content effect triggered with:', content);
     if (content) {
-      console.log('Setting contentItems to:', content);
       setContentItems(content);
     }
   }, [content]);
@@ -162,6 +177,78 @@ export default function ContentCreation() {
     { id: 'progress', name: 'Generation Progress', icon: ArrowPathIcon },
   ];
 
+  // Filter configurations
+  const filterConfigs = [
+    {
+      key: 'match_id',
+      label: 'Match',
+      type: 'select',
+      options: [
+        { value: '', label: 'All Matches' },
+        ...Array.from(new Set(contentItems.map(item => item.match_id || item.game_context?.teams?.home + ' vs ' + item.game_context?.teams?.away)))
+          .filter(Boolean)
+          .map(match => ({ value: match, label: match }))
+      ]
+    },
+    {
+      key: 'content_type',
+      label: 'Content Type',
+      type: 'select',
+      options: [
+        { value: '', label: 'All Types' },
+        { value: 'editorial', label: 'Editorial' },
+        { value: 'social_post', label: 'Social Post' },
+        { value: 'match_summary', label: 'Match Summary' }
+      ]
+    },
+    {
+      key: 'date_from',
+      label: 'From Date',
+      type: 'date'
+    },
+    {
+      key: 'date_to',
+      label: 'To Date',
+      type: 'date'
+    }
+  ];
+
+  // Filter content items based on current filters
+  const filteredContentItems = contentItems.filter(item => {
+    if (filters.match_id && item.match_id !== filters.match_id && 
+        (item.game_context?.teams?.home + ' vs ' + item.game_context?.teams?.away) !== filters.match_id) {
+      return false;
+    }
+    if (filters.content_type && item.type !== filters.content_type) {
+      return false;
+    }
+    if (filters.date_from) {
+      const itemDate = new Date(typeof item.timestamp === 'number' ? item.timestamp * 1000 : item.timestamp);
+      const filterDate = new Date(filters.date_from);
+      if (itemDate < filterDate) return false;
+    }
+    if (filters.date_to) {
+      const itemDate = new Date(typeof item.timestamp === 'number' ? item.timestamp * 1000 : item.timestamp);
+      const filterDate = new Date(filters.date_to);
+      filterDate.setHours(23, 59, 59, 999); // End of day
+      if (itemDate > filterDate) return false;
+    }
+    return true;
+  });
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      match_id: '',
+      content_type: '',
+      date_from: '',
+      date_to: '',
+      status: ''
+    });
+  };
   const getStatusIcon = (status) => {
     switch (status) {
       case 'completed':
@@ -213,119 +300,154 @@ export default function ContentCreation() {
     }
   };
 
+  // Calculate metrics based on filtered data
+  const calculateMetrics = () => {
+    const totalEditorials = filteredContentItems.filter(item => item.type === 'editorial').length;
+    const totalSocialPosts = filteredContentItems.filter(item => item.type === 'social_post').length;
+    const totalSummaries = filteredContentItems.filter(item => item.type === 'match_summary').length;
+    const generatingCount = Array.isArray(generationProgress) ? 
+      generationProgress.filter(item => item.status === 'generating').length : 0;
+    const completedToday = Array.isArray(generationProgress) ? 
+      generationProgress.filter(item => item.status === 'completed').length : 0;
+
+    return {
+      totalEditorials,
+      totalSocialPosts,
+      totalSummaries,
+      generatingCount,
+      completedToday
+    };
+  };
+
+  const metrics = calculateMetrics();
   const renderOverview = () => (
     <div className="space-y-6">
+      {/* Filters */}
+      <FilterBar
+        filters={filterConfigs}
+        values={filters}
+        onChange={handleFilterChange}
+        onClear={handleClearFilters}
+        title="Content Filters"
+      />
+
       {/* Stats cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <DocumentTextIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
-                    Total Editorials
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {contentItems.filter(item => item.type === 'editorial').length}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ChatBubbleLeftEllipsisIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
-                    Social Posts
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {contentItems.filter(item => item.type === 'social_post').length}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ArrowPathIcon className="h-6 w-6 text-warning-500 dark:text-warning-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
-                    Generating
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {Array.isArray(generationProgress) ? 
-                      generationProgress.filter(item => item.status === 'generating').length : 0}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <DocumentChartBarIcon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
-                    Game Summaries
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {contentItems.filter(item => item.type === 'match_summary').length}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ShareIcon className="h-6 w-6 text-success-500 dark:text-success-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-slate-400 truncate">
-                    Posted Today
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                    {Array.isArray(generationProgress) ? 
-                      generationProgress.filter(item => item.status === 'completed').length : 0}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProfessionalMetricCard
+          title="Editorial Articles"
+          value={metrics.totalEditorials}
+          subtitle={`${Math.round(metrics.totalEditorials / Math.max(filteredContentItems.length, 1) * 100)}% of content`}
+          icon={DocumentTextIcon}
+          color="emerald"
+          delay={0.1}
+        />
+        
+        <ProfessionalMetricCard
+          title="Social Posts"
+          value={metrics.totalSocialPosts}
+          subtitle={`${Math.round(metrics.totalSocialPosts / Math.max(filteredContentItems.length, 1) * 100)}% of content`}
+          icon={ChatBubbleLeftEllipsisIcon}
+          color="blue"
+          delay={0.2}
+        />
+        
+        <ProfessionalMetricCard
+          title="Currently Generating"
+          value={metrics.generatingCount}
+          subtitle="Active AI processes"
+          icon={ArrowPathIcon}
+          color="orange"
+          delay={0.3}
+        />
+        
+        <ProfessionalMetricCard
+          title="Match Summaries"
+          value={metrics.totalSummaries}
+          subtitle="Comprehensive reports"
+          icon={DocumentChartBarIcon}
+          color="purple"
+          delay={0.4}
+        />
+        
+        <ProfessionalMetricCard
+          title="Published Today"
+          value={metrics.completedToday}
+          subtitle="Successfully posted"
+          icon={ShareIcon}
+          color="slate"
+          delay={0.5}
+        />
       </div>
 
+      {/* Active Matches Overview */}
+      {activeMatches.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm"
+        >
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <UserGroupIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Active Matches</h3>
+                <Badge variant="secondary" size="sm">{activeMatches.length}</Badge>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <ArrowPathIcon className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeMatches.map((match, index) => (
+                <motion.div
+                  key={match.match_id || index}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 + (index * 0.1), duration: 0.3 }}
+                  className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-slate-900 dark:text-white">
+                      {match.home_team} vs {match.away_team}
+                    </h4>
+                    <Badge 
+                      variant={match.status === 'active' ? 'success' : 'secondary'} 
+                      size="sm"
+                    >
+                      {match.status}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    Match ID: {match.match_id}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <span>Content: {contentItems.filter(item => item.match_id === match.match_id).length}</span>
+                    <span>Started: {new Date(match.created_at).toLocaleDateString()}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Recent activity */}
-      <div className="card">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm"
+      >
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
             Recent Content Generation
           </h3>
+        </div>
+        <div className="p-6">
           <div className="flow-root">
             <ul className="-mb-8">
               {(Array.isArray(generationProgress) ? generationProgress : []).slice(0, 5).map((item, itemIdx) => (
@@ -333,27 +455,27 @@ export default function ContentCreation() {
                   <div className="relative pb-8">
                     {itemIdx !== (Array.isArray(generationProgress) ? generationProgress : []).length - 1 ? (
                       <span
-                        className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-slate-700"
+                        className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-slate-200 dark:bg-slate-700"
                         aria-hidden="true"
                       />
                     ) : null}
                     <div className="relative flex space-x-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white dark:ring-slate-800 shadow-sm">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-white dark:ring-slate-800 shadow-sm">
                         {getStatusIcon(item.status)}
                       </div>
                       <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                         <div>
-                          <p className="text-sm text-gray-500 dark:text-slate-400">
+                          <p className="text-sm text-slate-900 dark:text-white font-medium">
                             Generated {item.type} for{' '}
-                            <span className="font-medium text-gray-900 dark:text-white">
+                            <span className="text-emerald-600 dark:text-emerald-400">
                               {item.match}
                             </span>
                           </p>
-                          <p className="text-xs text-gray-400 dark:text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
                             Trigger: {item.trigger}
                           </p>
                         </div>
-                        <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-slate-400">
+                        <div className="whitespace-nowrap text-right text-sm text-slate-500 dark:text-slate-400">
                           {formatTimestamp(item.timestamp)}
                         </div>
                       </div>
@@ -364,16 +486,12 @@ export default function ContentCreation() {
             </ul>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 
   const renderContentList = (type) => {
-    console.log('renderContentList called with type:', type);
-    console.log('contentItems:', contentItems);
-    console.log('contentItems length:', contentItems?.length);
-    const filteredContent = contentItems.filter(item => !type || item.type === type);
-    console.log('filteredContent for type', type, ':', filteredContent);
+    const typeFilteredContent = type ? filteredContentItems.filter(item => item.type === type) : filteredContentItems;
     
     const getContentTitle = (type) => {
       switch (type) {
@@ -394,44 +512,58 @@ export default function ContentCreation() {
     };
     
     return (
-      <div className="card">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="sm:flex sm:items-center sm:justify-between mb-6">
-            <div>
-              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+      <div className="space-y-6">
+        {/* Filters for specific content type */}
+        <FilterBar
+          filters={filterConfigs}
+          values={filters}
+          onChange={handleFilterChange}
+          onClear={handleClearFilters}
+          title={`${getContentTitle(type)} Filters`}
+        />
+
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {getContentTitle(type)}
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
                 {getContentDescription(type)}
               </p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Badge variant="secondary" size="sm">
+                  {typeFilteredContent.length} items
+                </Badge>
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <ArrowPathIcon className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="btn btn-primary flex items-center"
-              onClick={() => refetch()}
-            >
-              <ArrowPathIcon className="h-4 w-4 mr-2" />
-              Refresh
-            </button>
           </div>
 
-          <div className="space-y-4">
-            {filteredContent.length === 0 ? (
-              <div className="text-center py-12">
-                <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-slate-500" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No content available</h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+          <div className="p-6">
+            {typeFilteredContent.length === 0 ? (
+              <div className="text-center py-8">
+                <DocumentTextIcon className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500" />
+                <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-white">No content available</h3>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   Content will appear here as it's generated during matches.
                 </p>
               </div>
             ) : (
-              filteredContent.map((item) => (
-                <div
+              <div className="space-y-3">
+                {typeFilteredContent.map((item, index) => (
+                  <motion.div
                   key={item.id}
-                  className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors duration-200 hover:shadow-sm"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all duration-200 hover:shadow-md"
                   onClick={() => {
-                    console.log('Clicking content item:', item);
-                    console.log('Item structure:', JSON.stringify(item, null, 2));
                     setSelectedContent(item);
                   }}
                 >
@@ -439,18 +571,18 @@ export default function ContentCreation() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         {React.createElement(contentTypeIcons[item.type], {
-                          className: "h-5 w-5 text-primary-600 dark:text-primary-400"
+                          className: "h-5 w-5 text-emerald-600 dark:text-emerald-400"
                         })}
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                        <h4 className="text-sm font-medium text-slate-900 dark:text-white">
                           {item.type === 'editorial' ? item.content.headline 
                            : item.type === 'match_summary' ? `Match Summary: ${item.game_context?.teams?.home || 'Team A'} vs ${item.game_context?.teams?.away || 'Team B'}`
                            : item.content.text.substring(0, 60) + '...'}
                         </h4>
                       </div>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                         {item.game_context?.teams?.home || 'Team A'} vs {item.game_context?.teams?.away || 'Team B'}
                       </p>
-                      <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         Generated: {formatTimestamp(
                           typeof item.timestamp === 'number' 
                             ? item.timestamp * 1000 
@@ -464,7 +596,7 @@ export default function ContentCreation() {
                           e.stopPropagation();
                           setSelectedContent(item);
                         }}
-                        className="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 p-1 rounded-md transition-colors duration-200"
+                        className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 p-2 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors duration-200"
                         title="View details"
                       >
                         <EyeIcon className="h-5 w-5" />
@@ -478,7 +610,7 @@ export default function ContentCreation() {
                                 e.stopPropagation();
                                 handleSocialMediaPost(platform, item.content.text, item.id);
                               }}
-                              className="p-1 rounded-md transition-transform duration-200 hover:scale-110 hover:shadow-sm"
+                              className="p-2 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-sm hover:bg-slate-100 dark:hover:bg-slate-700"
                               title={`Post to ${platform}`}
                             >
                               <SocialIcon platform={platform} className="w-4 h-4" />
@@ -488,8 +620,9 @@ export default function ContentCreation() {
                       )}
                     </div>
                   </div>
-                </div>
-              ))
+                  </motion.div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -498,31 +631,33 @@ export default function ContentCreation() {
   };
 
   const renderGenerationProgress = () => (
-    <div className="bg-white dark:bg-slate-800 shadow rounded-lg border border-gray-200 dark:border-slate-700">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-6">
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
           Content Generation Progress
         </h3>
+      </div>
+      <div className="p-6">
         <div className="space-y-4">
           {(Array.isArray(generationProgress) ? generationProgress : []).map((item) => (
             <div
               key={item.id}
-              className="border border-gray-200 dark:border-slate-700 rounded-lg p-4"
+              className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   {getStatusIcon(item.status)}
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">
                       {item.type.charAt(0).toUpperCase() + item.type.slice(1)} - {item.match}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Trigger: {item.trigger}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     {formatTimestamp(item.timestamp)}
                   </p>
                   <span className={classNames(
@@ -537,10 +672,10 @@ export default function ContentCreation() {
               </div>
               {item.status === 'generating' && (
                 <div className="mt-3">
-                  <div className="bg-gray-200 dark:bg-slate-700 rounded-full h-2">
+                  <div className="bg-slate-200 dark:bg-slate-700 rounded-full h-2">
                     <div className="bg-warning-500 h-2 rounded-full animate-pulse" style={{ width: '65%' }}></div>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Processing highlight content...</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Processing highlight content...</p>
                 </div>
               )}
             </div>
@@ -551,71 +686,89 @@ export default function ContentCreation() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
-      {/* Header */}
-      <div className="page-header">
-        <div className="flex-1 min-w-0">
-          <h2 className="page-title">
-            Content Creation
-          </h2>
-          <p className="page-subtitle">
-            AI-generated editorials and social media posts from live match highlights
-          </p>
-          
-          {/* Status indicators for API errors */}
-          {(contentError || progressError) && (
-            <div className="mt-2 flex items-center space-x-2 text-sm text-warning-600 dark:text-warning-400">
-              <XCircleIcon className="h-4 w-4" />
-              <span>
-                {contentError && progressError ? 'Using cached data - API unavailable' :
-                 contentError ? 'Content data unavailable - using mock data' :
-                 'Progress data unavailable - using mock data'}
-              </span>
+          {/* Professional Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              Content Operations Center
+            </h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400">
+              AI-powered editorial and social media content management
+            </p>
+            
+            {/* Status indicators for API errors */}
+            {(contentError || progressError) && (
+              <div className="mt-4 inline-flex items-center space-x-2 px-4 py-2 bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg text-sm text-warning-700 dark:text-warning-300">
+                <XCircleIcon className="h-4 w-4" />
+                <span>
+                  {contentError && progressError ? 'Using cached data - API unavailable' :
+                   contentError ? 'Content data unavailable - using mock data' :
+                   'Progress data unavailable - using mock data'}
+                </span>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Professional Tab Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm mb-6"
+          >
+            <div className="border-b border-slate-200 dark:border-slate-700">
+              <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedTab(tab.id)}
+                    className={classNames(
+                      selectedTab === tab.id
+                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
+                        : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600',
+                      'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-all duration-200'
+                    )}
+                  >
+                    <tab.icon className="h-5 w-5" />
+                    <span>{tab.name}</span>
+                  </button>
+                ))}
+              </nav>
             </div>
-          )}
-        </div>
-      </div>
+          </motion.div>
 
-      {/* Navigation tabs */}
-      <div className="border-b border-gray-200 dark:border-slate-700">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
-              className={classNames(
-                selectedTab === tab.id
-                  ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                  : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300 hover:border-gray-300 dark:hover:border-slate-600',
-                'whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200'
-              )}
+          {/* Tab content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
             >
-              <tab.icon className="h-5 w-5" />
-              <span>{tab.name}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+              {selectedTab === 'overview' && renderOverview()}
+              {selectedTab === 'editorials' && renderContentList('editorial')}
+              {selectedTab === 'social' && renderContentList('social_post')}
+              {selectedTab === 'summaries' && renderContentList('match_summary')}
+              {selectedTab === 'progress' && renderGenerationProgress()}
+            </motion.div>
+          </AnimatePresence>
 
-      {/* Tab content */}
-      <div className="mt-6">
-        {selectedTab === 'overview' && renderOverview()}
-        {selectedTab === 'editorials' && renderContentList('editorial')}
-        {selectedTab === 'social' && renderContentList('social_post')}
-        {selectedTab === 'summaries' && renderContentList('match_summary')}
-        {selectedTab === 'progress' && renderGenerationProgress()}
-      </div>
-
-      {/* Content detail modal */}
-      {selectedContent && (
-        <ContentDetailModal 
-          content={selectedContent} 
-          onClose={() => setSelectedContent(null)}
-          onSocialPost={handleSocialMediaPost}
-        />
-      )}
+          {/* Content detail modal */}
+          {selectedContent && (
+            <ContentDetailModal 
+              content={selectedContent} 
+              onClose={() => setSelectedContent(null)}
+              onSocialPost={handleSocialMediaPost}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -624,28 +777,26 @@ export default function ContentCreation() {
 
 // Content Detail Modal Component
 function ContentDetailModal({ content, onClose, onSocialPost }) {
-  // Debug: Log the received content
-  console.log('Modal received content:', content);
-  console.log('Content type:', content?.type);
-  console.log('Content structure:', JSON.stringify(content, null, 2));
-  
   if (!content) {
-    console.log('No content provided to modal');
     return null;
   }
   
   return (
     <div 
-      className="fixed inset-0 bg-gray-600 dark:bg-black bg-opacity-50 dark:bg-opacity-70 overflow-y-auto h-full w-full flex items-center justify-center"
+      className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center"
       style={{
         zIndex: 1000
       }}
       onClick={onClose}
     >
-      <div 
-        className="relative mx-auto p-8 border border-gray-200 dark:border-slate-600 w-11/12 max-w-7xl shadow-lg rounded-md bg-white dark:bg-slate-800"
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3 }}
+        className="relative mx-auto p-8 border border-slate-200 dark:border-slate-600 w-11/12 max-w-4xl shadow-xl rounded-lg bg-white dark:bg-slate-800"
         style={{
-          maxWidth: '1400px',
+          maxWidth: '1200px',
           width: '98%',
           position: 'relative',
           zIndex: 1001
@@ -655,7 +806,7 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
           <div className="absolute top-0 right-0 pt-4 pr-4">
             <button
               type="button"
-              className="bg-white dark:bg-slate-800 rounded-md text-gray-400 dark:text-slate-400 hover:text-gray-500 dark:hover:text-slate-300 transition-colors duration-200"
+              className="p-2 rounded-md text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
               onClick={onClose}
             >
               <span className="sr-only">Close</span>
@@ -664,25 +815,26 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
           </div>
 
         
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
           {content?.type === 'editorial' ? 'Editorial Content' 
            : content?.type === 'match_summary' ? 'Game Summary'
            : 'Social Media Post'}
         </h3>
                   
-                  <div className="mt-4 space-y-4">
+                  <div className="space-y-6">
                     {/* Meta information */}
-                    <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg border border-gray-200 dark:border-slate-600">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="bg-slate-50 dark:bg-slate-700/50 p-6 rounded-lg border border-slate-200 dark:border-slate-600">
+                      <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Match Information</h4>
+                      <div className="grid grid-cols-2 gap-6 text-sm">
                         <div>
-                          <span className="font-medium text-gray-500 dark:text-slate-400">Match:</span>
-                          <p className="text-gray-900 dark:text-white">
+                          <span className="font-medium text-slate-500 dark:text-slate-400">Match:</span>
+                          <p className="text-slate-900 dark:text-white font-medium">
                             {content?.game_context?.teams?.home || 'Team A'} vs {content?.game_context?.teams?.away || 'Team B'}
                           </p>
                         </div>
                         <div>
-                          <span className="font-medium text-gray-500 dark:text-slate-400">Generated:</span>
-                          <p className="text-gray-900 dark:text-white">
+                          <span className="font-medium text-slate-500 dark:text-slate-400">Generated:</span>
+                          <p className="text-slate-900 dark:text-white font-medium">
                             {content?.timestamp ? new Date(
                               typeof content.timestamp === 'number' 
                                 ? content.timestamp * 1000 
@@ -691,10 +843,10 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
                           </p>
                         </div>
                         <div className="col-span-2">
-                          <span className="font-medium text-gray-500 dark:text-slate-400">
+                          <span className="font-medium text-slate-500 dark:text-slate-400">
                             {content.type === 'match_summary' ? 'Summary Type:' : 'Trigger:'}
                           </span>
-                          <p className="text-gray-900 dark:text-white">
+                          <p className="text-slate-900 dark:text-white font-medium">
                             {content?.type === 'match_summary' 
                               ? `${content?.content?.type || 'fulltime'} - Covers ${content?.content?.highlights_covered || 'N/A'} highlights`
                               : (content?.trigger_highlight || 'N/A')}
@@ -705,74 +857,75 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
 
                     {/* Content sections */}
                     {content?.type === 'editorial' ? (
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                          <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                             {content?.content?.headline || 'Editorial Title'}
                           </h4>
-                          <div className="prose dark:prose-invert max-w-none">
-                            <div className="whitespace-pre-line text-gray-700 dark:text-slate-300">
+                          <div className="prose dark:prose-invert max-w-none bg-slate-50 dark:bg-slate-700/50 p-6 rounded-lg">
+                            <div className="whitespace-pre-line text-slate-700 dark:text-slate-300 leading-relaxed">
                               {content?.content?.body || 'Editorial content not available'}
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2 text-sm">
-                          <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded-md">
+                        <div className="flex flex-wrap gap-3">
+                          <Badge variant="primary" size="sm">
                             {content?.content?.word_count || 0} words
-                          </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                          </Badge>
+                          <Badge variant="secondary" size="sm">
                             {content?.content?.style || 'professional'}
-                          </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                          </Badge>
+                          <Badge variant="secondary" size="sm">
                             {content?.content?.tone || 'neutral'}
-                          </span>
+                          </Badge>
                         </div>
                       </div>
                     ) : content?.type === 'social_post' ? (
-                      <div className="space-y-4">
-                        <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg border border-gray-200 dark:border-slate-600">
-                          <p className="text-gray-900 dark:text-white">{content?.content?.text || 'Social post content not available'}</p>
+                      <div className="space-y-6">
+                        <div className="bg-slate-50 dark:bg-slate-700/50 p-6 rounded-lg border border-slate-200 dark:border-slate-600">
+                          <p className="text-slate-900 dark:text-white text-lg leading-relaxed">{content?.content?.text || 'Social post content not available'}</p>
                         </div>
-                        <div className="flex flex-wrap gap-2 text-sm">
-                          <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded-md">
+                        <div className="flex flex-wrap gap-3">
+                          <Badge variant="primary" size="sm">
                             {content?.content?.character_count || 0} characters
-                          </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                          </Badge>
+                          <Badge variant="secondary" size="sm">
                             {content?.content?.tone || 'neutral'}
-                          </span>
-                          <span className="px-2 py-1 bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-200 rounded-md">
+                          </Badge>
+                          <Badge variant="warning" size="sm">
                             {content?.content?.engagement_potential || 'medium'}
-                          </span>
+                          </Badge>
                         </div>
                         
                         {/* Social media posting buttons */}
-                        <div className="pt-4 border-t border-gray-200 dark:border-slate-600">
-                          <h5 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Post to Social Media:</h5>
-                          <div className="flex space-x-3">
+                        <div className="pt-6 border-t border-slate-200 dark:border-slate-600">
+                          <h5 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Post to Social Media</h5>
+                          <div className="flex flex-wrap gap-3">
                             {content?.platforms?.map((platform) => (
-                              <button
+                              <Button
                                 key={platform}
+                                variant="outline"
+                                size="sm"
                                 onClick={() => onSocialPost(platform, content?.content?.text, content?.id)}
-                                className="btn btn-secondary flex items-center space-x-2"
+                                leftIcon={<SocialIcon platform={platform} className="w-4 h-4" />}
                               >
-                                <SocialIcon platform={platform} className="w-4 h-4" />
-                                <span className="capitalize">{platform}</span>
-                              </button>
+                                {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                              </Button>
                             )) || (
-                              <p className="text-gray-500 dark:text-slate-400 text-sm">No platforms available</p>
+                              <p className="text-slate-500 dark:text-slate-400 text-sm">No platforms available</p>
                             )}
                           </div>
                         </div>
                       </div>
                     ) : (
                       // Match summary content
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                          <h4 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
                             {content?.game_context?.teams?.home || 'Team A'} vs {content?.game_context?.teams?.away || 'Team B'} - Final Summary
                           </h4>
-                          <div className="prose dark:prose-invert max-w-none">
-                            <div className="whitespace-pre-line text-gray-700 dark:text-slate-300">
+                          <div className="prose dark:prose-invert max-w-none bg-slate-50 dark:bg-slate-700/50 p-6 rounded-lg">
+                            <div className="whitespace-pre-line text-slate-700 dark:text-slate-300 leading-relaxed">
                               {content?.content?.content || 'No summary content available'}
                             </div>
                           </div>
@@ -780,35 +933,35 @@ function ContentDetailModal({ content, onClose, onSocialPost }) {
                         
                         {content?.content?.key_moments && content?.content?.key_moments?.length > 0 && (
                           <div>
-                            <h5 className="text-md font-semibold text-gray-900 dark:text-white mb-2">Key Moments</h5>
-                            <div className="space-y-2">
+                            <h5 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Key Moments</h5>
+                            <div className="space-y-3">
                               {content?.content?.key_moments?.map((moment, index) => (
-                                <div key={index} className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-200 dark:border-slate-600">
-                                  <p className="text-sm text-gray-700 dark:text-slate-300">{moment}</p>
+                                <div key={index} className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-200 dark:border-slate-600">
+                                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{moment}</p>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )}
                         
-                        <div className="flex flex-wrap gap-2 text-sm">
-                          <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded-md">
+                        <div className="flex flex-wrap gap-3">
+                          <Badge variant="primary" size="sm">
                             {content?.content?.type || 'fulltime'} summary
-                          </span>
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-200 rounded-md">
+                          </Badge>
+                          <Badge variant="secondary" size="sm">
                             {content?.content?.highlights_covered || 0} highlights covered
-                          </span>
+                          </Badge>
                           {content?.content?.match_rating && (
-                            <span className="px-2 py-1 bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-200 rounded-md flex items-center space-x-1">
-                              <StarIcon className="h-3 w-3" />
-                              <span>{content?.content?.match_rating}/5.0</span>
-                            </span>
+                            <Badge variant="warning" size="sm">
+                              <StarIcon className="h-3 w-3 mr-1" />
+                              {content?.content?.match_rating}/5.0
+                            </Badge>
                           )}
                         </div>
                       </div>
                     )}
                   </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
