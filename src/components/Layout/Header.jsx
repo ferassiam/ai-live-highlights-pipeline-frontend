@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Bars3Icon, BellIcon, UserIcon } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '../ui/ThemeToggle.jsx';
+import { DesignThemeSelector } from '../ui/DesignThemeSelector.jsx';
 import { Button } from '../ui/Button.jsx';
 import { cn } from '../../utils/cn.jsx';
 
@@ -20,27 +21,22 @@ export function Header({ setSidebarOpen }) {
   ];
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm"
+    <header
+      className="sticky top-0 z-30 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
           {/* Mobile menu button */}
           <div className="flex items-center lg:hidden">
-            <motion.button
+            <button
               type="button"
-              className="inline-flex items-center justify-center p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="inline-flex items-center justify-center p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-1 focus:ring-brand-500"
               onClick={() => setSidebarOpen(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               <span className="sr-only">Open sidebar</span>
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-            </motion.button>
+            </button>
           </div>
 
           {/* Left side - Page breadcrumb/title would go here */}
@@ -51,15 +47,15 @@ export function Header({ setSidebarOpen }) {
                 <ol className="flex items-center space-x-2">
                   <li>
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
                         Sports Operations
                       </span>
                     </div>
                   </li>
                   <li>
                     <div className="flex items-center">
-                      <span className="text-gray-400 dark:text-gray-600">/</span>
-                      <span className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
+                      <span className="text-neutral-400 dark:text-neutral-600">/</span>
+                      <span className="ml-2 text-sm font-medium text-neutral-900 dark:text-white">
                         Live Highlights Pipeline
                       </span>
                     </div>
@@ -73,54 +69,53 @@ export function Header({ setSidebarOpen }) {
           <div className="flex items-center space-x-3">
             
             {/* System status indicator */}
-            <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 border border-success-200 dark:border-success-800 text-xs font-medium">
+              <div className="w-2 h-2 bg-success-500 rounded-full" />
               <span>System Operational</span>
             </div>
 
+            {/* Design theme selector */}
+            <DesignThemeSelector />
+            
             {/* Theme toggle */}
             <ThemeToggle size="sm" />
 
             {/* Notifications */}
             <div className="relative">
-              <motion.button
+              <button
                 type="button"
-                className="relative inline-flex items-center justify-center p-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="relative inline-flex items-center justify-center p-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-1 focus:ring-brand-500"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-5 w-5" aria-hidden="true" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white dark:ring-gray-900" />
+                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-danger-500 ring-2 ring-white dark:ring-neutral-900" />
                 )}
-              </motion.button>
+              </button>
             </div>
 
             {/* User menu */}
             <div className="relative">
-              <motion.button
+              <button
                 type="button"
-                className="flex items-center space-x-3 text-sm rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                className="flex items-center space-x-3 text-sm p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 focus:outline-none focus:ring-1 focus:ring-brand-500"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center">
                   <UserIcon className="w-4 h-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  <div className="text-sm font-medium text-neutral-900 dark:text-white">
                     {user.name}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-neutral-500 dark:text-neutral-400">
                     {user.email}
                   </div>
                 </div>
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }

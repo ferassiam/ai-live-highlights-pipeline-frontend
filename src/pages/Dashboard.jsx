@@ -18,6 +18,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 
 import { apiService, wsService, showSuccessToast, showErrorToast } from '../services/api.jsx';
+import { useThemeClasses } from '../utils/themeClasses.jsx';
 
 // Modern color palette
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
@@ -128,6 +129,7 @@ const StatusIndicator = ({ label, status, count }) => {
 export function Dashboard() {
   const [orchestratorRunning, setOrchestratorRunning] = useState(false);
   const [realtimeData, setRealtimeData] = useState({});
+  const { getPageBg, getCardClasses } = useThemeClasses();
 
   // Queries for dashboard data
   const { data: statusData, refetch: refetchStatus } = useQuery({
@@ -152,6 +154,12 @@ export function Dashboard() {
     queryKey: ['segment-files'],
     queryFn: () => apiService.getSegmentFiles({ limit: 100 }),
     refetchInterval: 30000,
+  });
+
+  const { data: pipelinesData } = useQuery({
+    queryKey: ['pipelines'],
+    queryFn: () => apiService.getPipelines(),
+    refetchInterval: 10000,
   });
 
   // WebSocket for real-time updates
@@ -180,9 +188,9 @@ export function Dashboard() {
   }, [statusData]);
 
   // Calculate metrics
-  const activeChannels = channelsData?.channels || {};
+  const activeChannels = channelsData?.active_channels || {};
   const totalChannels = Object.keys(activeChannels).length;
-  const runningChannels = Object.values(activeChannels).filter(c => c.status === 'running').length;
+  const runningChannels = Object.values(activeChannels).filter(c => c.status === 'started').length;
   
   const totalHighlights = highlightsSummary?.total_highlights || 0;
   const todayHighlights = highlightsSummary?.today_highlights || 0;
@@ -194,10 +202,12 @@ export function Dashboard() {
   // Generate chart data
   const timelineData = generateHighlightsTimeData(highlightsSummary, activeChannels);
   const pipelineData = generatePipelineData(highlightsSummary, filesData);
+  const activePipelines = pipelinesData?.active_pipelines || [];
 
   // System health calculation
-  const systemHealth = orchestratorRunning && runningChannels > 0 ? 
-    Math.min(100, Math.floor(85 + (runningChannels * 3) + Math.random() * 10)) : 0;
+  const systemHealth = orchestratorRunning && totalChannels > 0 ? 
+    Math.min(100, Math.floor(85 + (totalChannels * 3) + Math.random() * 10)) : 
+    orchestratorRunning ? 50 : 0;
 
   const handleStartOrchestrator = async () => {
     try {
@@ -220,7 +230,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
+    <div className={`min-h-screen ${getPageBg()}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Hero Header */}
@@ -302,13 +312,13 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <MetricCard
             title="Active Channels"
-            value={runningChannels}
-            subtitle={`${totalChannels} total configured`}
+            value={totalChannels}
+            subtitle={`${runningChannels} started`}
             icon={VideoCameraIcon}
             color="bg-gradient-to-br from-blue-500 to-blue-600"
             gradient="bg-gradient-to-br from-blue-50/90 to-blue-100/60 dark:from-blue-900/40 dark:to-blue-800/60"
             delay={0.1}
-            trend={{ positive: runningChannels > 0, value: '+' + runningChannels, label: 'online' }}
+            trend={{ positive: totalChannels > 0, value: totalChannels, label: 'active' }}
           />
           
           <MetricCard
@@ -475,13 +485,13 @@ export function Dashboard() {
             />
             <StatusIndicator 
               label="Active Channels" 
-              status={runningChannels > 0 ? 'active' : 'idle'} 
-              count={runningChannels}
+              status={totalChannels > 0 ? 'active' : 'idle'} 
+              count={totalChannels}
             />
             <StatusIndicator 
               label="Processing Pipelines" 
-              status={pipelineData.length > 0 ? 'active' : 'idle'} 
-              count={pipelineData.length}
+              status={activePipelines.length > 0 ? 'active' : 'idle'} 
+              count={activePipelines.length}
             />
             <StatusIndicator 
               label="WebSocket" 

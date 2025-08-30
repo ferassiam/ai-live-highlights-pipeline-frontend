@@ -1,18 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { cn } from '../../utils/cn.jsx';
+import { cn } from '../../utils/cn';
 
 const buttonVariants = {
-  default: 'bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500',
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500',
-  secondary: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:ring-brand-500',
-  outline: 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:ring-brand-500',
+  default: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
+  secondary: 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-primary-500',
+  outline: 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-primary-500',
   success: 'bg-success-600 text-white hover:bg-success-700 focus:ring-success-500',
   danger: 'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500',
   destructive: 'bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500',
   warning: 'bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500',
-  ghost: 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 focus:ring-brand-500',
-  link: 'text-brand-600 dark:text-brand-400 underline-offset-4 hover:underline focus:ring-brand-500',
+  ghost: 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 focus:ring-primary-500',
+  link: 'text-primary-600 dark:text-primary-400 underline-offset-4 hover:underline focus:ring-primary-500',
 };
 
 const sizeVariants = {
@@ -36,12 +36,13 @@ export const Button = React.forwardRef(({
   ...props
 }, ref) => {
   return (
-  <button
+  <motion.button
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors duration-150',
-  'focus:outline-none focus:ring-1 focus:ring-offset-1 dark:focus:ring-offset-neutral-800',
+        'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200',
+  'focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800',
         'disabled:opacity-50 disabled:cursor-not-allowed',
+        'shadow-sm hover:shadow-md',
         buttonVariants[variant],
         sizeVariants[size],
         (leftIcon || rightIcon) && 'gap-2',
@@ -50,6 +51,8 @@ export const Button = React.forwardRef(({
       )}
       disabled={disabled || loading}
       aria-busy={loading ? 'true' : undefined}
+      whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
+      whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
       {...props}
     >
       {loading ? (
@@ -64,7 +67,7 @@ export const Button = React.forwardRef(({
           {rightIcon ? <span className="inline-flex items-center">{rightIcon}</span> : null}
         </>
       )}
-  </button>
+  </motion.button>
   );
 });
 

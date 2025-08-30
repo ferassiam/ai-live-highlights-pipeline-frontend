@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Authentication</title>
+</head>
+<body>
+    <h2>Debug Authentication Helper</h2>
+    <p>This page helps set up authentication for the dashboard.</p>
+    
+    <button onclick="setToken()">Set Debug Token</button>
+    <button onclick="clearToken()">Clear Token</button>
+    <button onclick="checkToken()">Check Current Token</button>
+    
+    <div id="status" style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;"></div>
+    
+    <script>
+        function setToken() {
+            localStorage.setItem('apiToken', 'pipeline');
+            updateStatus('Debug token "pipeline" has been set in localStorage. You can now refresh the dashboard.');
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('apiToken');
+            updateStatus('Authentication token has been cleared from localStorage.');
+        }
+        
+        function checkToken() {
+            const token = localStorage.getItem('apiToken');
+            if (token) {
+                updateStatus('Current token: ' + token);
+            } else {
+                updateStatus('No authentication token found in localStorage.');
+            }
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+        }
+        
+        // Check token on page load
+        checkToken();
+    </script>
+    
+    <hr style="margin: 30px 0;">
+    
+    <h3>Instructions:</h3>
+    <ol>
+        <li>Click "Set Debug Token" button above</li>
+        <li>Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> in another tab</li>
+        <li>The dashboard should now display data without requiring login</li>
+        <li>If you need to login again, you can also use any email/password on the login page</li>
+    </ol>
+    
+    <p><strong>Note:</strong> This is for development/testing purposes only. The actual API endpoints don't require authentication for testing.</p>
+</body>
+</html>

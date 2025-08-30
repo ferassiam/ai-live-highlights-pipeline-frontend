@@ -8,6 +8,7 @@ import { Header } from './components/Layout/Header.jsx';
 import { Sidebar } from './components/Layout/Sidebar.jsx';
 import { ErrorBoundary } from './components/ui/ErrorBoundary.jsx';
 import { ThemeProvider } from './hooks/useTheme.jsx';
+import { DesignThemeProvider } from './hooks/useDesignTheme.jsx';
 
 // Pages
 import { Dashboard } from './pages/Dashboard.jsx';
@@ -21,7 +22,7 @@ import EnhancedMonitoring from './pages/EnhancedMonitoring.jsx';
 import FileManager from './pages/FileManager.jsx';
 import Monitoring from './pages/Monitoring.jsx';
 import Settings from './pages/Settings.jsx';
-import { Login } from './pages/Login.jsx';
+import { Login } from './pages/Login.js';
 
 // Services
 import { wsService } from './services/api.jsx';
@@ -95,12 +96,14 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <AppContent />
-            <Toaster position="top-right" />
-          </Router>
-        </QueryClientProvider>
+        <DesignThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <Router>
+              <AppContent />
+              <Toaster position="top-right" />
+            </Router>
+          </QueryClientProvider>
+        </DesignThemeProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

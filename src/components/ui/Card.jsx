@@ -3,15 +3,12 @@ import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn.jsx';
 
 export const Card = React.forwardRef(({ className, ...props }, ref) => (
-  <motion.div
+  <div
     ref={ref}
     className={cn(
-  'rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm',
+  'border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800',
       className
     )}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
     {...props}
   />
 ));
@@ -51,7 +48,7 @@ CardHeader.displayName = 'CardHeader';
 export const CardTitle = React.forwardRef(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
-  className={cn('text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white', className)}
+  className={cn('text-lg font-semibold leading-tight text-neutral-900 dark:text-white', className)}
     {...props}
   >
     {children}
@@ -67,7 +64,7 @@ export const CardSubtitle = React.forwardRef(({
 }, ref) => (
   <p
     ref={ref}
-  className={cn('text-sm text-gray-600 dark:text-slate-400', className)}
+  className={cn('text-sm text-neutral-600 dark:text-neutral-400', className)}
     {...props}
   >
     {children}
@@ -93,7 +90,7 @@ export const CardFooter = React.forwardRef(({
     ref={ref}
     className={cn(
       'flex items-center p-6 pt-0',
-      divided && 'border-t border-gray-200 dark:border-slate-700',
+      divided && 'border-t border-neutral-200 dark:border-neutral-700',
       justify === 'end' && 'justify-end',
       justify === 'center' && 'justify-center',
       justify === 'between' && 'justify-between',
