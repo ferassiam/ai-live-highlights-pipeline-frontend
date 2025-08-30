@@ -552,6 +552,60 @@ export default function Highlights() {
                                       >
                                         {tag}
                                       </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2 ml-4">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedHighlight(highlight)}
+                                leftIcon={<EyeIcon className="h-4 w-4" />}
+                              >
+                                View
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingHighlight(highlight)}
+                                leftIcon={<PencilIcon className="h-4 w-4" />}
+                              >
+                                Edit
+                              </Button>
+                              {workflowStage === 'approved' && (
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => publishHighlightMutation.mutate(highlightId)}
+                                  leftIcon={<ShareIcon className="h-4 w-4" />}
+                                >
+                                  Publish
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Bulk Operations Bar */}
+          {selectedHighlights.length > 0 && (
+            <BulkOperationsBar
+              selectedCount={selectedHighlights.length}
+              onAction={handleBulkAction}
+              selectedItems={selectedHighlights}
+              contentType="highlights"
+            />
+          )}
+        </div>
       </div>
 
       {/* Highlight detail modal */}
@@ -1027,9 +1081,4 @@ if (typeof apiService.addHighlightComment === 'undefined') {
       setTimeout(() => resolve({ success: true, message: 'Comment added' }), 300);
     });
   };
-}
-        </div>
-      </div>
-    </div>
-  );
 }
