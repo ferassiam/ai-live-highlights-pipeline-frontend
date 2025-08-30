@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   DocumentDuplicateIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftRightIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
