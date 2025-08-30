@@ -46,9 +46,11 @@ function App() {
     const initAuth = async () => {
       // Prefer persisted token, else fall back to demo token from env
       let token = localStorage.getItem('apiToken');
-      if (!token && process.env.REACT_APP_API_TOKEN) {
-        await apiService.setAuthToken(process.env.REACT_APP_API_TOKEN);
-        token = process.env.REACT_APP_API_TOKEN;
+      const viteToken = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_TOKEN) || null;
+      if (!token && (viteToken || process.env.REACT_APP_API_TOKEN)) {
+        const defaultToken = viteToken || process.env.REACT_APP_API_TOKEN;
+        await apiService.setAuthToken(defaultToken);
+        token = defaultToken;
       }
 
       if (token) {

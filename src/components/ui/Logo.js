@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 import { cn } from '../../utils/cn';
 
 export const Logo = ({ size = 'default', showText = true, className }) => {
@@ -26,7 +26,7 @@ export const Logo = ({ size = 'default', showText = true, className }) => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        <Sparkles className={cn('text-white', size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5')} />
+        <SparklesIcon className={cn('text-white', size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5')} />
       </motion.div>
       {showText && (
         <div className="ml-3">
@@ -34,7 +34,7 @@ export const Logo = ({ size = 'default', showText = true, className }) => {
             Live Highlights
           </h1>
           {size !== 'sm' && (
-            <p className="text-xs text-gray-500 dark:text-dark-400">Pipeline Dashboard</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">Pipeline Dashboard</p>
           )}
         </div>
       )}

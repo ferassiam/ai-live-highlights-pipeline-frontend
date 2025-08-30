@@ -98,7 +98,7 @@ export default function Header({ setSidebarOpen, onLogout }) {
 
           {/* Notifications */}
           <Menu as="div" className="relative">
-            <Menu.Button className="-m-2.5 p-2.5 text-gray-400 dark:text-dark-400 hover:text-gray-500 dark:hover:text-slate-300">
+            <Menu.Button className="-m-2.5 p-2.5 text-gray-400 dark:text-slate-400 hover:text-gray-500 dark:hover:text-slate-300">
               <span className="sr-only">View notifications</span>
               <BellIcon className="h-6 w-6" aria-hidden="true" />
               {notifications.length > 0 && (
@@ -126,16 +126,16 @@ export default function Header({ setSidebarOpen, onLogout }) {
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white">Notifications</h3>
                 </div>
                 {notifications.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-500 dark:text-dark-400">No new notifications</div>
+                  <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">No new notifications</div>
                 ) : (
                   notifications.map((notification) => (
                     <Menu.Item key={notification.id}>
                       <motion.div 
-                        className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer"
+                        className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer"
                         whileHover={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
                       >
                         <p className="text-sm text-gray-900 dark:text-white">{notification.message}</p>
-                        <p className="text-xs text-gray-500 dark:text-dark-400 mt-1">{notification.time}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{notification.time}</p>
                       </motion.div>
                     </Menu.Item>
                   ))
@@ -151,7 +151,7 @@ export default function Header({ setSidebarOpen, onLogout }) {
           <Menu as="div" className="relative">
             <Menu.Button className="-m-1.5 flex items-center p-1.5">
               <span className="sr-only">Open user menu</span>
-              <UserCircleIcon className="h-8 w-8 text-gray-400 dark:text-dark-400" />
+              <UserCircleIcon className="h-8 w-8 text-gray-400 dark:text-slate-400" />
               <span className="hidden lg:flex lg:items-center">
                 <span className="ml-4 text-sm font-semibold leading-6 text-gray-900 dark:text-white" aria-hidden="true">
                   API User

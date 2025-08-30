@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
-import { Card, CardContent } from './Card';
 
 export function MetricsCard({ 
   title, 
@@ -20,13 +19,13 @@ export function MetricsCard({
     success: 'bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300',
     warning: 'bg-warning-50 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300',
     danger: 'bg-danger-50 dark:bg-danger-900/20 text-danger-700 dark:text-danger-300',
-    gray: 'bg-gray-50 dark:bg-dark-800 text-gray-700 dark:text-dark-300'
+  gray: 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300'
   };
 
   const changeColorClasses = {
     positive: 'text-success-600 dark:text-success-400',
     negative: 'text-danger-600 dark:text-danger-400',
-    neutral: 'text-gray-500 dark:text-dark-400'
+  neutral: 'text-gray-500 dark:text-slate-400'
   };
 
   const getChangeType = (change) => {
@@ -41,9 +40,9 @@ export function MetricsCard({
   };
 
   const cardContent = (
-    <div className={cn('relative overflow-hidden rounded-lg border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 px-4 py-5 shadow-sm', className)}>
+  <div className={cn('relative overflow-hidden rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-5 shadow-sm', className)}>
       {loading && (
-        <div className="absolute inset-0 bg-white/50 dark:bg-dark-800/50 flex items-center justify-center">
+  <div className="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
         </div>
       )}
@@ -52,7 +51,7 @@ export function MetricsCard({
         <div className={cn('absolute rounded-md p-3', colorClasses[color])}>
           {Icon && <Icon className="h-6 w-6" aria-hidden="true" />}
         </div>
-        <p className="ml-16 truncate text-sm font-medium text-gray-500 dark:text-dark-400">
+  <p className="ml-16 truncate text-sm font-medium text-gray-500 dark:text-slate-400">
           {title}
         </p>
       </dt>
@@ -93,7 +92,7 @@ export function MetricsCard({
       {cardContent}
     </motion.div>
   );
-});
+}
 
 MetricsCard.displayName = 'MetricsCard';
 

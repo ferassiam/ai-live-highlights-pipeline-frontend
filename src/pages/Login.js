@@ -60,12 +60,13 @@ export function Login({ onLogin }) {
     
     try {
       // For development/demo: check if there's an environment token
-      let token = process.env.REACT_APP_API_TOKEN || 'pipeline';
+      let token = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_TOKEN) || 'pipeline';
 
       if (!token) {
         // If no env token, try a simple auth call to the backend
         // This is where you'd normally integrate with your actual auth system
-        const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api'}/auth/login`, {
+        const apiBase = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || 'https://ai-highlights-orchestrator.mkio.dev/api';
+        const response = await fetch(`${apiBase}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -85,6 +86,9 @@ export function Login({ onLogin }) {
       if (!token) {
         throw new Error('No authentication token received');
       }
+      
+      // Store the token in localStorage
+      localStorage.setItem('apiToken', token);
       
       // Call the onLogin prop with user data
       onLogin({

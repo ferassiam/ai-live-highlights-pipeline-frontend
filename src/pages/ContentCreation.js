@@ -338,7 +338,7 @@ export default function ContentCreation() {
                       />
                     ) : null}
                     <div className="relative flex space-x-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white dark:ring-dark-800 shadow-sm">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white dark:ring-slate-800 shadow-sm">
                         {getStatusIcon(item.status)}
                       </div>
                       <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
@@ -428,7 +428,7 @@ export default function ContentCreation() {
               filteredContent.map((item) => (
                 <div
                   key={item.id}
-                  className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer transition-colors duration-200 hover:shadow-sm"
+                  className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors duration-200 hover:shadow-sm"
                   onClick={() => {
                     console.log('Clicking content item:', item);
                     console.log('Item structure:', JSON.stringify(item, null, 2));

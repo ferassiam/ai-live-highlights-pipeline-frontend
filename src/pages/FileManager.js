@@ -333,7 +333,7 @@ export default function FileManager() {
             </div>
           ) : (
             <div className="overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-600">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
                 <thead className="bg-gray-50 dark:bg-slate-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
@@ -350,14 +350,14 @@ export default function FileManager() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-dark-600">
+                <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-600">
                   {filteredFiles.map((file, index) => (
                     <motion.tr
                       key={file.name || index}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2, delay: index * 0.05 }}
-                      className="hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
+                      className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

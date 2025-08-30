@@ -1,0 +1,1 @@
+// Deprecated stub removed during Vite migration. Use src/index.jsx as entry.

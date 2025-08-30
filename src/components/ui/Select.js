@@ -29,14 +29,14 @@ export const Select = React.forwardRef(({
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-dark-300">
+  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
           {label}
         </label>
       )}
       <select
         className={cn(
-          'flex h-10 w-full rounded-md border border-gray-300 dark:border-dark-600',
-          'bg-white dark:bg-dark-800 px-3 py-2 text-sm',
+          'flex h-10 w-full rounded-md border border-gray-300 dark:border-slate-600',
+          'bg-white dark:bg-slate-800 px-3 py-2 text-sm',
           'text-gray-900 dark:text-white',
           'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
           'disabled:cursor-not-allowed disabled:opacity-50',

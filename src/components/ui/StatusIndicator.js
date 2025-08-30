@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { Badge } from './Badge';
 
@@ -18,7 +19,22 @@ export const StatusIndicator = ({
       stopped: {
         variant: 'secondary',
         text: 'Stopped',
-        dotColor: 'bg-gray-400 dark:bg-dark-500',
+  dotColor: 'bg-gray-400 dark:bg-slate-500',
+      },
+      connected: {
+        variant: 'success',
+        text: 'Connected',
+        dotColor: 'bg-success-500',
+      },
+      disconnected: {
+        variant: 'danger',
+        text: 'Disconnected',
+        dotColor: 'bg-danger-500',
+      },
+      reconnecting: {
+        variant: 'warning',
+        text: 'Reconnecting',
+        dotColor: 'bg-warning-500',
       },
       error: {
         variant: 'danger',

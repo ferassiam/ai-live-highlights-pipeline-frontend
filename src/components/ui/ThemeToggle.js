@@ -14,11 +14,11 @@ export const ThemeToggle = ({ className, size = 'md' }) => {
   return (
     <Button
       variant="ghost"
-      size={size}
+  size={size}
       onClick={toggleTheme}
       className={className}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      leftIcon={isDark ? SunIcon : MoonIcon}
+  leftIcon={isDark ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
     >
       <span className="sr-only">
         {isDark ? 'Switch to light mode' : 'Switch to dark mode'}

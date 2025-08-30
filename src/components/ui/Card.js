@@ -1,11 +1,12 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 
 export const Card = React.forwardRef(({ className, ...props }, ref) => (
   <motion.div
     ref={ref}
     className={cn(
-      'rounded-lg border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 shadow-sm',
+  'rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm',
       className
     )}
     initial={{ opacity: 0, y: 20 }}
@@ -30,7 +31,7 @@ CardHeader.displayName = 'CardHeader';
 export const CardTitle = React.forwardRef(({ className, children, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white', className)}
+  className={cn('text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white', className)}
     {...props}
   >
     {children}
@@ -41,13 +42,16 @@ CardTitle.displayName = 'CardTitle';
 
 export const CardSubtitle = React.forwardRef(({ 
   className, 
+  children,
   ...props 
 }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-gray-600 dark:text-dark-400', className)}
+  className={cn('text-sm text-gray-600 dark:text-slate-400', className)}
     {...props}
-  />
+  >
+    {children}
+  </p>
 ));
 
 CardSubtitle.displayName = 'CardSubtitle';

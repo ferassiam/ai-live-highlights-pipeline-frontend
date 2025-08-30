@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 
 export const LoadingSpinner = ({ size = 'default', className }) => {
@@ -22,10 +23,10 @@ export const LoadingSpinner = ({ size = 'default', className }) => {
 };
 
 export const LoadingPage = ({ message = 'Loading...' }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dark-900">
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
     <div className="text-center">
       <LoadingSpinner size="lg" />
-      <p className="mt-4 text-gray-600 dark:text-dark-300">{message}</p>
+  <p className="mt-4 text-gray-600 dark:text-slate-300">{message}</p>
     </div>
   </div>
 );

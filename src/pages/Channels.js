@@ -111,7 +111,7 @@ export default function Channels() {
             </div>
             <div className="ml-4">
               <div className="metric-value">
-                {Object.values(activeChannels).filter(ch => ch.status === 'running').length}
+                {Object.values(activeChannels).filter(ch => ch.status === 'started').length}
               </div>
               <div className="metric-label">Streaming</div>
             </div>
@@ -149,7 +149,7 @@ export default function Channels() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-dark-600">
+            <div className="divide-y divide-gray-200 dark:divide-slate-600">
               {Object.entries(activeChannels).map(([scheduleId, channel]) => (
                 <div key={scheduleId} className="p-6">
                   <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function Channels() {
                         <div className="flex items-center space-x-2">
                           <h3 className="text-lg font-medium text-gray-900 dark:text-white">{channel.name}</h3>
                           <span className={`status-indicator ${
-                            channel.status === 'running' ? 'status-running' : 
+                            channel.status === 'started' ? 'status-running' : 
                             channel.status === 'stopped' ? 'status-stopped' : 'status-warning'
                           }`}>
                             {channel.status}
@@ -185,15 +185,15 @@ export default function Channels() {
                       {/* Status indicator */}
                       <div className="flex items-center space-x-2">
                         <div className={`h-3 w-3 rounded-full ${
-                          channel.status === 'running' ? 'bg-success-500 animate-pulse-fast' : 
-                          channel.status === 'stopped' ? 'bg-gray-400 dark:bg-dark-500' : 'bg-warning-500'
+                          channel.status === 'started' ? 'bg-success-500 animate-pulse-fast' : 
+                          channel.status === 'stopped' ? 'bg-gray-400 dark:bg-slate-500' : 'bg-warning-500'
                         }`}></div>
                         <span className="text-sm text-gray-600 dark:text-slate-400 capitalize">{channel.status}</span>
                       </div>
 
                       {/* Manual controls */}
                       <div className="flex space-x-2">
-                        {channel.status === 'running' ? (
+                        {channel.status === 'started' ? (
                           <button
                             onClick={() => handleManualControl(scheduleId, 'stop')}
                             disabled={manualControlMutation.isLoading}
@@ -251,7 +251,7 @@ export default function Channels() {
                   </div>
 
                   {/* Channel streaming URLs would go here if available */}
-                  {channel.status === 'running' && (
+                  {channel.status === 'started' && (
                     <div className="mt-4 p-3 bg-success-50 dark:bg-success-900/20 rounded-lg border border-success-200 dark:border-success-700">
                       <div className="flex items-center">
                         <SignalIcon className="h-4 w-4 text-success-600 dark:text-success-400 mr-2" />

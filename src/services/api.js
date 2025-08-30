@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api',
+  baseURL: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || 'https://ai-highlights-orchestrator.mkio.dev/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -448,7 +448,7 @@ class WebSocketService {
   }
 
   connect(url = null) {
-    const baseUrl = process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
+  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || process.env.REACT_APP_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
     let wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '').replace(/\/$/, '') + '/ws';
     // Include token as query param for demo environments if available
     try {
@@ -543,6 +543,8 @@ class WebSocketService {
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
     console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
+  // Notify listeners that we are attempting to reconnect
+  this.emit('reconnecting', { attempt: this.reconnectAttempts, delay });
     
     setTimeout(() => {
       this.connect();
