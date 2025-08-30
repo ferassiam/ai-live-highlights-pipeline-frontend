@@ -1,6 +1,7 @@
 // Deprecated duplicate of Header; kept temporarily for reference during migration.
 // Prefer using Header.js everywhere.
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { 
   Bars3Icon, 
   BellIcon, 
@@ -39,6 +40,14 @@ export default function Header({ setSidebarOpen, onLogout }) {
   const orchestratorRunning = status?.orchestrator_running || false;
   const activeChannels = Object.keys(status?.orchestrator_status?.active_channels || {}).length;
   const activePipelines = status?.orchestrator_status?.active_pipelines?.length || 0;
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Implement global search functionality
+      console.log('Searching for:', searchQuery);
+    }
+  };
 
   return (
     <motion.div 
@@ -201,6 +210,6 @@ export default function Header({ setSidebarOpen, onLogout }) {
           </Menu>
         </div>
       </div>
-    </motion.div>
+    </header>
   );
 }
