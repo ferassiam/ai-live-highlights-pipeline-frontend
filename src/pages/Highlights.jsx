@@ -493,7 +493,7 @@ export default function Highlights() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center space-x-2 mb-1">
-                                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                     <p className="text-sm font-medium text-gray-900 dark:text-white break-words">
                                         {highlight.description || highlight.title || 'Untitled Highlight'}
                                       </p>
                                       <Badge 
@@ -538,7 +538,7 @@ export default function Highlights() {
                                 </div>
                                 
                                 {highlight.summary && (
-                                  <p className="mt-2 text-sm text-gray-600 dark:text-slate-300 line-clamp-2">
+                                 <p className="mt-2 text-sm text-gray-600 dark:text-slate-300 break-words">
                                     {highlight.summary}
                                   </p>
                                 )}
