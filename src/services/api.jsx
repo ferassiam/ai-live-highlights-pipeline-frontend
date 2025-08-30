@@ -448,8 +448,19 @@ class WebSocketService {
   }
 
   connect(url = null) {
-  const baseUrl = import.meta.env.VITE_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
-    let wsUrl = url || baseUrl.replace(/^http/, 'ws').replace('/api', '').replace(/\/$/, '') + '/ws';
+    let wsUrl;
+    
+    if (url) {
+      wsUrl = url;
+    } else if (import.meta.env.DEV) {
+      // In development, use local proxy
+      wsUrl = `ws://${window.location.host}/ws`;
+    } else {
+      // In production, use the API URL
+      const baseUrl = import.meta.env.VITE_API_URL || 'https://ai-highlights-orchestrator.mkio.dev/api';
+      wsUrl = baseUrl.replace(/^http/, 'ws').replace('/api', '').replace(/\/$/, '') + '/ws';
+    }
+    
     // Include token as query param for demo environments if available
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('apiToken') : null;
