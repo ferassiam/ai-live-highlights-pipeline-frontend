@@ -84,11 +84,8 @@ export const DataTable = ({
           </thead>
           <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
             {data.map((row, rowIndex) => (
-              <motion.tr
+              <tr
                 key={row.id || rowIndex}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: rowIndex * 0.05 }}
                 className={cn(
                   'data-table-row',
                   striped && rowIndex % 2 === 1 && 'bg-slate-50/50 dark:bg-slate-700/25',
