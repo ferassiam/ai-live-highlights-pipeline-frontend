@@ -128,12 +128,14 @@ export default function ContentCreation() {
   });
 
   // Fetch active content matches
-  const { data: activeMatches = [] } = useQuery({
-    queryKey: ['activeContentMatches'],
+  const { data: activeMatchesData } = useQuery({
     queryFn: () => apiService.getActiveContentMatches(),
     refetchInterval: 15000, // Refresh every 15 seconds
     retry: 1,
   });
+
+  // Ensure activeMatches is always an array
+  const activeMatches = Array.isArray(activeMatchesData) ? activeMatchesData : [];
 
   // Fetch content items
   const { data: content, refetch, isError: contentError } = useQuery({
