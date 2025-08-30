@@ -24,6 +24,15 @@ import { apiService, wsService, showSuccessToast, showErrorToast } from '../serv
 // Status configuration for channels
 const getStatusConfig = (status) => {
   const configs = {
+    started: {
+      color: 'bg-green-500',
+      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      borderColor: 'border-green-200 dark:border-green-800',
+      textColor: 'text-green-700 dark:text-green-300',
+      label: 'STARTED',
+      icon: CheckCircleIcon,
+      pulse: true,
+    },
     running: {
       color: 'bg-green-500',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
@@ -78,7 +87,7 @@ const ChannelCard = ({ channelId, channel, onControl, isControlling }) => {
 
   // Simulate real-time viewer count changes
   useEffect(() => {
-    if (channel.status === 'running') {
+    if (channel.status === 'running' || channel.status === 'started') {
       const interval = setInterval(() => {
         setLocalStats(prev => ({
           ...prev,
@@ -135,7 +144,7 @@ const ChannelCard = ({ channelId, channel, onControl, isControlling }) => {
       </div>
 
       {/* Channel metrics */}
-      {channel.status === 'running' && (
+      {(channel.status === 'running' || channel.status === 'started') && (
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
             <div className="flex items-center space-x-2">
@@ -211,7 +220,7 @@ const ChannelCard = ({ channelId, channel, onControl, isControlling }) => {
 
       {/* Control buttons */}
       <div className="flex space-x-3">
-        {channel.status === 'running' ? (
+        {(channel.status === 'running' || channel.status === 'started') ? (
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -310,12 +319,12 @@ export function Channels() {
     );
   }
 
-  const channels = channelsData?.channels || {};
+  const channels = channelsData?.active_channels || {};
   const channelEntries = Object.entries(channels);
   
   // Calculate summary stats
   const totalChannels = channelEntries.length;
-  const runningChannels = channelEntries.filter(([_, channel]) => channel.status === 'running').length;
+  const runningChannels = channelEntries.filter(([_, channel]) => channel.status === 'running' || channel.status === 'started').length;
   const errorChannels = channelEntries.filter(([_, channel]) => channel.status === 'error').length;
 
   return (

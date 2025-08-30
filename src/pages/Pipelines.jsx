@@ -321,13 +321,15 @@ export function Pipelines() {
     );
   }
 
-  const pipelines = pipelinesData?.pipelines || {};
-  const pipelineEntries = Object.entries(pipelines);
+  const activePipelines = pipelinesData?.active_pipelines || [];
+  const totalPipelines = pipelinesData?.total_active || 0;
+  
+  // Create pipeline entries from active pipeline IDs (assuming they're all running)
+  const pipelineEntries = activePipelines.map(id => [id, { status: 'running', id }]);
   
   // Calculate summary stats
-  const totalPipelines = pipelineEntries.length;
-  const runningPipelines = pipelineEntries.filter(([_, pipeline]) => pipeline.status === 'running').length;
-  const errorPipelines = pipelineEntries.filter(([_, pipeline]) => pipeline.status === 'error').length;
+  const runningPipelines = activePipelines.length; // All active pipelines are running
+  const errorPipelines = 0; // API doesn't provide error pipeline info
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
