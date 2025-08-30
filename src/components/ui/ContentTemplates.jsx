@@ -4,8 +4,6 @@ import {
   DocumentDuplicateIcon,
   DocumentTextIcon,
   ChatBubbleLeftRightIcon,
-  DocumentTextIcon,
-  ChatBubbleLeftRightIcon,
   PlusIcon,
   PencilIcon,
   TrashIcon,
