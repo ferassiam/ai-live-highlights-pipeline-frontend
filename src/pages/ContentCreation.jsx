@@ -16,6 +16,11 @@ import {
   FunnelIcon,
   CalendarIcon,
   UserGroupIcon,
+  PlusIcon,
+  PencilIcon,
+  CheckIcon,
+  ListBulletIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 // Import real social media icons
@@ -32,10 +37,14 @@ import { FaXTwitter } from 'react-icons/fa6';
 import { apiService } from '../services/api';
 import { ProfessionalMetricCard } from '../components/ui/ProfessionalMetricCard.jsx';
 import { FilterBar } from '../components/ui/FilterBar.jsx';
-import { DataTable } from '../components/ui/DataTable.jsx';
 import { Badge } from '../components/ui/Badge.jsx';
 import { Button } from '../components/ui/Button.jsx';
 import { Select } from '../components/ui/Select.jsx';
+import { ContentWorkflowCard } from '../components/ui/ContentWorkflow.jsx';
+import { ContentTemplateSelector } from '../components/ui/ContentTemplates.jsx';
+import { ContentCalendar } from '../components/ui/ContentCalendar.jsx';
+import { ContentEditor } from '../components/ui/ContentEditor.jsx';
+import { BulkOperationsBar, ContentSelectionCheckbox } from '../components/ui/BulkOperations.jsx';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -103,14 +112,20 @@ export default function ContentCreation() {
   const [selectedContent, setSelectedContent] = useState(null);
   const [contentItems, setContentItems] = useState(mockContentItems);
   const [generationProgress, setGenerationProgress] = useState([]);
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'calendar' | 'table'
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingContent, setEditingContent] = useState(null);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [filters, setFilters] = useState({
     match_id: '',
     content_type: '',
     date_from: '',
     date_to: '',
-    status: ''
+    status: '',
+    workflow_stage: '',
+    assigned_to: ''
   });
-  const [selectedMatch, setSelectedMatch] = useState('');
 
   // Fetch active content matches
   const { data: activeMatches = [] } = useQuery({
@@ -171,9 +186,11 @@ export default function ContentCreation() {
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: ClockIcon },
+    { id: 'workflow', name: 'Workflow', icon: CheckIcon },
     { id: 'editorials', name: 'Editorials', icon: DocumentTextIcon },
     { id: 'social', name: 'Social Posts', icon: ChatBubbleLeftEllipsisIcon },
     { id: 'summaries', name: 'Game Summaries', icon: DocumentChartBarIcon },
+    { id: 'templates', name: 'Templates', icon: Squares2X2Icon },
     { id: 'progress', name: 'Generation Progress', icon: ArrowPathIcon },
   ];
 
@@ -185,7 +202,10 @@ export default function ContentCreation() {
       type: 'select',
       options: [
         { value: '', label: 'All Matches' },
-        ...Array.from(new Set(contentItems.map(item => item.match_id || item.game_context?.teams?.home + ' vs ' + item.game_context?.teams?.away)))
+        ...Array.from(new Set([
+          ...contentItems.map(item => item.match_id),
+          ...activeMatches.map(match => match.match_id)
+        ]))
           .filter(Boolean)
           .map(match => ({ value: match, label: match }))
       ]
@@ -210,13 +230,36 @@ export default function ContentCreation() {
       key: 'date_to',
       label: 'To Date',
       type: 'date'
+    },
+    {
+      key: 'workflow_stage',
+      label: 'Workflow Stage',
+      type: 'select',
+      options: [
+        { value: '', label: 'All Stages' },
+        { value: 'draft', label: 'Draft' },
+        { value: 'review', label: 'In Review' },
+        { value: 'approved', label: 'Approved' },
+        { value: 'published', label: 'Published' },
+        { value: 'rejected', label: 'Rejected' }
+      ]
+    },
+    {
+      key: 'assigned_to',
+      label: 'Assigned To',
+      type: 'select',
+      options: [
+        { value: '', label: 'All Assignees' },
+        { value: 'editor1', label: 'John Smith' },
+        { value: 'editor2', label: 'Sarah Johnson' },
+        { value: 'social1', label: 'Mike Chen' }
+      ]
     }
   ];
 
   // Filter content items based on current filters
   const filteredContentItems = contentItems.filter(item => {
-    if (filters.match_id && item.match_id !== filters.match_id && 
-        (item.game_context?.teams?.home + ' vs ' + item.game_context?.teams?.away) !== filters.match_id) {
+    if (filters.match_id && item.match_id !== filters.match_id) {
       return false;
     }
     if (filters.content_type && item.type !== filters.content_type) {
@@ -233,6 +276,12 @@ export default function ContentCreation() {
       filterDate.setHours(23, 59, 59, 999); // End of day
       if (itemDate > filterDate) return false;
     }
+    if (filters.workflow_stage && item.workflow_stage !== filters.workflow_stage) {
+      return false;
+    }
+    if (filters.assigned_to && item.assigned_to !== filters.assigned_to) {
+      return false;
+    }
     return true;
   });
 
@@ -246,8 +295,128 @@ export default function ContentCreation() {
       content_type: '',
       date_from: '',
       date_to: '',
-      status: ''
+      status: '',
+      workflow_stage: '',
+      assigned_to: ''
     });
+  };
+
+  // Enhanced content management functions
+  const handleCreateContent = (type = 'editorial') => {
+    const newContent = {
+      id: `new_${Date.now()}`,
+      type,
+      content: {},
+      workflow_stage: 'draft',
+      created_at: new Date().toISOString(),
+      game_context: {
+        teams: { home: 'Team A', away: 'Team B' }
+      }
+    };
+    setEditingContent(newContent);
+    setShowEditor(true);
+  };
+
+  const handleEditContent = (content) => {
+    setEditingContent(content);
+    setShowEditor(true);
+  };
+
+  const handleSaveContent = (updatedContent) => {
+    setContentItems(prev => {
+      const index = prev.findIndex(item => item.id === updatedContent.id);
+      if (index >= 0) {
+        const newItems = [...prev];
+        newItems[index] = { ...updatedContent, updated_at: new Date().toISOString() };
+        return newItems;
+      } else {
+        return [...prev, { ...updatedContent, created_at: new Date().toISOString() }];
+      }
+    });
+    setShowEditor(false);
+    setEditingContent(null);
+    toast.success('Content saved successfully');
+  };
+
+  const handleWorkflowStageChange = (contentId, newStage) => {
+    setContentItems(prev => 
+      prev.map(item => 
+        item.id === contentId 
+          ? { ...item, workflow_stage: newStage, updated_at: new Date().toISOString() }
+          : item
+      )
+    );
+    toast.success(`Content moved to ${newStage}`);
+  };
+
+  const handleAddComment = (contentId, comment) => {
+    setContentItems(prev => 
+      prev.map(item => 
+        item.id === contentId 
+          ? { 
+              ...item, 
+              comments: [
+                ...(item.comments || []),
+                {
+                  id: Date.now(),
+                  text: comment,
+                  author: 'Current User',
+                  timestamp: new Date().toISOString()
+                }
+              ]
+            }
+          : item
+      )
+    );
+    toast.success('Comment added');
+  };
+
+  const handleBulkAction = (action, items, options = {}) => {
+    switch (action) {
+      case 'publish':
+        setContentItems(prev => 
+          prev.map(item => 
+            items.includes(item.id) 
+              ? { ...item, workflow_stage: 'published', published_at: new Date().toISOString() }
+              : item
+          )
+        );
+        toast.success(`Published ${items.length} item(s)`);
+        break;
+      case 'delete':
+        setContentItems(prev => prev.filter(item => !items.includes(item.id)));
+        toast.success(`Deleted ${items.length} item(s)`);
+        break;
+      case 'assign':
+        setContentItems(prev => 
+          prev.map(item => 
+            items.includes(item.id) 
+              ? { ...item, assigned_to: options.assignee }
+              : item
+          )
+        );
+        toast.success(`Assigned ${items.length} item(s)`);
+        break;
+      case 'schedule':
+        setContentItems(prev => 
+          prev.map(item => 
+            items.includes(item.id) 
+              ? { ...item, scheduled_for: options.date }
+              : item
+          )
+        );
+        toast.success(`Scheduled ${items.length} item(s)`);
+        break;
+    }
+    setSelectedItems([]);
+  };
+
+  const handleSelectionChange = (contentId, isSelected) => {
+    setSelectedItems(prev => 
+      isSelected 
+        ? [...prev, contentId]
+        : prev.filter(id => id !== contentId)
+    );
   };
   const getStatusIcon = (status) => {
     switch (status) {
@@ -379,6 +548,103 @@ export default function ContentCreation() {
         />
       </div>
 
+      {/* Enhanced Active Matches with Real Data */}
+      {activeMatches.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm"
+        >
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <UserGroupIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Active Matches</h3>
+                <Badge variant="secondary" size="sm">{activeMatches.length}</Badge>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Select
+                  value={filters.match_id}
+                  onChange={(value) => handleFilterChange('match_id', value)}
+                  options={[
+                    { value: '', label: 'All Matches' },
+                    ...activeMatches.map(match => ({ 
+                      value: match.match_id, 
+                      label: `${match.home_team} vs ${match.away_team}` 
+                    }))
+                  ]}
+                  className="min-w-[200px]"
+                />
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <ArrowPathIcon className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeMatches.map((match, index) => {
+                const matchContent = contentItems.filter(item => item.match_id === match.match_id);
+                const publishedContent = matchContent.filter(item => item.workflow_stage === 'published');
+                
+                return (
+                  <motion.div
+                    key={match.match_id || index}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.7 + (index * 0.1), duration: 0.3 }}
+                    className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-slate-900 dark:text-white">
+                        {match.home_team} vs {match.away_team}
+                      </h4>
+                      <Badge 
+                        variant={match.status === 'active' ? 'success' : 'secondary'} 
+                        size="sm"
+                      >
+                        {match.status}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">Total Content:</span>
+                        <span className="font-medium text-slate-900 dark:text-white">{matchContent.length}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">Published:</span>
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{publishedContent.length}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">In Review:</span>
+                        <span className="font-medium text-blue-600 dark:text-blue-400">
+                          {matchContent.filter(item => item.workflow_stage === 'review').length}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        Started: {new Date(match.created_at).toLocaleDateString()}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleFilterChange('match_id', match.match_id)}
+                      >
+                        View Content
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
       {/* Active Matches Overview */}
       {activeMatches.length > 0 && (
         <motion.div
@@ -522,114 +788,229 @@ export default function ContentCreation() {
           title={`${getContentTitle(type)} Filters`}
         />
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                {getContentTitle(type)}
-              </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                {getContentDescription(type)}
-              </p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Badge variant="secondary" size="sm">
-                  {typeFilteredContent.length} items
-                </Badge>
-                <Button variant="outline" size="sm" onClick={() => refetch()}>
-                  <ArrowPathIcon className="h-4 w-4 mr-2" />
-                  Refresh
-                </Button>
-              </div>
-            </div>
+        {/* View Mode Toggle and Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant={viewMode === 'cards' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+              leftIcon={<Squares2X2Icon className="h-4 w-4" />}
+            >
+              Cards
+            </Button>
+            <Button
+              variant={viewMode === 'calendar' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('calendar')}
+              leftIcon={<CalendarIcon className="h-4 w-4" />}
+            >
+              Calendar
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'primary' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              leftIcon={<ListBulletIcon className="h-4 w-4" />}
+            >
+              Table
+            </Button>
           </div>
-
-          <div className="p-6">
+          
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTemplates(true)}
+            >
+              Templates
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleCreateContent(type)}
+              leftIcon={<PlusIcon className="h-4 w-4" />}
+            >
+              Create {getContentTitle(type).slice(0, -1)}
+            </Button>
+          </div>
+        </div>
+        {/* Content Display */}
+        {viewMode === 'calendar' ? (
+          <ContentCalendar
+            contentItems={typeFilteredContent}
+            onContentSelect={setSelectedContent}
+          />
+        ) : viewMode === 'cards' ? (
+          <div className="space-y-4">
             {typeFilteredContent.length === 0 ? (
-              <div className="text-center py-8">
+              <div className="text-center py-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
                 <DocumentTextIcon className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500" />
                 <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-white">No content available</h3>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   Content will appear here as it's generated during matches.
                 </p>
+                <div className="mt-4">
+                  <Button
+                    variant="primary"
+                    onClick={() => handleCreateContent(type)}
+                    leftIcon={<PlusIcon className="h-4 w-4" />}
+                  >
+                    Create {getContentTitle(type).slice(0, -1)}
+                  </Button>
+                </div>
               </div>
             ) : (
-              <div className="space-y-3">
-                {typeFilteredContent.map((item, index) => (
-                  <motion.div
-                  key={item.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all duration-200 hover:shadow-md"
-                  onClick={() => {
-                    setSelectedContent(item);
-                  }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        {React.createElement(contentTypeIcons[item.type], {
-                          className: "h-5 w-5 text-emerald-600 dark:text-emerald-400"
-                        })}
-                        <h4 className="text-sm font-medium text-slate-900 dark:text-white">
-                          {item.type === 'editorial' ? item.content.headline 
-                           : item.type === 'match_summary' ? `Match Summary: ${item.game_context?.teams?.home || 'Team A'} vs ${item.game_context?.teams?.away || 'Team B'}`
-                           : item.content.text.substring(0, 60) + '...'}
-                        </h4>
+              <>
+                {/* Selection Header */}
+                {selectedItems.length > 0 && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <ContentSelectionCheckbox
+                          contentId="select-all"
+                          isSelected={selectedItems.length === typeFilteredContent.length}
+                          onSelectionChange={(_, isSelected) => {
+                            if (isSelected) {
+                              setSelectedItems(typeFilteredContent.map(item => item.id));
+                            } else {
+                              setSelectedItems([]);
+                            }
+                          }}
+                        />
+                        <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                          {selectedItems.length} of {typeFilteredContent.length} items selected
+                        </span>
                       </div>
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {item.game_context?.teams?.home || 'Team A'} vs {item.game_context?.teams?.away || 'Team B'}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        Generated: {formatTimestamp(
-                          typeof item.timestamp === 'number' 
-                            ? item.timestamp * 1000 
-                            : item.timestamp
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedContent(item);
-                        }}
-                        className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 p-2 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors duration-200"
-                        title="View details"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedItems([])}
                       >
-                        <EyeIcon className="h-5 w-5" />
-                      </button>
-                      {item.type === 'social_post' && (
-                        <div className="flex space-x-2">
-                          {item.platforms?.map((platform) => (
-                            <button
-                              key={platform}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSocialMediaPost(platform, item.content.text, item.id);
-                              }}
-                              className="p-2 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-sm hover:bg-slate-100 dark:hover:bg-slate-700"
-                              title={`Post to ${platform}`}
-                            >
-                              <SocialIcon platform={platform} className="w-4 h-4" />
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        Clear Selection
+                      </Button>
                     </div>
                   </div>
-                  </motion.div>
+                )}
+
+                {/* Content Cards with Workflow */}
+                <div className="space-y-4">
+                {typeFilteredContent.map((item, index) => (
+                    <div key={item.id} className="relative">
+                      <div className="absolute top-4 left-4 z-10">
+                        <ContentSelectionCheckbox
+                          contentId={item.id}
+                          isSelected={selectedItems.includes(item.id)}
+                          onSelectionChange={handleSelectionChange}
+                        />
+                      </div>
+                      <ContentWorkflowCard
+                        content={{
+                          ...item,
+                          workflow_stage: item.workflow_stage || 'draft',
+                          comments: item.comments || []
+                        }}
+                        onStageChange={handleWorkflowStageChange}
+                        onEdit={handleEditContent}
+                        onView={setSelectedContent}
+                        onComment={handleAddComment}
+                        className="pl-12"
+                      />
+                    </div>
                 ))}
-              </div>
+                </div>
+              </>
             )}
           </div>
-        </div>
+        ) : (
+          // Table view would go here
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm p-6">
+            <p className="text-center text-slate-500 dark:text-slate-400">Table view coming soon</p>
+          </div>
+        )}
       </div>
     );
   };
 
+  const renderWorkflowView = () => {
+    const workflowStages = ['draft', 'review', 'approved', 'published', 'rejected'];
+    
+    return (
+      <div className="space-y-6">
+        <FilterBar
+          filters={filterConfigs}
+          values={filters}
+          onChange={handleFilterChange}
+          onClear={handleClearFilters}
+          title="Workflow Filters"
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {workflowStages.map(stage => {
+            const stageContent = filteredContentItems.filter(item => (item.workflow_stage || 'draft') === stage);
+            const stageConfig = {
+              draft: { name: 'Draft', color: 'slate', icon: PencilIcon },
+              review: { name: 'In Review', color: 'blue', icon: EyeIcon },
+              approved: { name: 'Approved', color: 'emerald', icon: CheckCircleIcon },
+              published: { name: 'Published', color: 'purple', icon: ShareIcon },
+              rejected: { name: 'Rejected', color: 'red', icon: XCircleIcon }
+            }[stage];
+            
+            const StageIcon = stageConfig.icon;
+
+            return (
+              <div key={stage} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center space-x-2">
+                    <StageIcon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                    <h3 className="font-semibold text-slate-900 dark:text-white">
+                      {stageConfig.name}
+                    </h3>
+                    <Badge variant="secondary" size="sm">
+                      {stageContent.length}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                  {stageContent.length === 0 ? (
+                    <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
+                      No content in this stage
+                    </p>
+                  ) : (
+                    stageContent.map(item => (
+                      <div
+                        key={item.id}
+                        className="border border-slate-200 dark:border-slate-700 rounded-lg p-3 hover:shadow-sm transition-shadow cursor-pointer"
+                        onClick={() => setSelectedContent(item)}
+                      >
+                        <h4 className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+                          {item.type === 'editorial' ? item.content?.headline?.substring(0, 40) + '...'
+                           : item.type === 'social_post' ? item.content?.text?.substring(0, 40) + '...'
+                           : 'Match Summary'}
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {item.game_context?.teams?.home} vs {item.game_context?.teams?.away}
+                        </p>
+                        {item.assigned_to && (
+                          <div className="flex items-center space-x-1 mt-2">
+                            <UserIcon className="h-3 w-3 text-slate-400" />
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              {item.assigned_to}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
   const renderGenerationProgress = () => (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
       <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
@@ -754,13 +1135,79 @@ export default function ContentCreation() {
               transition={{ duration: 0.3 }}
             >
               {selectedTab === 'overview' && renderOverview()}
+              {selectedTab === 'workflow' && renderWorkflowView()}
               {selectedTab === 'editorials' && renderContentList('editorial')}
               {selectedTab === 'social' && renderContentList('social_post')}
               {selectedTab === 'summaries' && renderContentList('match_summary')}
+              {selectedTab === 'templates' && (
+                <ContentTemplateSelector
+                  onSelectTemplate={(template) => {
+                    handleCreateContent(template.type);
+                    setShowTemplates(false);
+                  }}
+                />
+              )}
               {selectedTab === 'progress' && renderGenerationProgress()}
             </motion.div>
           </AnimatePresence>
 
+          {/* Content Editor Modal */}
+          {showEditor && (
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+              <div className="flex items-center justify-center min-h-screen p-4">
+                <div className="w-full max-w-4xl">
+                  <ContentEditor
+                    content={editingContent}
+                    onSave={handleSaveContent}
+                    onCancel={() => {
+                      setShowEditor(false);
+                      setEditingContent(null);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Templates Modal */}
+          {showTemplates && (
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+              <div className="flex items-center justify-center min-h-screen p-4">
+                <div className="w-full max-w-6xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl">
+                  <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                        Content Templates
+                      </h2>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowTemplates(false)}
+                        leftIcon={<XMarkIcon className="h-4 w-4" />}
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <ContentTemplateSelector
+                      onSelectTemplate={(template) => {
+                        handleCreateContent(template.type);
+                        setShowTemplates(false);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bulk Operations */}
+          <BulkOperationsBar
+            selectedItems={selectedItems}
+            onClearSelection={() => setSelectedItems([])}
+            onBulkAction={handleBulkAction}
+            availableActions={['publish', 'delete', 'assign', 'schedule']}
+          />
           {/* Content detail modal */}
           {selectedContent && (
             <ContentDetailModal 
@@ -974,6 +1421,9 @@ const mockContentItems = [
     match_id: "el_clasico_003_1754171406",
     timestamp: 1754171736,
     match_minute: 29236432,
+    workflow_stage: "approved",
+    assigned_to: "editor1",
+    priority: "high",
     trigger_highlight: "Jude Bellingham (Real Madrid) makes a strong tackle, then Vinicius Jr. and Rodrigo (Real Madrid) lead an attack before Barcelona's number 20 volleys just wide.",
     content: {
       headline: "Bellingham's Grit and Vinicius-Led Break Ignite Early Clasico Fire as Barcelona Narrowly Miss",
@@ -983,6 +1433,14 @@ const mockContentItems = [
       tone: "analytical",
       key_themes: ["individual_brilliance", "team_performance", "tactical_analysis"]
     },
+    comments: [
+      {
+        id: 1,
+        text: "Great analysis of the tactical shift. Consider adding more context about Bellingham's defensive contribution.",
+        author: "Sarah Johnson",
+        timestamp: new Date(Date.now() - 3600000).toISOString()
+      }
+    ],
     game_context: {
       score: { home: 0, away: 0 },
       minute: 29236432,
@@ -995,6 +1453,9 @@ const mockContentItems = [
     match_id: "el_clasico_003_1754171406", 
     timestamp: 1754171544,
     match_minute: 29236430,
+    workflow_stage: "published",
+    assigned_to: "social1",
+    priority: "medium",
     trigger_highlight: "Pre-match tension builds as Kounde, Lewandowski, Raphinha, and Pedri (Barcelona) prepare, followed by Real Madrid's tactical huddle and the match kickoff at 0-0.",
     content: {
       text: "KICKOFF! 🚨 Lewandowski, Kounde, Raphinha & Pedri locked in as Barcelona get ready, while Real Madrid huddle up—tension is electric at Camp Nou! 2' and it's 0-0... Who will make the first move? ⚡️\n\nWho takes control early—Barça or Madrid? #ElClasico #ForçaBarça #HalaMadrid",
@@ -1016,8 +1477,11 @@ const mockContentItems = [
   {
     id: "summary_el_clasico_003_final",
     type: "match_summary",
-    schedule_id: "el_clasico_003",
+    match_id: "el_clasico_003_1754171406",
     timestamp: 1754172745,
+    workflow_stage: "review",
+    assigned_to: "editor2",
+    priority: "high",
     content: {
       content: "**FULLTIME SUMMARY: FC BARCELONA 0–0 REAL MADRID**\n\n**Opening Statement**\n\nAfter 90 pulsating minutes at the Camp Nou, FC Barcelona and Real Madrid have played out a gripping 0-0 draw that belies the drama and quality on display. From the opening whistle, this latest edition of El Clásico delivered intensity, tactical intrigue, and a series of pivotal moments—though neither side could find a decisive breakthrough. Both teams showcased defensive resilience and flashes of attacking brilliance, but ultimately the night belonged to the goalkeepers and backlines, who stood tall in the face of relentless pressure.\n\n**Key Moments Breakdown**\n\nThe tone was set early, with Thibaut Courtois (1') making a vital save to deny Barcelona after intricate buildup play by Raphinha and Dani Olmo. Moments later, Lewandowski was flagged offside (3') following a slick move involving Martínez and De Jong, as Real Madrid's Tchouaméni and Bellingham regained control, signaling Madrid's intent to dictate midfield battles.\n\nBy the 10th minute, both sides had exchanged quick counterattacks—De Jong and Tchouaméni orchestrating a rapid transition, only for Martínez and Vinícius Jr. to be halted by Barcelona's Bowde and Rayal. The pattern continued: Raphinha and Lewandowski (12') threatened again, but Madrid's stand-in keeper Mash Bay produced another crucial save.",
       type: "fulltime",
@@ -1032,6 +1496,14 @@ const mockContentItems = [
       match_rating: 5.0,
       narrative_flow: "dominance"
     },
+    comments: [
+      {
+        id: 1,
+        text: "Excellent comprehensive summary. Ready for publication after final review.",
+        author: "John Smith",
+        timestamp: new Date(Date.now() - 1800000).toISOString()
+      }
+    ],
     game_context: {
       score: { home: 0, away: 0 },
       teams: { home: "FC Barcelona", away: "Real Madrid" }
